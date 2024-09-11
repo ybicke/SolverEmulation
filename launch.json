@@ -1,0 +1,112 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        }, 
+
+        {
+            "name": "Python Debugger: train_vit_column",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_files/train_column_clean.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "vit_column4",
+                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_edited",
+                "--percent", "0.1",
+                "--subsample", "0.1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--train",
+                "--test",
+                "--shuffle",
+                "--batch-size", "4",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--patch-size", "1",
+                "--vit-hidden-dim", "256",
+                "--vit-layers", "4",
+                "--vit-heads", "6",
+                "--vit-dropout", "0.0"
+            ]
+        },
+        {
+            "name": "Python Debugger: train_afno_column",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_files/train_column_clean.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "afno",
+                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/afno_testing",
+                "--percent", "0.1",
+                "--subsample", "0.1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--train",
+                "--test",
+                "--shuffle", 
+                "--batch-size", "4",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--patch-size", "1",
+                "--vit-hidden-dim", "8",
+                "--vit-layers", "4",
+                "--vit-dropout", "0.0",
+            ]
+        },  
+        {
+            "name": "Python Debugger: train_afno_column_crossAttention",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_files/train_column_crossAttention",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "afno",
+                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/afno_testing",
+                "--percent", "0.1",
+                "--subsample", "0.1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--train",
+                "--test",
+                "--shuffle", 
+                "--batch-size", "4",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--patch-size", "1",
+                "--vit-hidden-dim", "8",
+                "--vit-layers", "4",
+                "--vit-dropout", "0.0"
+            ]
+        }
+    ]
+
+    
+}
