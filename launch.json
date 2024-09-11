@@ -79,7 +79,7 @@
             "name": "Python Debugger: train_afno_column_crossAttention",
             "type": "debugpy",
             "request": "launch",
-            "program": "/mydata/deepcloud/yves/SolverEmulation/train_files/train_column_crossAttention",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_files/train_column_crossAttention.py",
             "console": "integratedTerminal",
             "args": [
                 "--model", "afno",

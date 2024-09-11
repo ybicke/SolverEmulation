@@ -23,7 +23,7 @@ from einops.layers.torch import Rearrange
 # Bring your packages onto the path
 import sys
 sys.path.append('/myhome/AFNO/AFNO-transformer')
-sys.path.append('/mydata/deepcloud/yves/online-datasets/workspace')
+sys.path.insert(0, '/mydata/deepcloud/yves/SolverEmulation')
 
 from afno.afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
