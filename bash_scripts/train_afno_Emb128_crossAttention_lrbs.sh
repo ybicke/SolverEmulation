@@ -24,7 +24,7 @@ echo training$line_number started!
 
 
 # Run the training script with specified parameters
-python train_files\train_column_crossAttention.py \
+python train_files/train_column_crossAttention.py \
     --model afno \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
     --save /mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_crossAttention_lrbs\

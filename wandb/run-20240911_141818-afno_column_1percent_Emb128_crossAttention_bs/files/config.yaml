@@ -1,0 +1,119 @@
+wandb_version: 1
+
+seed:
+  desc: null
+  value: 42
+model:
+  desc: null
+  value: afno
+dataset:
+  desc: null
+  value: /mydata/deepcloud/salman/dataset/h5_data_all_chuncked
+save:
+  desc: null
+  value: /mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_crossAttention_bs
+percent:
+  desc: null
+  value: 0.1
+subsample:
+  desc: null
+  value: 0.1
+num_workers:
+  desc: null
+  value: 4
+prefetch_factor:
+  desc: null
+  value: 2
+wandb_mode:
+  desc: null
+  value: online
+num_cells:
+  desc: null
+  value: 81920
+train:
+  desc: null
+  value: true
+test:
+  desc: null
+  value: true
+shuffle:
+  desc: null
+  value: true
+batch_size:
+  desc: null
+  value: 128
+vbatch:
+  desc: null
+  value: 1
+optimizer:
+  desc: null
+  value: adamw
+clip:
+  desc: null
+  value: 1.0
+num_epoch:
+  desc: null
+  value: 150
+learning_rate:
+  desc: null
+  value: 0.0005
+patch_size:
+  desc: null
+  value: 1
+vit_hidden_dim:
+  desc: null
+  value: 128
+vit_layers:
+  desc: null
+  value: 4
+vit_heads:
+  desc: null
+  value: 6
+vit_dropout:
+  desc: null
+  value: 0.0
+afno_sparsity_threshold:
+  desc: null
+  value: 0.01
+hard_thresholding_fraction:
+  desc: null
+  value: 1
+cutoff_frequency:
+  desc: null
+  value: 0.1
+_wandb:
+  desc: null
+  value:
+    code_path: code/train_files/train_column_crossAttention.py
+    python_version: 3.9.15
+    cli_version: 0.17.0
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1726064298
+    t:
+      1:
+      - 1
+      - 41
+      - 49
+      - 55
+      - 63
+      2:
+      - 1
+      - 41
+      - 49
+      - 55
+      - 63
+      3:
+      - 1
+      - 13
+      - 14
+      - 15
+      - 16
+      - 23
+      - 35
+      4: 3.9.15
+      5: 0.17.0
+      8:
+      - 5
+      13: linux-x86_64
