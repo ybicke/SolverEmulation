@@ -28,8 +28,10 @@ from torchinfo import summary
 
 import torch.autograd.profiler as profiler
 
+import sys
+sys.path.insert(0, '/mydata/deepcloud/yves/SolverEmulation')
 from data_loaders import IconColumnIterableDataset
-from afno_column_crossAttention import AFNONet
+from column_files.afno_column_crossAttention import AFNONet
 
 # Implementation of afno model
 # from afno_column import AFNO
@@ -211,19 +213,19 @@ def train_model(model, train_set, valid_set):
     # Log the start of training
     logger.info('Train started...')
     
-    # Initialize Weights & Biases (W&B) for experiment tracking
-    wandb.init(
-        project='deepcloud-yves', 
-        name=save_id, 
-        id=save_id, 
-        config={**wandb_config, **args.__dict__}, 
-        sync_tensorboard=True, 
-        save_code=True,
-        resume='allow', 
-        tags=['icon grid',],    
-        mode=args.wandb_mode
-    )
-    wandb.watch(model, log_freq=100)
+    # Initialize Weights & Biases (W&B) for experiment tracking 
+    #wandb.init(
+    #    project='deepcloud-yves', 
+    #    name=save_id, 
+    #    id=save_id, 
+    #    config={**wandb_config, **args.__dict__}, 
+    #    sync_tensorboard=True, 
+    #    save_code=True,
+    #    resume='allow', 
+    #    tags=['icon grid',],    
+    #    mode=args.wandb_mode
+    #)
+    #wandb.watch(model, log_freq=100)
     
    
     # Set up the optimizer based on the specified type
