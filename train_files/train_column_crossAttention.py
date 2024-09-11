@@ -263,7 +263,7 @@ def train_model(model, train_set, valid_set):
         init_epoch = 0
         # vbatch = args.vbatch
 
-    vbatch = args.vbatch
+    vbatch = args.vbatch 
     epoch_number = init_epoch
     best_loss = 1e9999999 
       
