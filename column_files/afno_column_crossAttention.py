@@ -177,7 +177,6 @@ class CrossAttentionBlock(nn.Module):
         x = self.proj_drop(x)
         return x
 
-
     
 class AFNONet(nn.Module):
     """

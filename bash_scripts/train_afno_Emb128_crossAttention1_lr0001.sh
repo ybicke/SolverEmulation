@@ -24,10 +24,10 @@ echo training$line_number started!
 
 
 # Run the training script with specified parameters
-python train_files/train_column_crossAttention.py \
+python train_files/train_column_crossAttention1.py \
     --model afno \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_crossAttention_check\
+    --save /mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_crossAttention1_lr0001\
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -41,7 +41,7 @@ python train_files/train_column_crossAttention.py \
     --optimizer adamw \
     --clip 1.0 \
     --num-epoch 150 \
-    --learning-rate 0.0005 \
+    --learning-rate 0.001 \
     --patch-size 1 \
     --vit-hidden-dim 128 \
     --vit-layers 4 \

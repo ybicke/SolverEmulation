@@ -145,21 +145,36 @@ import torch
 import torch.nn as nn
 
 class CrossAttentionBlock(nn.Module):
-    def __init__(self, dim, num_heads=8, qkv_bias=False, attn_drop=0., proj_drop=0.):
+    def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
         super().__init__()
         self.num_heads = num_heads
+        head_dim = dim // num_heads
+        self.scale = qk_scale or head_dim ** -0.5
 
-        self.attn = nn.MultiheadAttention(dim, num_heads, dropout=attn_drop, bias=qkv_bias, batch_first=True)
+        # Linear layers for query, key, and value projections
+        self.q = nn.Linear(dim, dim, bias=qkv_bias)
+        self.k = nn.Linear(dim, dim, bias=qkv_bias)
+        self.v = nn.Linear(dim, dim, bias=qkv_bias)
+
+        self.attn_drop = nn.Dropout(attn_drop)
         self.proj = nn.Linear(dim, dim)
         self.proj_drop = nn.Dropout(proj_drop)
 
     def forward(self, atmos_emb, surface_emb):
         B, N, C = atmos_emb.shape
 
-        # Compute attention output using MultiheadAttention layer
-        x, _ = self.attn(atmos_emb, surface_emb, surface_emb)
+        # Compute query, key, and value projections
+        q = self.q(atmos_emb).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+        k = self.k(surface_emb).reshape(B, -1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+        v = self.v(surface_emb).reshape(B, -1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
 
-        # Apply projection and dropout
+        # Compute attention scores and apply softmax
+        attn = (q @ k.transpose(-2, -1)) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        # Compute attention output and apply projection
+        x = (attn @ v).transpose(1, 2).reshape(B, N, C)
         x = self.proj(x)
         x = self.proj_drop(x)
         return x

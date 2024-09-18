@@ -92,7 +92,6 @@ args = parser.parse_args()
 save_id = f'{basename(normpath(args.save))}'
 checkpoint_path = join(args.save)
 os.makedirs(checkpoint_path, exist_ok=True)
-# test_path = join(args.save, 'test_year_checkpoint/') # save to 
 test_path = join(args.save, 'test/')
 os.makedirs(test_path, exist_ok=True)
 
@@ -502,7 +501,6 @@ def main():
     stats_file = join(args.dataset, 'normalizer_stats_per_feat.pickle')
     mean2d, var2d, mean3d, var3d = get_normalization_params(stats_file)
     model = get_model(args.model, mean2d, var2d, mean3d, var3d, args.test)
-    # summary(model, [(1, 70, 6),     (1, 6)])
     
     num_params = count_parameters(model)
     print(f"The model has {num_params:,} trainable parameters.")
