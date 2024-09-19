@@ -29,10 +29,7 @@ from torchinfo import summary
 import torch.autograd.profiler as profiler
 
 from data_loaders import IconColumnIterableDataset
-from afno_column_concat_easy import AFNONet
 
-# Implementation of afno model
-# from afno_column import AFNO
 
 sys.path.append(dirname(__file__))
 
@@ -83,21 +80,12 @@ parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help=
 parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
 
 
-## afno specifics
-#parser.add_argument('--afno-blocks', type=int, default=8, help='Number of AFNO blocks')
-#parser.add_argument('--afno-hidden-size', type=int, default=256, help='Hidden size of AFNO blocks')
-#parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
-#parser.add_argument('--afno-hard-thresholding-fraction', type=float, default=1.0, help='Hard thresholding fraction for AFNO')
-#parser.add_argument('--mixing-type', type=str, default='afno', choices=['afno', 'sa', 'ls', 'gfn', 'bfno'],
-                    #help='Attention/mixer type')
-
 args = parser.parse_args()
 
 
 save_id = f'{basename(normpath(args.save))}'
 checkpoint_path = join(args.save)
 os.makedirs(checkpoint_path, exist_ok=True)
-# test_path = join(args.save, 'test_year_checkpoint/') # save to 
 test_path = join(args.save, 'test/')
 os.makedirs(test_path, exist_ok=True)
 
@@ -159,7 +147,6 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
         
     elif model_name == 'vit_column4':
         from vit_column import ViT4
-        #height_patch_size = args.height_patch_size
         model = ViT4(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -173,11 +160,12 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             mean3d=mean3d, 
             var3d=var3d,
             device=device
-            # is_test=is_test  # Assuming ViT4 can accept an is_test parameter
         ).to(device)
         
-    # AFNO Implementation!!!    
+    
+    # AFNO Implementation
     elif model_name == 'afno':
+        from column_files.afno_column_clean import AFNONet
         model = AFNONet(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -195,8 +183,46 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
             cutoff_frequency=args.cutoff_frequency
-
-
+        ).to(device)
+        
+    elif model_name == 'afno_crossAttention':
+        from column_files.afno_column_crossAttention import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            cutoff_frequency=args.cutoff_frequency
+        ).to(device)
+        
+    elif model_name == 'afno_concatEasy':
+        from column_files.afno_column_concatEasy import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            cutoff_frequency=args.cutoff_frequency
         ).to(device)
         
     else:
@@ -212,17 +238,14 @@ def find_latest_checkpoint(directory):
     return join(directory, f'checkpoint_epoch_{max(idx)}.pth'), max(idx)
 
 
-
 def train_model(model, train_set, valid_set):
     
     # Log the start of training
     logger.info('Train started...')
     
-    
-    # Initialize Weights & Biases (W&B) for experiment tracking
+    # Initialize Weights & Biases 
     wandb.init(
         project='deepcloud-yves', 
-        # entity='deepcloud',
         name=save_id, 
         id=save_id, 
         config={**wandb_config, **args.__dict__}, 
@@ -233,7 +256,6 @@ def train_model(model, train_set, valid_set):
         mode=args.wandb_mode
     )
     wandb.watch(model, log_freq=100)
-
 
     # Set up the optimizer based on the specified type
     if args.optimizer == 'adam':
@@ -280,23 +302,19 @@ def train_model(model, train_set, valid_set):
         t1 = time.perf_counter()
         epoch_number += 1
         
-
-        
         # Training step
         model.train(True)        
         for i, data in enumerate(train_set):
-            
-            # if i >= max_train_iterations:
-            #        break  # Exit the loop after 3 iterations
             
             t1_1 = time.perf_counter()
             
             batch_x3, batch_x2, batch_y = data
             batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
 
-            outputs =  model(batch_x3, batch_x2)
+            outputs = model(batch_x3, batch_x2)
             loss = train_loss(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
+            
             if i > 0 and i % vbatch == 0:
                 optimizer.zero_grad()
                 loss.backward()
@@ -371,7 +389,6 @@ def train_model(model, train_set, valid_set):
     return model
 
 
-# needs some more inspection---------------------------------------------------------------------------------
 def calculate_heating_rates(y, x3d, x2d): 
     # assumed output order is: [lw_up, lw_dn, sw_up, sw_dn]
     g = 9.80665
@@ -404,7 +421,6 @@ def test_model(model, test_set):
     logger.info('Test started...')    
  
     # Load the best model checkpoint
-    #best_chkpt = join(checkpoint_path, 'checkpoint_epoch_22.pth')
     best_chkpt = join(checkpoint_path, 'best_model.pth')
     assert isfile(best_chkpt), 'Checkpoint not found, testing faild!'
     checkpoint = torch.load(best_chkpt, map_location=torch.device(device))
@@ -419,12 +435,8 @@ def test_model(model, test_set):
     
     t1 = time.perf_counter(), time.process_time()
     
-    #max_iterations = 1  # Limit the number of iterations for debugging
     
     for i, data in enumerate(test_set):
-        
-        #if i >= max_iterations:
-        #    break  # Exit the loop after 5 iterations
         
         batch_x3, batch_x2, batch_y = data
         batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
@@ -432,7 +444,6 @@ def test_model(model, test_set):
         with torch.no_grad():
             outputs = model(batch_x3, batch_x2)
             
-        
         # Collect true and predicted values for further analysis
         y_true.append(batch_y.detach().cpu())
         y_pred.append(outputs.detach().cpu())
@@ -448,9 +459,6 @@ def test_model(model, test_set):
                     f'mean_absolute_error: {mae:.4f},')
 
     t2 = time.perf_counter(), time.process_time()
-    
-    # print(f'Batch size: {args.batch_size} ', 
-    #       f'Real time: {t2[0] - t1[0]:.2f}, CPU time: {t2[1]-t1[1]}')
     
     # Concatenate all collected true and predicted values
     y_true = torch.cat(y_true, 0)
@@ -468,7 +476,6 @@ def test_model(model, test_set):
     # mean_err = torch.mean(torch.abs(y_true - y_pred), dim=0)
     # heat_err = torch.mean(torch.abs(h_true - h_pred), dim=0)
 
-
     # Save true and predicted values to files for further analysis
     with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
         pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -482,8 +489,6 @@ def test_model(model, test_set):
     with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
         pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
-    
-  
 
 def test_loading_time(train_files, iter=10):
     logger.info('Test Loading time started...')
@@ -498,8 +503,6 @@ def test_loading_time(train_files, iter=10):
         logger.info(f'Iteration: {it}: Real time: {t2[0] - t1[0]:.2f}, CPU time: {t2[1]-t1[1]}')
         import gc
         gc.collect()
-
-
 
 
 def main():
@@ -522,7 +525,6 @@ def main():
     stats_file = join(args.dataset, 'normalizer_stats_per_feat.pickle')
     mean2d, var2d, mean3d, var3d = get_normalization_params(stats_file)
     model = get_model(args.model, mean2d, var2d, mean3d, var3d, args.test)
-    # summary(model, [(1, 70, 6),     (1, 6)])
     
     num_params = count_parameters(model)
     print(f"The model has {num_params:,} trainable parameters.")
@@ -548,17 +550,3 @@ def main():
 if __name__ == '__main__':
     main()
     
-    
-    
-    
-# default=['pres_sfc_ecrad_in', 'cosmu0_ecrad_in', 'qv_s_ecrad_in', 
-# 'albvisdir_ecrad_in', 'albnirdir_ecrad_in', 'tsfctrad_ecrad_in'],
-# help='2D input features'
-
-# parser.add_argument('--feats-3d', nargs='+',
-# default=['clc_ecrad_in', 'temp_ecrad_in', 'pres_ecrad_in',
-# 'qc_ecrad_in', 'qi_ecrad_in', 'qv_ecrad_in'],
-# help='3D input features')
-
-# clc_ecrad_in: cloud cover (before ecrad), qc_ecrad_in: specific cloud water content (before ecrad)
-# qi_ecrad_in: specific cloud ice content (before ecrad), qv_ecrad_in: specific water vapor content (before ecrad)
