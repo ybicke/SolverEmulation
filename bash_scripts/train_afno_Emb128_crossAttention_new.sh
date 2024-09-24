@@ -27,7 +27,7 @@ echo training$line_number started!
 python train_column.py \
     --model afno_crossAttention_new \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_crossAttention_new\
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_crossAttention_new4\
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \

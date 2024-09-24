@@ -134,16 +134,17 @@ class Block(nn.Module):
         residual = atmos_emb
         atmos_emb = self.norm1(atmos_emb)
         atmos_emb = self.filter(atmos_emb)
-
-        if self.double_skip:
-            atmos_emb = atmos_emb + residual
-            residual = atmos_emb
-            
+        # if self.double_skip:
+        atmos_emb = atmos_emb + residual
+        
         # Cross Attention
+        residual = atmos_emb    
         atmos_emb = self.norm2(atmos_emb) 
         atmos_emb = self.cross_attn(atmos_emb, surface_emb)
-        
-        # Feed Forward Part
+        atmos_emb = atmos_emb + residual
+
+        # MLP with residual
+        residual = atmos_emb
         atmos_emb = self.norm3(atmos_emb)
         atmos_emb = self.mlp(atmos_emb)
         atmos_emb = self.drop_path(atmos_emb)
@@ -316,25 +317,26 @@ class AFNONet(nn.Module):
         return y_pred
         
             
-
-            
+         
     def forward(self, x3d, x2d):
         
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
         
         # Repeat the dummy vector along the batch dimension
-        # Concatenate the resulting tensor as an additional height level
         dummy_vector_across_batch = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
-        x3d = torch.cat((x3d, dummy_vector_across_batch), dim=1)
+        dummy_vector_embedded = self.to_patch_embedding(dummy_vector_across_batch)
 
         x3d = self.to_patch_embedding(x3d)
         x2d = self.to_patch_embedding_2D(x2d)
+
+        x3d = torch.cat((x3d, dummy_vector_embedded), dim=1)
 
         atmos_emb = x3d + self.pos_embed
         atmos_emb = self.pos_drop(atmos_emb)
         
         surface_emb = x2d[:, None, :] # extending dimesnion for attention mecanism.
+        surface_emb_expanded = surface_emb.expand(-1, atmos_emb.size(1), -1)
 
         # "Transformer" Block 
         for blk in self.blocks:
@@ -347,6 +349,7 @@ class AFNONet(nn.Module):
         x = self._scale_output(x, x2d)
         
         return x.squeeze()
+    
         
     
     

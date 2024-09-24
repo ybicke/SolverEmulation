@@ -101,7 +101,8 @@ class Block(nn.Module):
                  hard_thresholding_fraction=1.0,
                  hidden_size_factor=1,
                  cutoff_frequency=0.1,
-                 double_skip=True):
+                 #double_skip=True
+                 ):
         super().__init__()
         
         self.norm1 = norm_layer(dim)
@@ -125,7 +126,7 @@ class Block(nn.Module):
     
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-        self.double_skip = double_skip
+        # self.double_skip = double_skip
 
 
     def forward(self, atmos_emb, surface_emb):
@@ -134,16 +135,17 @@ class Block(nn.Module):
         residual = atmos_emb
         atmos_emb = self.norm1(atmos_emb)
         atmos_emb = self.filter(atmos_emb)
-
-        if self.double_skip:
-            atmos_emb = atmos_emb + residual
-            residual = atmos_emb
-            
+        # if self.double_skip:
+        atmos_emb = atmos_emb + residual
+        
         # Cross Attention
+        residual = atmos_emb    
         atmos_emb = self.norm2(atmos_emb) 
         atmos_emb = self.cross_attn(atmos_emb, surface_emb)
-        
-        # Feed Forward Part
+        atmos_emb = atmos_emb + residual
+
+        # MLP with residual
+        residual = atmos_emb
         atmos_emb = self.norm3(atmos_emb)
         atmos_emb = self.mlp(atmos_emb)
         atmos_emb = self.drop_path(atmos_emb)
@@ -334,6 +336,7 @@ class AFNONet(nn.Module):
 
         atmos_emb = x3d + self.pos_embed
         atmos_emb = self.pos_drop(atmos_emb)
+        
         
         surface_emb = x2d[:, None, :] # extending dimesnion for attention mecanism.
 

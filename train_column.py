@@ -117,7 +117,7 @@ def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle
     return DataLoader(
         icon_data, 
         batch_size=args.batch_size, 
-        # shuffle=shuffle, 
+        # shuffle=shuffle, deafult should be shuffle=none
         pin_memory=True, 
         num_workers=args.num_workers, # The number of subprocesses to use for data loading. Each worker will fetch samples from the dataset independently and in parallel.
         prefetch_factor=args.prefetch_factor #  The number of samples to prefetch in the background while the current batch is being processed.
