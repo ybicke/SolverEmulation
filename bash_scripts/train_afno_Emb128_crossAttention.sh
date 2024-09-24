@@ -27,7 +27,7 @@ echo training$line_number started!
 python train_column.py \
     --model afno_crossAttention \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_crossAttention_reproduction\
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_crossAttention\
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -45,6 +45,6 @@ python train_column.py \
     --patch-size 1 \
     --vit-hidden-dim 128 \
     --vit-layers 4 \
-    --vit-heads 6 \
+    --vit-heads 8 \
     --vit-dropout 0.0 \
     --wandb-mode online \

@@ -40,13 +40,18 @@ CACHE_DIR = '/tmp' # tempfile.TemporaryDirectory(dir='/tmp').name
 
 
 seed = 42
-wandb_config = {'seed':seed}
+wandb_config = {'seed': seed}
 prng = np.random.RandomState(seed)
 
 torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
+if torch.cuda.is_available():
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 import argparse
 import os
@@ -185,8 +190,9 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             cutoff_frequency=args.cutoff_frequency
         ).to(device)
         
+                
     elif model_name == 'afno_crossAttention':
-        from column_files.afno_column_crossAttention import AFNONet
+        from afno_column_crossAttention import AFNONet
         model = AFNONet(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -205,7 +211,7 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             cutoff_frequency=args.cutoff_frequency
         ).to(device)
         
-    elif model_name == 'afno_concatEasy':
+    elif model_name == 'afno_easyConcat':
         from column_files.afno_column_concatEasy import AFNONet
         model = AFNONet(
             num_cells=args.num_cells,
@@ -246,7 +252,46 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             cutoff_frequency=args.cutoff_frequency
         ).to(device)
         
+    elif model_name == 'afno_crossAttention_new':
+        from column_files.afno_column_crossAttention_new import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            cutoff_frequency=args.cutoff_frequency
+        ).to(device)
     
+    
+    elif model_name == 'afno_crossAttention_new1':
+        from column_files.afno_column_crossAttention_new1 import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            cutoff_frequency=args.cutoff_frequency
+        ).to(device)
         
     else:
         raise NotImplementedError('Model has not implemented yet!')
@@ -288,7 +333,7 @@ def train_model(model, train_set, valid_set):
             model.parameters(), 
             lr=args.learning_rate,
             eps=1e-8,
-            weight_decay=0.01
+            weight_decay=0.01  # basically applying ridge regression L2
         )
     else:
         raise NameError('optimizer not supported.')

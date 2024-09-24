@@ -105,8 +105,7 @@ class Block(nn.Module):
                                  num_blocks=fno_blocks,
                                  sparsity_threshold=sparsity_threshold,
                                  hard_thresholding_fraction=hard_thresholding_fraction,
-                                 hidden_size_factor=1,
-                                 cutoff_frequency=0.1)
+                                 hidden_size_factor=1)
         
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
     
@@ -334,13 +333,6 @@ class AFNONet(nn.Module):
         # Embed the concatenated features using a single embedding layer
         x = self.to_patch_embedding(x_concat)
         
-        
-        ## Repeat x2d along the height dimension to match the shape of x3d
-        #x2d_repeated = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
-        ## Concatenate x3d and x2d_repeated along the feature dimension
-        #x_concat = torch.cat((x3d, x2d_repeated), dim=-1)
-        ## Embed the concatenated features using a single embedding layer
-        #x = self.to_patch_embedding(x_concat)
 
         x = x + self.pos_embed
         x = self.pos_drop(x)
@@ -354,9 +346,7 @@ class AFNONet(nn.Module):
     def forward(self, x3d, x2d):
         x = self.forward_features(x3d, x2d)
         x = self.mlp_head(x)
-        
-        ## Pad the output to get 71 levels
-        #x = self.output_padding(x)  
+
     
         x = self.sigmoid(x)
         x = self._scale_output(x, x2d)
