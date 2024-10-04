@@ -233,26 +233,7 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             cutoff_frequency=args.cutoff_frequency
         ).to(device)
         
-        
-    elif model_name == 'afno_crossAttention_modified':
-        from column_files.afno_column_crossAttention_modified import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            cutoff_frequency=args.cutoff_frequency
-        ).to(device)
+    
         
     elif model_name == 'afno_crossAttention_new':
         from column_files.afno_column_crossAttention_new import AFNONet
@@ -352,7 +333,7 @@ def train_model(model, train_set, valid_set):
         raise NameError('optimizer not supported.')
     
     # Initialize the learning rate scheduler
-    scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+    # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
     
     # Initialize loss and metric trackers
     train_loss = MeanSquaredError().to(device)
@@ -446,7 +427,7 @@ def train_model(model, train_set, valid_set):
         t2 = time.perf_counter()
         
         # Update the learning rate scheduler
-        scheduler.step(total_valid_loss)
+        #scheduler.step(total_valid_loss)
 
         # Log metrics to W&B
         wandb.log({
@@ -456,8 +437,8 @@ def train_model(model, train_set, valid_set):
             'val_loss': total_valid_loss,
             'mean_absolute_error': total_train_mae,
             'mean_absolute_percentage_error': total_train_mape,
-            'val_mean_absolute_error': total_valid_mae,
-            'learning_rate': optimizer.param_groups[0]['lr']  # Log the learning rate
+            'val_mean_absolute_error': total_valid_mae
+            #'learning_rate': optimizer.param_groups[0]['lr']  # Log the learning rate
 
             })
 

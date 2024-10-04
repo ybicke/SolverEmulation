@@ -140,6 +140,7 @@ class Block(nn.Module):
         # Cross Attention
         residual = atmos_emb    
         atmos_emb = self.norm2(atmos_emb) 
+        surface_emb = self.norm2(surface_emb) 
         atmos_emb = self.cross_attn(atmos_emb, surface_emb)
         atmos_emb = atmos_emb + residual
 

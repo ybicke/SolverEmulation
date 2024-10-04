@@ -25,9 +25,9 @@ echo training$line_number started!
 
 # Run the training script with specified parameters
 python train_column.py \
-    --model afno_crossAttention \
+    --model afno_crossAttention_new1 \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_crossAttention\
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_crossAttention_noPos\
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -48,3 +48,4 @@ python train_column.py \
     --vit-heads 8 \
     --vit-dropout 0.0 \
     --wandb-mode online \
+

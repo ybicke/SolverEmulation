@@ -141,6 +141,7 @@ class Block(nn.Module):
         # Cross Attention
         residual = atmos_emb    
         atmos_emb = self.norm2(atmos_emb) 
+        surface_emb = self.norm2(surface_emb) 
         atmos_emb = self.cross_attn(atmos_emb, surface_emb)
         atmos_emb = atmos_emb + residual
 
@@ -323,22 +324,21 @@ class AFNONet(nn.Module):
     def forward(self, x3d, x2d):
         
         x3d = self.normalizer3d(x3d)
-        x2d = self.normalizer2d(x2d)
+        x2d = self.normalizer2d(x2d) 
         
         # Repeat the dummy vector along the batch dimension
         dummy_vector_across_batch = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
         dummy_vector_embedded = self.to_patch_embedding(dummy_vector_across_batch)
 
         x3d = self.to_patch_embedding(x3d)
-        x2d = self.to_patch_embedding_2D(x2d)
-
         x3d = torch.cat((x3d, dummy_vector_embedded), dim=1)
-
         atmos_emb = x3d + self.pos_embed
         atmos_emb = self.pos_drop(atmos_emb)
         
-        
-        surface_emb = x2d[:, None, :] # extending dimesnion for attention mecanism.
+        x2d = self.to_patch_embedding_2D(x2d)
+        surface_emb = x2d[:, None, :] # Shape: (batch_size, 1, embed_dim)
+        surface_emb = surface_emb.expand(-1, atmos_emb.size(1), -1)
+        surface_emb = surface_emb # + self.surface_pos_embed  
 
         # "Transformer" Block 
         for blk in self.blocks:
@@ -351,7 +351,6 @@ class AFNONet(nn.Module):
         x = self._scale_output(x, x2d)
         
         return x.squeeze()
-        
     
     
     
