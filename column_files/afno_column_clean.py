@@ -90,7 +90,6 @@ class Block(nn.Module):
                  sparsity_threshold=0.01,
                  hard_thresholding_fraction=1.0,
                  hidden_size_factor=1,
-                 cutoff_frequency=0.1,
                  double_skip=True):
         super().__init__()
         
@@ -105,8 +104,8 @@ class Block(nn.Module):
                                  num_blocks=fno_blocks,
                                  sparsity_threshold=sparsity_threshold,
                                  hard_thresholding_fraction=hard_thresholding_fraction,
-                                 hidden_size_factor=1,
-                                 cutoff_frequency=0.1)
+                                 hidden_size_factor=1
+                                 )
         
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
     
@@ -169,7 +168,6 @@ class AFNONet(nn.Module):
                  mlp_ratio=4.,
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
-                 cutoff_frequency=0.1,
                  *args,
                  **kwargs): 
 
@@ -242,8 +240,8 @@ class AFNONet(nn.Module):
                 h=h,
                 w=w,
                 sparsity_threshold=sparsity_threshold,
-                hard_thresholding_fraction = hard_thresholding_fraction,
-                cutoff_frequency=cutoff_frequency)
+                hard_thresholding_fraction = hard_thresholding_fraction
+                )
                 for i in range(depth)
                 
         ])
