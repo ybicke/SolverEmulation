@@ -10,8 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
-# from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+
 import torch.fft
 from torch.nn.modules.container import Sequential
 # from main_afnonet import get_args
@@ -23,7 +22,7 @@ from einops.layers.torch import Rearrange
 # Bring your packages onto the path
 import sys
 sys.path.append('/myhome/AFNO/AFNO-transformer')
-from afno.afno1d import AFNO1D
+from afno.afno1d_smoothing import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
 from afno.ls import AttentionLS
@@ -73,16 +72,6 @@ class Mlp(nn.Module):
         x = self.drop(x)
         return x
 
-class CrossAttentionBlock(nn.Module):
-    def __init__(self, dim, num_heads=8, dropout=0.):
-        super().__init__()
-        self.mha = nn.MultiheadAttention(dim, num_heads, dropout=dropout, batch_first=True)
-
-    def forward(self, atmos_emb, surface_emb):
-        # Perform multi-head attention
-        attn_output, _ = self.mha(atmos_emb, surface_emb, surface_emb)
-        return attn_output
-
 
 class Block(nn.Module):
     def __init__(self, 
@@ -92,7 +81,7 @@ class Block(nn.Module):
                  drop_path=0.,
                  act_layer=nn.GELU,
                  norm_layer=nn.LayerNorm,
-                 h=14, # I do overwrite them
+                 h=14, # gets overwritten
                  w=8,
                  mixing_type="afno",
                  hidden_size=256,
@@ -100,60 +89,57 @@ class Block(nn.Module):
                  sparsity_threshold=0.01,
                  hard_thresholding_fraction=1.0,
                  hidden_size_factor=1,
-                 cutoff_frequency=0.1,
-                 #double_skip=True
-                 ):
+                 zero_freq_indices=None,  # New parameter
+                 double_skip=True):
         super().__init__()
         
         self.norm1 = norm_layer(dim)
+        
         self.norm2 = norm_layer(dim)
-        self.norm3 = norm_layer(dim)
-
 
         # could potentially implment other mixing types here such as bfno, sa from the paper
         # here hidden_size = hidden_size before, for making embedding dimension smaller..? 
         # I had to adjust it to make it suit the division by the block size in the afno1D
         if mixing_type == "afno":
-            self.filter = AFNO1D(hidden_size=dim,
+            self.filter = AFNO1D(hidden_size=dim, # What's hidden size here
                                  num_blocks=fno_blocks,
                                  sparsity_threshold=sparsity_threshold,
                                  hard_thresholding_fraction=hard_thresholding_fraction,
                                  hidden_size_factor=1,
-                                 cutoff_frequency=0.1)
-        
-        self.cross_attn = CrossAttentionBlock(dim)
+                                 zero_freq_indices=zero_freq_indices)  # Pass the parameter
+
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
     
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-        # self.double_skip = double_skip
+        self.double_skip = double_skip
 
+    def forward(self, x):
+        residual = x
+        x = self.norm1(x)
+        x = self.filter(x)
 
-    def forward(self, atmos_emb, surface_emb):
+        if self.double_skip:
+            x = x + residual
+            residual = x
 
-        # AFNO part with afno1d mixing operation (filter)
-        residual = atmos_emb
-        atmos_emb = self.norm1(atmos_emb)
-        atmos_emb = self.filter(atmos_emb)
-        # if self.double_skip:
-        atmos_emb = atmos_emb + residual
-        
-        # Cross Attention
-        residual = atmos_emb    
-        atmos_emb = self.norm2(atmos_emb) 
-        surface_emb = self.norm2(surface_emb) 
-        atmos_emb = self.cross_attn(atmos_emb, surface_emb)
-        atmos_emb = atmos_emb + residual
+        x = self.norm2(x)
+        x = self.mlp(x)
+        x = self.drop_path(x)
+        x = x + residual
+        return x
+    
+## For extra dimension in the output, lazy concat
+#class OutputPadding(nn.Module):
+#    def __init__(self, channels_out):
+#        super(OutputPadding, self).__init__()
+#        self.channels_out = channels_out
+#        self.padding_vector = nn.Parameter(torch.randn(1, 1, channels_out))
 
-        # MLP with residual
-        residual = atmos_emb
-        atmos_emb = self.norm3(atmos_emb)
-        atmos_emb = self.mlp(atmos_emb)
-        atmos_emb = self.drop_path(atmos_emb)
-        atmos_emb = atmos_emb + residual
-        
-        return atmos_emb
-
+#    def forward(self, x):
+#        return torch.cat((x, self.padding_vector.repeat(x.shape[0], 1, 1)), dim=1)
+    
+    
     
 class AFNONet(nn.Module):
     """
@@ -172,17 +158,17 @@ class AFNONet(nn.Module):
                  patch_size,
                  num_cells,
                  embed_dim, # (mlp_dim)
-                 depth, # actually num of blocks, what about the layers?
+                 depth, # actually num of blocks
                  # heads, not used in afno
                  dropout,
                  emb_dropout=0.,
-                 channels_in=6,
+                 channels_in=12, # 12 because of the lazy concatenation
                  channels_out=4,
                  height=71,
                  swflx_idx=[2, 3],
                  lwflx_idx=[0, 1], 
                  cosmu0_idx=1, 
-                 tsfctrad_idx=5, 
+                 tsfctrad_idx=5,   
                  mean2d=None,
                  var2d=None, 
                  mean3d=None, 
@@ -190,10 +176,10 @@ class AFNONet(nn.Module):
                  device=None,
                  uniform_drop=False, 
                  drop_path_rate=0.,
-                 mlp_ratio=4.,
+                 mlp_ratio=4., 
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
-                 cutoff_frequency=0.1,
+                 zero_freq_indices=None,  # Pass the parameter
                  *args,
                  **kwargs): 
 
@@ -209,7 +195,12 @@ class AFNONet(nn.Module):
         self.cosmu0_idx = cosmu0_idx
         self.tsfctrad_idx = tsfctrad_idx
         
-        # Initialize normalizers for 2D and 3D inputs
+        # due to the lazy concat
+        # self.output_padding = OutputPadding(channels_out)
+        # self.output_padding = nn.Parameter(torch.randn(1, output_padding_size, 1))
+        self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
+
+
         self.normalizer2d = Normalization(std=torch.sqrt(var2d), mean=mean2d)
         self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
 
@@ -224,23 +215,21 @@ class AFNONet(nn.Module):
             nn.LayerNorm(embed_dim),
         )
 
-        self.to_patch_embedding_2D = nn.Sequential(
-            nn.Linear(channels_in, embed_dim),
-            nn.LayerNorm(embed_dim)
-        )
-        
-         # Add a dummy vector as an extra input dimension 
-        self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
+        # not needed in lazy apporach
+        #self.to_patch_embedding_2D = nn.Sequential(
+        #    nn.Linear(channels_in, embed_dim),
+        #    nn.LayerNorm(embed_dim)
+        #)
         
         self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
         self.pos_drop = nn.Dropout(p=dropout)
         self.norm = nn.LayerNorm(embed_dim)              
         
-        # Define the MLP head for final output 
         self.mlp_head = nn.Linear(embed_dim, patch_size*channels_out)
         self.sigmoid = nn.Sigmoid()
 
-      
+ 
+        
         # With uniform fals and drop_path_rate to 0 not really used. Responsible for calculating the drop path rates for each 
         # "transformer" block based on the uniform_drop flag and the drop_path_rate value. If uniform_drop is True, the same 
         # drop_path_rate is used for all blocks. Otherwise, a linearly increasing drop path rate is used, starting from 0 and 
@@ -254,14 +243,15 @@ class AFNONet(nn.Module):
             dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
         # dpr = [drop_path_rate for _ in range(depth)]  # stochastic depth decay rule
         
-          
+
+        # The patch embedding is applied only along the height dimension, and the resulting feature maps have a width of 1.
         h=height // patch_size
         w=1
         
       
         self.blocks = nn.ModuleList([
             Block(
-                dim=embed_dim, 
+                dim=embed_dim,
                 mlp_ratio=mlp_ratio,
                 drop=dropout,
                 drop_path=dpr[i],
@@ -270,9 +260,9 @@ class AFNONet(nn.Module):
                 w=w,
                 sparsity_threshold=sparsity_threshold,
                 hard_thresholding_fraction = hard_thresholding_fraction,
-                cutoff_frequency=cutoff_frequency)
+                zero_freq_indices=None if i < depth - 1 else zero_freq_indices  # Zero out frequencies in the last block
+                )
                 for i in range(depth)
-                
         ])
         
 
@@ -318,39 +308,38 @@ class AFNONet(nn.Module):
         y_pred = torch.cat(y_pred_scaled, dim=-1)
         return y_pred
         
-            
-
+        
+              
             
     def forward(self, x3d, x2d):
-        
+
         x3d = self.normalizer3d(x3d)
-        x2d = self.normalizer2d(x2d) 
+        x2d = self.normalizer2d(x2d)
         
-        # Repeat the dummy vector along the batch dimension
-        dummy_vector_across_batch = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
-        dummy_vector_embedded = self.to_patch_embedding(dummy_vector_across_batch)
-
-        x3d = self.to_patch_embedding(x3d)
-        x3d = torch.cat((x3d, dummy_vector_embedded), dim=1)
-        atmos_emb = x3d + self.pos_embed
-        atmos_emb = self.pos_drop(atmos_emb)
+        # Repeat x2d along the height dimension to match the shape of x3d
+        x2d_repeated = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
+        x_concat = torch.cat((x3d, x2d_repeated), dim=-1)
         
-        x2d = self.to_patch_embedding_2D(x2d)
-        surface_emb = x2d[:, None, :] # Shape: (batch_size, 1, embed_dim)
-        surface_emb = surface_emb.expand(-1, atmos_emb.size(1), -1)
-        surface_emb = surface_emb # + self.surface_pos_embed  
+        # Repeat the dummy vector along the batch dimension, same random nr accross the batch
+        dummy_vector_repeated = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
+        concat_with_x2d = torch.cat((dummy_vector_repeated, x2d.unsqueeze(1)), dim=-1)
+        
+        # Concatenate the resulting tensor as an additional height level
+        x_concat = torch.cat((x_concat, concat_with_x2d), dim=1)
+        x = self.to_patch_embedding(x_concat)
+        
+        x = x + self.pos_embed
+        x = self.pos_drop(x)
 
-        # "Transformer" Block 
         for blk in self.blocks:
-            atmos_emb = blk(atmos_emb, surface_emb)
+            x = blk(x)
 
-        # linear amd softmax after N transformer blocks
-        atmos_emb = self.norm(atmos_emb)
-        x = self.mlp_head(atmos_emb)
+        x = self.norm(x)
+        x = self.mlp_head(x)
         x = self.sigmoid(x)
         x = self._scale_output(x, x2d)
         
-        return x.squeeze()
+        return x.squeeze()    
     
     
     

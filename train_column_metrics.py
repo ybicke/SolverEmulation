@@ -85,6 +85,7 @@ parser.add_argument('--vit-dropout', type=float, default=0.0, help='Vit dropout'
 parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
+parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
 
 
 args = parser.parse_args()
@@ -135,24 +136,7 @@ def get_normalization_params(stats_file):
     
 def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
     logger.info('Preparing the model...')
-    if model_name == 'vit':
-        from vit import ViT
-        model = ViT(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            dim=args.vit_hidden_dim,
-            mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers,
-            heads=args.vit_heads,
-            dropout=args.vit_dropout,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device
-        ).to(device)
-        
-    elif model_name == 'vit_column4':
+    if model_name == 'vit_column4':
         from vit_column import ViT4
         model = ViT4(
             num_cells=args.num_cells,
@@ -177,7 +161,6 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             num_cells=args.num_cells,
             patch_size=args.patch_size,
             embed_dim=args.vit_hidden_dim,
-            # mlp_dim=args.vit_hidden_dim,
             depth=args.vit_layers, #num blocks
             dropout=args.vit_dropout, # used in the mlp
             mean2d=mean2d,
@@ -234,47 +217,27 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
         ).to(device)
         
     
+    elif model_name == 'afno_smooth':
+        from column_files.afno_column_concatEasy_smoothing import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
+            
+        ).to(device)
         
-    elif model_name == 'afno_crossAttention_new':
-        from column_files.afno_column_crossAttention_new import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            cutoff_frequency=args.cutoff_frequency
-        ).to(device)
-    
-    
-    elif model_name == 'afno_crossAttention_new1':
-        from column_files.afno_column_crossAttention_new1 import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            cutoff_frequency=args.cutoff_frequency
-        ).to(device)
         
     else:
         raise NotImplementedError('Model has not implemented yet!')

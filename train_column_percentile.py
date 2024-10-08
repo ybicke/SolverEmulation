@@ -28,6 +28,7 @@ from torchinfo import summary
 from torch.optim.lr_scheduler import StepLR
 
 
+from scipy.stats import percentileofscore
 
 
 import torch.autograd.profiler as profiler
@@ -554,24 +555,23 @@ def calculate_heating_rates(y, x3d, x2d):
 import matplotlib.pyplot as plt
 import os
 
-def plot_sorted_magnitudes(all_magnitudes_sorted, lambda_10, lambda_5, lambda_2, lambda_1, test_path):
+def plot_sorted_magnitudes(all_magnitudes_sorted, lambda_1, lambda_2, lambda_5, lambda_10, test_path):
     """
-    Plot the sorted Fourier magnitudes and visualize 90%, 95%, 98%, and 99% quantiles.
+    Plot the sorted Fourier magnitudes and visualize 1%, 2%, 5%, and 10% quantiles.
     Save the plot to the test path.
     """
-
     # Plot the sorted Fourier magnitudes
     plt.figure(figsize=(10, 6))
     plt.plot(all_magnitudes_sorted, label="Sorted Fourier Magnitudes", color="blue")
 
-    # Add horizontal lines for the 90%, 95%, 98%, and 99% quantiles
-    plt.axhline(y=lambda_10, color="purple", linestyle="--", label="90% Quantile (Top 10%)")
-    plt.axhline(y=lambda_5, color="orange", linestyle="--", label="95% Quantile (Top 5%)")
-    plt.axhline(y=lambda_2, color="green", linestyle="--", label="98% Quantile (Top 2%)")
-    plt.axhline(y=lambda_1, color="red", linestyle="--", label="99% Quantile (Top 1%)")
+    # Add horizontal lines for the 1%, 2%, 5%, and 10% quantiles
+    plt.axhline(y=lambda_1, color="red", linestyle="--", label="1% Quantile (Bottom 1%)")
+    plt.axhline(y=lambda_2, color="green", linestyle="--", label="2% Quantile (Bottom 2%)")
+    plt.axhline(y=lambda_5, color="orange", linestyle="--", label="5% Quantile (Bottom 5%)")
+    plt.axhline(y=lambda_10, color="purple", linestyle="--", label="10% Quantile (Bottom 10%)")
 
     # Add labels and title
-    plt.title("Sorted Fourier Magnitudes with Percentile Cutoffs")
+    plt.title("Sorted Fourier Magnitudes with Lower Quantile Cutoffs")
     plt.xlabel("Index (Fourier Components)")
     plt.ylabel("Magnitude")
     plt.legend()
@@ -583,38 +583,47 @@ def plot_sorted_magnitudes(all_magnitudes_sorted, lambda_10, lambda_5, lambda_2,
     plot_file = os.path.join(test_path, 'quantile_plot_new.png')
     plt.savefig(plot_file)
     print(f"Plot saved to {plot_file}")
-
-    # Close the plot to free up memory
+    plt.close()
     
-
-def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_10, lambda_5, lambda_2, lambda_1, test_path, lambda_fixed=0.01):
+def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_values, test_path, specified_values_quantiles):
     """
-    Plot the sorted Fourier magnitudes and visualize 90%, 95%, 98%, and 99% quantiles.
+    Plot the sorted Fourier magnitudes and visualize specified quantile values.
     Save both the full-range plot and the zoomed-in plot to the provided test_path directory.
     
     Parameters:
     - all_magnitudes_sorted: Sorted magnitudes
-    - lambda_10, lambda_5, lambda_2, lambda_1: Quantile values (90%, 95%, 98%, and 99%)
+    - lambda_values: Dictionary containing lambda values for quantiles
     - test_path: Directory where the plots will be saved
-    - lambda_fixed: Fixed lambda value (default is 0.01)
+    - specified_values_quantiles: Dictionary mapping specified values to their quantiles
     """
-
+    # Unpack lambda values
+    lambda_1 = lambda_values['lambda_1']
+    lambda_2 = lambda_values['lambda_2']
+    lambda_5 = lambda_values['lambda_5']
+    lambda_10 = lambda_values['lambda_10']
+    
+    # Sort magnitudes in ascending order
+    all_magnitudes_sorted = np.sort(all_magnitudes_sorted)
+    
     # Full Range Plot
     plt.figure(figsize=(10, 6))
     plt.plot(all_magnitudes_sorted, label="Sorted Fourier Magnitudes", color="blue")
     
     # Add horizontal lines for quantiles
-    plt.axhline(y=lambda_10, color="purple", linestyle="--", label="90% Quantile (Top 10%)")
-    plt.axhline(y=lambda_5, color="orange", linestyle="--", label="95% Quantile (Top 5%)")
-    plt.axhline(y=lambda_2, color="green", linestyle="--", label="98% Quantile (Top 2%)")
-    plt.axhline(y=lambda_1, color="red", linestyle="--", label="99% Quantile (Top 1%)")
-    plt.axhline(y=lambda_fixed, color="cyan", linestyle="--", label=f"Lambda Fixed: {lambda_fixed}")
+    plt.axhline(y=lambda_1, color="red", linestyle="--", label="1% Quantile")
+    plt.axhline(y=lambda_2, color="green", linestyle="--", label="2% Quantile")
+    plt.axhline(y=lambda_5, color="orange", linestyle="--", label="5% Quantile")
+    plt.axhline(y=lambda_10, color="purple", linestyle="--", label="10% Quantile")
+    
+    # Add horizontal lines for specified values
+    for value, quantile in specified_values_quantiles.items():
+        plt.axhline(y=value, linestyle=":", label=f"Value {value} (Quantile {quantile:.2%})")
     
     # Add labels and title
     plt.title("Sorted Fourier Magnitudes (Full Range)")
     plt.xlabel("Index (Fourier Components)")
     plt.ylabel("Magnitude")
-    plt.legend()
+    plt.legend(loc='upper left')
     plt.grid(True)
     
     # Save the full-range plot
@@ -627,22 +636,27 @@ def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_10, lambda_5, lamb
     plt.figure(figsize=(10, 6))
     plt.plot(all_magnitudes_sorted, label="Sorted Fourier Magnitudes", color="blue")
     
-    # Add horizontal lines for quantiles and lambda value
-    plt.axhline(y=lambda_10, color="purple", linestyle="--", label="90% Quantile (Top 10%)")
-    plt.axhline(y=lambda_5, color="orange", linestyle="--", label="95% Quantile (Top 5%)")
-    plt.axhline(y=lambda_2, color="green", linestyle="--", label="98% Quantile (Top 2%)")
-    plt.axhline(y=lambda_1, color="red", linestyle="--", label="99% Quantile (Top 1%)")
-    plt.axhline(y=lambda_fixed, color="cyan", linestyle="--", label=f"Lambda Fixed: {lambda_fixed}")
+    # Add horizontal lines and annotations for quantiles and specified values
+    plt.axhline(y=lambda_1, color="red", linestyle="--", label="1% Quantile")
+    plt.axhline(y=lambda_2, color="green", linestyle="--", label="2% Quantile")
+    plt.axhline(y=lambda_5, color="orange", linestyle="--", label="5% Quantile")
+    plt.axhline(y=lambda_10, color="purple", linestyle="--", label="10% Quantile")
+    
+    for value, quantile in specified_values_quantiles.items():
+        plt.axhline(y=value, linestyle=":", label=f"Value {value} (Quantile {quantile:.2%})")
+        # Annotate the quantile
+        plt.text(len(all_magnitudes_sorted) * 0.6, value + 0.001, f"Quantile: {quantile:.2%}", color='black')
     
     # Add labels and title
     plt.title("Sorted Fourier Magnitudes (Zoomed-In)")
     plt.xlabel("Index (Fourier Components)")
     plt.ylabel("Magnitude")
-    plt.legend()
+    plt.legend(loc='upper left')
     plt.grid(True)
     
-    # Zoom in on lower magnitudes
-    plt.ylim([0, 0.1])
+    # Zoom in on specified range
+    max_value = max([lambda_1, lambda_2, lambda_5, lambda_10] + list(specified_values_quantiles.keys()))
+    plt.ylim([0, max_value * 1.1])
     
     # Save the zoomed-in plot
     zoomed_plot_file = os.path.join(test_path, 'quantile_plot_zoomed.png')
@@ -651,7 +665,7 @@ def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_10, lambda_5, lamb
     plt.close()
 
 
-    
+
 
 
 def test_model(model, test_set):
@@ -711,55 +725,55 @@ def test_model(model, test_set):
         all_magnitudes_sorted, _ = torch.sort(all_magnitudes, descending=True)
         all_magnitudes = torch.tensor(all_magnitudes_sorted).flatten().cpu().numpy()
         np.save(file_path, all_magnitudes)
+        
+            
+     # Compute lower quantiles to remove bottom percentages
+    lambda_1 = np.quantile(all_magnitudes, 0.01)
+    lambda_2 = np.quantile(all_magnitudes, 0.02)
+    lambda_5 = np.quantile(all_magnitudes, 0.05)
+    lambda_10 = np.quantile(all_magnitudes, 0.10)
 
-    # Compute quantiles using numpy
-    lambda_99 = np.quantile(all_magnitudes, 0.99)
-    lambda_98 = np.quantile(all_magnitudes, 0.98)
-    lambda_95 = np.quantile(all_magnitudes, 0.95)
-    lambda_90 = np.quantile(all_magnitudes, 0.90)
+    logger.info(f'Lambda 1st percentile (removing bottom 1%): {lambda_1}')
+    logger.info(f'Lambda 2nd percentile (removing bottom 2%): {lambda_2}')
+    logger.info(f'Lambda 5th percentile (removing bottom 5%): {lambda_5}')
+    logger.info(f'Lambda 10th percentile (removing bottom 10%): {lambda_10}')
 
+    # Now you can use these lambda values in your thresholding step
+    print(f"Lambda 1% (Removing bottom 1% of components): {lambda_1}")
+    print(f"Lambda 2% (Removing bottom 2% of components): {lambda_2}")
+    print(f"Lambda 5% (Removing bottom 5% of components): {lambda_5}")
+    print(f"Lambda 10% (Removing bottom 10% of components): {lambda_10}")
 
-    logger.info(f'Lambda 99th percentile: {lambda_99}')
-    logger.info(f'Lambda 98th percentile: {lambda_98}')
-    logger.info(f'Lambda 95th percentile: {lambda_95}')
-    logger.info(f'Lambda 90th percentile: {lambda_90}')
-
-
-    # Now you can use these lambda values in your soft-thresholding step
-    print(f"Lambda 99% (Keeping top 1% of components): {lambda_99.item()}")
-    print(f"Lambda 98% (Keeping top 2% of components): {lambda_98.item()}")
-    print(f"Lambda 95% (Keeping top 5% of components): {lambda_95.item()}")
-    print(f"Lambda 90% (Keeping top 10% of components): {lambda_90.item()}")
-
-    
-    # **Save lambda parameters to a file**
+    # Save lambda parameters to a file
     lambda_values = {
-        'lambda_99': lambda_99.item(),
-        'lambda_98': lambda_98.item(),
-        'lambda_95': lambda_95.item(),
-        'lambda_90': lambda_90.item()
+        'lambda_1': lambda_1.item(),
+        'lambda_2': lambda_2.item(),
+        'lambda_5': lambda_5.item(),
+        'lambda_10': lambda_10.item(),
     }
-      
+
     with open(pickle_file, 'wb') as handle:
         pickle.dump(lambda_values, handle, protocol=pickle.HIGHEST_PROTOCOL)
     print(f"Lambda values saved to {pickle_file}")
 
-    target_value = 0.01
-    closest_index = np.argmin(np.abs(all_magnitudes - target_value))
 
-    # Print the index and the closest value
-    print(f"Index of the value closest to {target_value}: {closest_index}")
-    print(f"Closest value: {all_magnitudes[closest_index]}")
+    specified_values = [0.02, 0.03, 0.04, 0.05]
+    specified_values_quantiles = {}
+    for v in specified_values:
+        quantile = percentileofscore(all_magnitudes, v, kind='weak') / 100.0
+        specified_values_quantiles[v] = quantile
+        print(f"Value {v} corresponds to quantile {quantile:.4f}")
 
-    # plot_sorted_magnitudes(all_magnitudes_sorted, lambda_1, lambda_2, lambda_5, test_path)
-    #plot_sorted_magnitudes(all_magnitudes, lambda_90, lambda_95, lambda_98, lambda_99, test_path)
-
-    #plot_sorted_magnitudes_zoom(all_magnitudes, lambda_90, lambda_95, lambda_98, lambda_99, test_path)
-
+    # Plot the sorted magnitudes with the new quantiles and specified values
+    plot_sorted_magnitudes_zoom(all_magnitudes, lambda_values, test_path, specified_values_quantiles)
+    
+    
+   # At the end of test_model function
+    plot_sorted_magnitudes(all_magnitudes, lambda_1, lambda_2, lambda_5, lambda_10, test_path)
+    # plot_sorted_magnitudes_zoom(all_magnitudes, lambda_1, lambda_2, lambda_5, lambda_10, test_path)
 
     
 
-        
 def test_loading_time(train_files, iter=10):
     logger.info('Test Loading time started...')
     dataset = get_data_with_disk_cache(train_files, shuffle=True)
@@ -811,9 +825,9 @@ def main():
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')
     
-    if args.test:
-        test_loader = get_column_data_with_disk_cache(test_files)
-        test_model(model, test_loader)
+    if args.test: # here put in train file and train loader as I evulate the percentiles
+        train_loader = get_column_data_with_disk_cache(train_files)
+        test_model(model, train_loader)
     
     logger.info('Code ended!')
 

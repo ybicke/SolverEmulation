@@ -309,31 +309,23 @@ class AFNONet(nn.Module):
         
               
             
-    def forward_features(self, x3d, x2d):
+    def forward(self, x3d, x2d):
 
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
         
-        
         # Repeat x2d along the height dimension to match the shape of x3d
         x2d_repeated = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
-        
-        # Concatenate x3d and x2d_repeated along the feature dimension
         x_concat = torch.cat((x3d, x2d_repeated), dim=-1)
         
         # Repeat the dummy vector along the batch dimension, same random nr accross the batch
         dummy_vector_repeated = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
-        
-        # Concatenate the repeated dummy vector with the normalized x2d
-        dummy_vector_with_x2d = torch.cat((dummy_vector_repeated, x2d.unsqueeze(1)), dim=-1)
+        concat_with_x2d = torch.cat((dummy_vector_repeated, x2d.unsqueeze(1)), dim=-1)
         
         # Concatenate the resulting tensor as an additional height level
-        x_concat = torch.cat((x_concat, dummy_vector_with_x2d), dim=1)
-        
-        # Embed the concatenated features using a single embedding layer
+        x_concat = torch.cat((x_concat, concat_with_x2d), dim=1)
         x = self.to_patch_embedding(x_concat)
         
-
         x = x + self.pos_embed
         x = self.pos_drop(x)
 
@@ -341,13 +333,7 @@ class AFNONet(nn.Module):
             x = blk(x)
 
         x = self.norm(x)
-        return x
-
-    def forward(self, x3d, x2d):
-        x = self.forward_features(x3d, x2d)
         x = self.mlp_head(x)
-
-    
         x = self.sigmoid(x)
         x = self._scale_output(x, x2d)
         

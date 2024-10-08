@@ -49,3 +49,4 @@ python train_column.py \
     --vit-dropout 0.0 \
     --wandb-mode online \
 
+ 
