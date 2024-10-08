@@ -84,6 +84,8 @@ parser.add_argument('--vit-dropout', type=float, default=0.0, help='Vit dropout'
 parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
+parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
+
 
 
 args = parser.parse_args()
@@ -248,27 +250,9 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)        
         
-    elif model_name == 'afno_crossAttention_modified':
-        from column_files.afno_column_crossAttention_modified import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
         
-    elif model_name == 'afno_crossAttention_new':
-        from column_files.afno_column_crossAttention_new import AFNONet
+    elif model_name == 'afno_easyConcat_clean_smooth':
+        from column_files.afno_column_concatEasy_clean_smoothing import AFNONet
         model = AFNONet(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -284,27 +268,10 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             is_test=args.test,  
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-    
-    
-    elif model_name == 'afno_crossAttention_new1':
-        from column_files.afno_column_crossAttention_new1 import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
+            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
             
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
+        ).to(device)    
+
         
     else:
         raise NotImplementedError('Model has not implemented yet!')

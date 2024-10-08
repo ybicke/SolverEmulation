@@ -23,7 +23,7 @@ from einops.layers.torch import Rearrange
 # Bring your packages onto the path
 import sys
 sys.path.append('/myhome/AFNO/AFNO-transformer')
-from afno.afno1d import AFNO1D
+from afno.afno1d_smoothing import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
 from afno.ls import AttentionLS
@@ -90,6 +90,7 @@ class Block(nn.Module):
                  sparsity_threshold=0.01,
                  hard_thresholding_fraction=1.0,
                  hidden_size_factor=1,
+                 zero_freq_indices=None,  # New parameter
                  double_skip=True):
         super().__init__()
         
@@ -104,13 +105,14 @@ class Block(nn.Module):
                                  num_blocks=fno_blocks,
                                  sparsity_threshold=sparsity_threshold,
                                  hard_thresholding_fraction=hard_thresholding_fraction,
-                                 hidden_size_factor=1)
+                                 hidden_size_factor=1,
+                                 zero_freq_indices=zero_freq_indices  # Pass the parameter
+                                 )
         
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
     
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-
         self.double_skip = double_skip
 
     def forward(self, x):
@@ -167,6 +169,7 @@ class AFNONet(nn.Module):
                  mlp_ratio=4.,
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
+                 zero_freq_indices=None,  # Pass the parameter
                  *args,
                  **kwargs): 
 
@@ -241,7 +244,9 @@ class AFNONet(nn.Module):
                 h=h,
                 w=w,
                 sparsity_threshold=sparsity_threshold,
-                hard_thresholding_fraction = hard_thresholding_fraction)
+                hard_thresholding_fraction = hard_thresholding_fraction, 
+                zero_freq_indices=None if i < depth - 1 else zero_freq_indices  # Zero out frequencies in the last block
+                )
                 for i in range(depth)
                 
         ])
