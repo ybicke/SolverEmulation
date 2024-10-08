@@ -217,8 +217,9 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
         ).to(device)
         
     
-    elif model_name == 'afno_smooth':
-        from column_files.afno_column_concatEasy_smoothing import AFNONet
+        
+    elif model_name == 'afno_easyConcat_clean_smooth':
+        from column_files.afno_column_concatEasy_clean_smoothing import AFNONet
         model = AFNONet(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -236,7 +237,7 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             hard_thresholding_fraction = args.hard_thresholding_fraction,
             zero_freq_indices=args.zero_freq_indices  # Pass the parameter
             
-        ).to(device)
+        ).to(device)    
         
         
     else:
