@@ -132,8 +132,6 @@ class Block(nn.Module):
             
         # Cross Attention
         atmos_emb = self.norm2(atmos_emb) 
-        # here I also normalized the surface embedding
-        surface_emb = self.norm2(surface_emb) 
         atmos_emb = self.cross_attn(atmos_emb, surface_emb)
         atmos_emb = atmos_emb + residual
         
@@ -149,39 +147,14 @@ class Block(nn.Module):
     
     
 class CrossAttentionBlock(nn.Module):
-    def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
+    def __init__(self, dim, num_heads=8, dropout=0.):
         super().__init__()
-        self.num_heads = num_heads
-        head_dim = dim // num_heads
-        self.scale = qk_scale or head_dim ** -0.5
-
-        # Linear layers for query, key, and value projections
-        self.q = nn.Linear(dim, dim, bias=qkv_bias)
-        self.k = nn.Linear(dim, dim, bias=qkv_bias)
-        self.v = nn.Linear(dim, dim, bias=qkv_bias)
-
-        self.attn_drop = nn.Dropout(attn_drop)
-        self.proj = nn.Linear(dim, dim)
-        self.proj_drop = nn.Dropout(proj_drop)
+        self.mha = nn.MultiheadAttention(dim, num_heads, dropout=dropout, batch_first=True)
 
     def forward(self, atmos_emb, surface_emb):
-        B, N, C = atmos_emb.shape
-
-        # Compute query, key, and value projections
-        q = self.q(atmos_emb).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        k = self.k(surface_emb).reshape(B, -1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        v = self.v(surface_emb).reshape(B, -1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-
-        # Compute attention scores and apply softmax
-        attn = (q @ k.transpose(-2, -1)) * self.scale
-        attn = attn.softmax(dim=-1)
-        attn = self.attn_drop(attn)
-
-        # Compute attention output and apply projection
-        x = (attn @ v).transpose(1, 2).reshape(B, N, C)
-        x = self.proj(x)
-        x = self.proj_drop(x)
-        return x
+        # Perform multi-head attention
+        attn_output, _ = self.mha(atmos_emb, surface_emb, surface_emb)
+        return attn_output
     
     
     
@@ -263,8 +236,6 @@ class AFNONet(nn.Module):
         )
         
         self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
-        self.surface_pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
-
         self.pos_drop = nn.Dropout(p=dropout)
         self.norm = nn.LayerNorm(embed_dim)              
         
@@ -370,9 +341,6 @@ class AFNONet(nn.Module):
         atmos_emb = x3d + self.pos_embed
         atmos_emb = self.pos_drop(atmos_emb)
         surface_emb = x2d[:, None, :] 
-        surface_emb = surface_emb.expand(-1, atmos_emb.size(1), -1)
-        surface_emb = surface_emb + self.surface_pos_embed  
-
 
         # "Transformer" Block 
         for blk in self.blocks:

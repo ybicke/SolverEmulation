@@ -186,7 +186,6 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             mean3d=mean3d, 
             var3d=var3d,
             device=device,
-            
             is_test=args.test,  
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
@@ -206,12 +205,47 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             mean3d=mean3d, 
             var3d=var3d,
             device=device,
-            
             is_test=args.test,  
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)
         
+    elif model_name == 'afno_crossAttention_clean1':
+        from column_files.afno_column_crossAttention_clean1 import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)
+        
+    elif model_name == 'afno_crossAttention_expanded_clean':
+        from column_files.afno_column_crossAttention_expanded_clean import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)
+            
 
     elif model_name == 'afno_easyConcat_clean':
         from column_files.afno_column_concatEasy_clean import AFNONet
@@ -226,11 +260,28 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             mean3d=mean3d, 
             var3d=var3d,
             device=device,
-            
             is_test=args.test,  
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)        
+        
+    elif model_name == 'afno_easyConcat_clean_debug':
+        from column_files.afno_column_concatEasy_clean_debug import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)     
         
         
     elif model_name == 'afno_easyConcat_clean_smooth':
@@ -246,7 +297,6 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             mean3d=mean3d, 
             var3d=var3d,
             device=device,
-            
             is_test=args.test,  
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
