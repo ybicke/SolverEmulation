@@ -18,7 +18,7 @@ class AFNO1D(nn.Module):
                  sparsity_threshold=0.01,
                  hard_thresholding_fraction=1,
                  hidden_size_factor=1,
-                 cutoff_frequency=0.1):
+                 ):
         super().__init__()
         assert hidden_size % num_blocks == 0, f"hidden_size {hidden_size} should be divisble by num_blocks {num_blocks}"
 
@@ -32,9 +32,6 @@ class AFNO1D(nn.Module):
         self.hard_thresholding_fraction = hard_thresholding_fraction
         self.hidden_size_factor = hidden_size_factor
         self.scale = 0.02
-
-        # try out low pass filtering
-        self.cutoff_frequency = cutoff_frequency  # Fixed cutoff frequency
 
         # preparation for blockwhise processing: 2 for real and imag, hiddensize factor for output
         self.w1 = nn.Parameter(self.scale * torch.randn(2, self.num_blocks, self.block_size, self.block_size * self.hidden_size_factor))

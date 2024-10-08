@@ -128,17 +128,6 @@ class Block(nn.Module):
         x = x + residual
         return x
     
-## For extra dimension in the output, lazy concat
-#class OutputPadding(nn.Module):
-#    def __init__(self, channels_out):
-#        super(OutputPadding, self).__init__()
-#        self.channels_out = channels_out
-#        self.padding_vector = nn.Parameter(torch.randn(1, 1, channels_out))
-
-#    def forward(self, x):
-#        return torch.cat((x, self.padding_vector.repeat(x.shape[0], 1, 1)), dim=1)
-    
-    
     
 class AFNONet(nn.Module):
     """
@@ -195,8 +184,6 @@ class AFNONet(nn.Module):
         self.tsfctrad_idx = tsfctrad_idx
         
         # due to the lazy concat
-        # self.output_padding = OutputPadding(channels_out)
-        # self.output_padding = nn.Parameter(torch.randn(1, output_padding_size, 1))
         self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
 
 

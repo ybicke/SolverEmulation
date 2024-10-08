@@ -27,7 +27,7 @@ echo training$line_number started!
 python train_column_metrics.py \
     --model afno_easyConcat \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_control \
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \

@@ -34,9 +34,6 @@ import matplotlib.pyplot as plt
 import os
 
 _logger = logging.getLogger(__name__)   
-
-
-
     
 # this class is borrowed from vit_column, here for normalizing the input
 class Normalization(nn.Module):
