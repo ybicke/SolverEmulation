@@ -19,7 +19,6 @@ from os.path import join, dirname, basename, normpath, isfile, exists
 import wandb
 import torch
 # import lightning as L
-# import lightning as L
 import numpy as np
 import matplotlib.pyplot as plt
 from torch import optim, nn
@@ -30,7 +29,10 @@ from torchinfo import summary
 import torch.autograd.profiler as profiler
 
 from data_loaders import IconColumnIterableDataset
+from afno_column_crossAttention import AFNONet
 
+# Implementation of afno model
+# from afno_column import AFNO
 
 sys.path.append(dirname(__file__))
 
@@ -41,18 +43,13 @@ CACHE_DIR = '/tmp' # tempfile.TemporaryDirectory(dir='/tmp').name
 
 
 seed = 42
-wandb_config = {'seed': seed}
+wandb_config = {'seed':seed}
 prng = np.random.RandomState(seed)
 
 torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-if torch.cuda.is_available():
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
 
 import argparse
 import os
@@ -84,7 +81,6 @@ parser.add_argument('--vit-dropout', type=float, default=0.0, help='Vit dropout'
 parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
-parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
 
 
 
@@ -94,6 +90,7 @@ args = parser.parse_args()
 save_id = f'{basename(normpath(args.save))}'
 checkpoint_path = join(args.save)
 os.makedirs(checkpoint_path, exist_ok=True)
+# test_path = join(args.save, 'test_year_checkpoint/') # save to 
 test_path = join(args.save, 'test/')
 os.makedirs(test_path, exist_ok=True)
 
@@ -120,7 +117,7 @@ def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle
     return DataLoader(
         icon_data, 
         batch_size=args.batch_size, 
-        # shuffle=shuffle, deafult should be shuffle=none
+        # shuffle=shuffle, 
         pin_memory=True, 
         num_workers=args.num_workers, # The number of subprocesses to use for data loading. Each worker will fetch samples from the dataset independently and in parallel.
         prefetch_factor=args.prefetch_factor #  The number of samples to prefetch in the background while the current batch is being processed.
@@ -155,6 +152,7 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
         
     elif model_name == 'vit_column4':
         from vit_column import ViT4
+        #height_patch_size = args.height_patch_size
         model = ViT4(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -168,12 +166,11 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             mean3d=mean3d, 
             var3d=var3d,
             device=device
+            # is_test=is_test  # Assuming ViT4 can accept an is_test parameter
         ).to(device)
         
-    
-    # AFNO Implementation
+    # AFNO Implementation!!!    
     elif model_name == 'afno':
-        from column_files.afno_column_clean import AFNONet
         model = AFNONet(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -190,70 +187,10 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             is_test=args.test,  
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-                
-    elif model_name == 'afno_crossAttention_clean':
-        from column_files.afno_column_crossAttention_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
+            cutoff_frequency=args.cutoff_frequency
 
-    elif model_name == 'afno_easyConcat_clean':
-        from column_files.afno_column_concatEasy_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)        
-        
-        
-    elif model_name == 'afno_easyConcat_clean_smooth':
-        from column_files.afno_column_concatEasy_clean_smoothing import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
-            
-        ).to(device)    
 
+        ).to(device)
         
     else:
         raise NotImplementedError('Model has not implemented yet!')
@@ -268,12 +205,13 @@ def find_latest_checkpoint(directory):
     return join(directory, f'checkpoint_epoch_{max(idx)}.pth'), max(idx)
 
 
+
 def train_model(model, train_set, valid_set):
     
     # Log the start of training
     logger.info('Train started...')
     
-    # Initialize Weights & Biases 
+    # Initialize Weights & Biases (W&B) for experiment tracking
     wandb.init(
         project='deepcloud-yves', 
         name=save_id, 
@@ -286,7 +224,8 @@ def train_model(model, train_set, valid_set):
         mode=args.wandb_mode
     )
     wandb.watch(model, log_freq=100)
-
+    
+   
     # Set up the optimizer based on the specified type
     if args.optimizer == 'adam':
         optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
@@ -295,7 +234,7 @@ def train_model(model, train_set, valid_set):
             model.parameters(), 
             lr=args.learning_rate,
             eps=1e-8,
-            weight_decay=0.01  # basically applying ridge regression L2
+            weight_decay=0.01
         )
     else:
         raise NameError('optimizer not supported.')
@@ -344,7 +283,6 @@ def train_model(model, train_set, valid_set):
             outputs = model(batch_x3, batch_x2)
             loss = train_loss(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
-            
             if i > 0 and i % vbatch == 0:
                 optimizer.zero_grad()
                 loss.backward()
@@ -419,6 +357,7 @@ def train_model(model, train_set, valid_set):
     return model
 
 
+# needs some more inspection---------------------------------------------------------------------------------
 def calculate_heating_rates(y, x3d, x2d): 
     # assumed output order is: [lw_up, lw_dn, sw_up, sw_dn]
     g = 9.80665
@@ -474,6 +413,7 @@ def test_model(model, test_set):
         with torch.no_grad():
             outputs = model(batch_x3, batch_x2)
             
+        
         # Collect true and predicted values for further analysis
         y_true.append(batch_y.detach().cpu())
         y_pred.append(outputs.detach().cpu())
@@ -506,6 +446,7 @@ def test_model(model, test_set):
     # mean_err = torch.mean(torch.abs(y_true - y_pred), dim=0)
     # heat_err = torch.mean(torch.abs(h_true - h_pred), dim=0)
 
+
     # Save true and predicted values to files for further analysis
     with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
         pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -519,6 +460,8 @@ def test_model(model, test_set):
     with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
         pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
+    
+  
 
 def test_loading_time(train_files, iter=10):
     logger.info('Test Loading time started...')
@@ -533,6 +476,8 @@ def test_loading_time(train_files, iter=10):
         logger.info(f'Iteration: {it}: Real time: {t2[0] - t1[0]:.2f}, CPU time: {t2[1]-t1[1]}')
         import gc
         gc.collect()
+
+
 
 
 def main():
@@ -555,6 +500,7 @@ def main():
     stats_file = join(args.dataset, 'normalizer_stats_per_feat.pickle')
     mean2d, var2d, mean3d, var3d = get_normalization_params(stats_file)
     model = get_model(args.model, mean2d, var2d, mean3d, var3d, args.test)
+    # summary(model, [(1, 70, 6),     (1, 6)])
     
     num_params = count_parameters(model)
     print(f"The model has {num_params:,} trainable parameters.")
