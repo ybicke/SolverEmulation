@@ -4,6 +4,7 @@ from os.path import join, basename, exists
 
 import h5py
 import torch
+import random
 from torch.utils.data import IterableDataset, DataLoader
 
 
@@ -33,9 +34,6 @@ class IconColumnIterableDataset(IterableDataset):
                 shutil.copy2(filename, local_file)
                 continue
             break         
-        if self.shuffle:
-            # TODO: Add shuffle        
-            pass
 
         if self.subsample:
             indices = torch.randint(0, y.size(0), (int(self.subsample*y.size(0)), ))
@@ -55,8 +53,15 @@ class IconColumnIterableDataset(IterableDataset):
             iter_start = worker_id * per_worker
             iter_end = min(iter_start + per_worker, len(self.filenames))
             
-        for filename in self.filenames[iter_start: iter_end]:
+        if self.shuffle:
+            # Shuffle the filenames within the worker's range
+            indices = list(range(iter_start, iter_end))
+            random.shuffle(indices)
+            filenames = [self.filenames[i] for i in indices]
+        else:
+            filenames = self.filenames[iter_start:iter_end]
+            
+        for filename in filenames:
             x3d, x2d, y = self.read_file(filename)
             for x3d_, x2d_, y_ in zip(x3d, x2d, y):
                 yield x3d_, x2d_, y_
-

@@ -357,7 +357,6 @@ class AFNONet(nn.Module):
         # Repeat the dummy vector along the batch dimension
         # Concatenate the resulting tensor as an additional height level
         dummy_vector_across_batch = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
-        
         x3d = torch.cat((x3d, dummy_vector_across_batch), dim=1)
 
         x3d = self.to_patch_embedding(x3d)

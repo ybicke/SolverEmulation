@@ -5,12 +5,24 @@ from os.path import join
 from matplotlib import pyplot as plt
 from itertools import cycle
 
-# Define the model name
-model_name = 'afno_column_1percent_Emb128_afno_crossAttention_clean'
-model_path = f'/mydata/deepcloud/yves/results_git/{model_name}/test'
+# Define the model names and paths
+model_names = [
+    #'afno_column_1percent_Emb128_afno_crossAttention_clean',
+    #'afno_column_1percent_Emb128_afno_crossAttention_clean1'
+    'afno_column_1percent_Emb128_easyConcat_clean_smooth33',
+    'afno_column_1percent_Emb128_easyConcat_clean_smooth34',
+    'afno_column_1percent_Emb128_easyConcat_clean_smooth35'
 
-# Define the model dictionary
-models = [{'name': model_name, 'path': model_path}]
+]
+
+model_paths = [
+    f'/mydata/deepcloud/yves/results_git/{model_names[0]}/test',
+    f'/mydata/deepcloud/yves/results_git/{model_names[1]}/test',
+    f'/mydata/deepcloud/yves/results_git/{model_names[2]}/test'
+
+]
+
+models = [{'name': name, 'path': path} for name, path in zip(model_names, model_paths)]
 
 y_true_list, y_pred_list, h_true_list, h_pred_list = [], [], [], []
 
@@ -31,10 +43,10 @@ for model in models:
     h_true_list.append(h_true)
     h_pred_list.append(h_pred)
 
-def add_subplot(fig, x, y_trues, y_preds, id, models, xlabel=None, ylabel=None, title=None, flux=True, subset_slice=slice(None)):
+def add_subplot(fig, x, y_trues, y_preds, id, models, xlabel=None, ylabel=None, title=None, subset_slice=slice(None)):
     ax = fig.add_subplot(*id)
     color_cycle = cycle(plt.rcParams['axes.prop_cycle'].by_key()['color'])
-    for y_true, y_pred, model in zip(y_trues, y_preds, models):
+    for i, (y_true, y_pred, model) in enumerate(zip(y_trues, y_preds, models)):
         color = next(color_cycle)
         # Check the dimensionality and adjust accordingly
         if y_true.ndim == 3:
@@ -54,21 +66,23 @@ def add_subplot(fig, x, y_trues, y_preds, id, models, xlabel=None, ylabel=None, 
         x_array = np.array(x)
         x_diff = x_array[:-1]
 
-        if flux:
-            ax.plot(delta_y_true, x_diff, label=f'{model["name"]} True', linestyle='-', color=color)
-            ax.plot(delta_y_pred, x_diff, linestyle='--', color=color)
+        # Plot true values with different line styles for each model
+        if i == 0:
+            ax.plot(delta_y_true, x_diff, linestyle='-', color='red', linewidth=1.5, label='True')
         else:
-            ax.plot(delta_y_true, x_diff, label=f'{model["name"]} True HR', linestyle='-', color=color)
-            ax.plot(delta_y_pred, x_diff, linestyle='--', color=color)
+            ax.plot(delta_y_true, x_diff, linestyle='--', color='black', linewidth=1.5)
+
+        # Plot predicted values
+        ax.plot(delta_y_pred, x_diff, label=f'{model["name"]}', linestyle='--', color=color)
+
     ax.grid()
     ax.set_xlabel(xlabel if xlabel else '')
     ax.set_ylabel(ylabel if ylabel else '')
     ax.set_title(title if title else '')
-    # Uncomment the legend if needed
-    # ax.legend(fontsize="10", loc='lower left')
     return ax
 
-fig = plt.figure(figsize=(10, 13))
+# Increase the figure width to make the plots wider
+fig = plt.figure(figsize=(20, 13))
 
 # Define the subset slice, e.g., averaging over the first 5 samples
 subset = slice(0, 5)
@@ -80,11 +94,17 @@ add_subplot(fig, x=range(35, 71), y_trues=[y[:, 35:, 2] for y in y_true_list], y
 add_subplot(fig, x=range(35, 71), y_trues=[y[:, 35:, 0] for y in y_true_list], y_preds=[y[:, 35:, 0] for y in y_pred_list], id=(2, 3, 5), models=models, title='Upward Longwave', xlabel='Flux Difference [W/m$^2$]', ylabel='Vertical Level', subset_slice=subset)
 
 # Heating rate plots
-add_subplot(fig, x=range(35, 70), y_trues=[h[:, 35:, 1] for h in h_true_list], y_preds=[h[:, 35:, 1] for h in h_pred_list], id=(2, 3, 3), models=models, title='Heating Rates (Shortwave)', xlabel='MAE Difference [K/day]', ylabel='Vertical Level', flux=False, subset_slice=subset)
-add_subplot(fig, x=range(35, 70), y_trues=[h[:, 35:, 0] for h in h_true_list], y_preds=[h[:, 35:, 0] for h in h_pred_list], id=(2, 3, 6), models=models, title='Heating Rates (Longwave)', xlabel='MAE Difference [K/day]', ylabel='Vertical Level', flux=False, subset_slice=subset)
-# Create a single title for the entire plot
-fig.suptitle(f'{model_name}', fontsize=16)
+add_subplot(fig, x=range(35, 70), y_trues=[h[:, 35:, 1] for h in h_true_list], y_preds=[h[:, 35:, 1] for h in h_pred_list], id=(2, 3, 3), models=models, title='Heating Rates (Shortwave)', xlabel='MAE Difference [K/day]', ylabel='Vertical Level', subset_slice=subset)
+last_ax = add_subplot(fig, x=range(35, 70), y_trues=[h[:, 35:, 0] for h in h_true_list], y_preds=[h[:, 35:, 0] for h in h_pred_list], id=(2, 3, 6), models=models, title='Heating Rates (Longwave)', xlabel='MAE Difference [K/day]', ylabel='Vertical Level', subset_slice=subset)
 
-plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to make room for the suptitle
-plt.title('Differences')  # Adjust layout to make room for the suptitle
-plt.savefig(f'/mydata/deepcloud/yves/results_git/{model_name}_differences.png', bbox_inches='tight', dpi=300)
+# Create a single title for the entire plot
+fig.suptitle(f'Comparison of {", ".join([model["name"] for model in models])}', fontsize=16)
+
+# Create a single legend at the bottom center of the plot
+handles, labels = last_ax.get_legend_handles_labels()
+fig.legend(handles, labels, loc='lower center', ncol=len(models)+1, fontsize="10")
+
+# Adjust the spacing between subplots to make room for the legend
+plt.tight_layout(rect=[0, 0.05, 1, 0.96])  # Adjust the bottom spacing as needed
+
+plt.savefig(f'/mydata/deepcloud/yves/results_git/easyConcat_clean_smooth_differences.png', bbox_inches='tight', dpi=300)

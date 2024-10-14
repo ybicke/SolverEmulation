@@ -21,21 +21,21 @@ from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
 # Bring your packages onto the path
-#import sys
-#sys.path.append('/myhome/AFNO/AFNO-transformer')
-#sys.path.insert(0, '/mydata/deepcloud/yves/SolverEmulation')
-
+import sys
+sys.path.append('/myhome/AFNO/AFNO-transformer')
 from afno.afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
-# from ..afno.bfno2d import BFNO2D
-# from ..afno.ls import AttentionLS
-# from ..afno.sa import SelfAttention
-# from ..afno.gfn import GlobalFilter
+from afno.bfno2d import BFNO2D
+from afno.ls import AttentionLS
+from afno.sa import SelfAttention
+from afno.gfn import GlobalFilter
 
 import matplotlib.pyplot as plt
 import os
 
 _logger = logging.getLogger(__name__)   
+
+
 
     
 # this class is borrowed from vit_column, here for normalizing the input
@@ -74,7 +74,6 @@ class Mlp(nn.Module):
         return x
 
 
-
 class Block(nn.Module):
     def __init__(self, 
                  dim,
@@ -83,7 +82,7 @@ class Block(nn.Module):
                  drop_path=0.,
                  act_layer=nn.GELU,
                  norm_layer=nn.LayerNorm,
-                 h=14,
+                 h=14, # I do overwrite them
                  w=8,
                  mixing_type="afno",
                  hidden_size=256,
@@ -91,15 +90,15 @@ class Block(nn.Module):
                  sparsity_threshold=0.01,
                  hard_thresholding_fraction=1.0,
                  hidden_size_factor=1,
-                 cutoff_frequency=0.1,
                  double_skip=True):
         super().__init__()
         
         self.norm1 = norm_layer(dim)
         self.norm2 = norm_layer(dim)
-        self.norm3 = norm_layer(dim)
 
-        # AFNO1D layer for atmospheric embeddings
+        # could potentially implment other mixing types here such as bfno, sa from the paper
+        # here hidden_size = hidden_size before, for making embedding dimension smaller..? 
+        # I had to adjust it to make it suit the division by the block size in the afno1D
         if mixing_type == "afno":
             self.filter = AFNO1D(hidden_size=dim,
                                  num_blocks=fno_blocks,
@@ -107,51 +106,28 @@ class Block(nn.Module):
                                  hard_thresholding_fraction=hard_thresholding_fraction,
                                  hidden_size_factor=1)
         
-        # Cross-attention block for atmospheric and surface embeddings
-        self.cross_attn = CrossAttentionBlock(dim)
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
     
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
+
         self.double_skip = double_skip
 
-
-    def forward(self, atmos_emb, surface_emb):
-
-        # AFNO part with afno1d mixing operation (filter)
-        residual = atmos_emb
-        atmos_emb = self.norm1(atmos_emb)
-        atmos_emb = self.filter(atmos_emb)
+    def forward(self, x):
+        residual = x
+        x = self.norm1(x)
+        x = self.filter(x)
 
         if self.double_skip:
-            atmos_emb = atmos_emb + residual
-            residual = atmos_emb
-            
-        # Cross Attention
-        atmos_emb = self.norm2(atmos_emb) 
-        atmos_emb = self.cross_attn(atmos_emb, surface_emb)
-        
-        # Feed Forward Part
-        atmos_emb = self.norm3(atmos_emb)
-        atmos_emb = self.mlp(atmos_emb)
-        atmos_emb = self.drop_path(atmos_emb)
-        atmos_emb = atmos_emb + residual
-        
-        return atmos_emb
+            x = x + residual
+            residual = x
 
-
-
-class CrossAttentionBlock(nn.Module):
-    def __init__(self, dim, num_heads=8, dropout=0.):
-        super().__init__()
-        self.mha = nn.MultiheadAttention(dim, num_heads, dropout=dropout, batch_first=True)
-
-    def forward(self, atmos_emb, surface_emb):
-        # Perform multi-head attention
-        attn_output, _ = self.mha(atmos_emb, surface_emb, surface_emb)
-        return attn_output
-
-
+        x = self.norm2(x)
+        x = self.mlp(x)
+        x = self.drop_path(x)
+        x = x + residual
+        return x
+    
     
 class AFNONet(nn.Module):
     """
@@ -174,7 +150,7 @@ class AFNONet(nn.Module):
                  # heads, not used in afno
                  dropout,
                  emb_dropout=0.,
-                 channels_in=6,
+                 channels_in=12,
                  channels_out=4,
                  height=71,
                  swflx_idx=[2, 3],
@@ -191,7 +167,6 @@ class AFNONet(nn.Module):
                  mlp_ratio=4.,
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
-                 # cutoff_frequency=0.1,
                  *args,
                  **kwargs): 
 
@@ -210,17 +185,6 @@ class AFNONet(nn.Module):
         # Initialize normalizers for 2D and 3D inputs
         self.normalizer2d = Normalization(std=torch.sqrt(var2d), mean=mean2d)
         self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
-        
-         # Add a dummy vector as an extra input dimension 
-        self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
-        
-        self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
-        self.pos_drop = nn.Dropout(p=dropout)
-        self.norm = nn.LayerNorm(embed_dim)              
-        
-        # Define the MLP head for final output 
-        self.mlp_head = nn.Linear(embed_dim, patch_size*channels_out)
-        self.sigmoid = nn.Sigmoid()
 
         patch_dim = channels_in  * patch_size
 
@@ -237,8 +201,19 @@ class AFNONet(nn.Module):
             nn.Linear(channels_in, embed_dim),
             nn.LayerNorm(embed_dim)
         )
+        
+        self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
+        
+        self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
+        self.pos_drop = nn.Dropout(p=dropout)
+        self.norm = nn.LayerNorm(embed_dim)              
+        
+        # Define the MLP head for final output 
+        self.mlp_head = nn.Linear(embed_dim, patch_size*channels_out)
+        self.sigmoid = nn.Sigmoid()
+
       
-        # With uniform false and drop_path_rate to 0 not really used. Responsible for calculating the drop path rates for each 
+        # With uniform fals and drop_path_rate to 0 not really used. Responsible for calculating the drop path rates for each 
         # "transformer" block based on the uniform_drop flag and the drop_path_rate value. If uniform_drop is True, the same 
         # drop_path_rate is used for all blocks. Otherwise, a linearly increasing drop path rate is used, starting from 0 and 
         # reaching drop_path_rate at the last block.
@@ -266,9 +241,9 @@ class AFNONet(nn.Module):
                 h=h,
                 w=w,
                 sparsity_threshold=sparsity_threshold,
-                hard_thresholding_fraction = hard_thresholding_fraction
-                )
-                for i in range(depth)      
+                hard_thresholding_fraction = hard_thresholding_fraction)
+                for i in range(depth)
+                
         ])
         
 
@@ -314,36 +289,43 @@ class AFNONet(nn.Module):
         y_pred = torch.cat(y_pred_scaled, dim=-1)
         return y_pred
         
+            
 
-    def forward(self, x3d, x2d):
-        
+            
+    def forward_features(self, x3d, x2d):
+
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
         
-        # Repeat the dummy vector along the batch dimension
-        # Concatenate the resulting tensor as an additional height level
-        dummy_vector_across_batch = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
-        x3d = torch.cat((x3d, dummy_vector_across_batch), dim=1)
-
-        x3d = self.to_patch_embedding(x3d)
-        x2d = self.to_patch_embedding_2D(x2d)
-
-        atmos_emb = x3d + self.pos_embed
-        atmos_emb = self.pos_drop(atmos_emb)
+        # Repeat x2d along the height dimension to match the shape of x3d
+        x2d_repeated = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
+        x_concat = torch.cat((x3d, x2d_repeated), dim=-1)
         
-        surface_emb = x2d[:, None, :] # extending dimesnion for attention mecanism.
+        # Repeat the dummy vector along the batch dimension, same random nr accross the batch
+        dummy_vector_repeated = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
+        concat_with_x2d = torch.cat((dummy_vector_repeated, x2d.unsqueeze(1)), dim=-1)
+        
+        # Concatenate the resulting tensor as an additional height level
+        x_concat = torch.cat((x_concat, concat_with_x2d), dim=1)
+        x = self.to_patch_embedding(x_concat)
 
-        # "Transformer" Block 
+        x = x + self.pos_embed
+        x = self.pos_drop(x)
+
         for blk in self.blocks:
-            atmos_emb = blk(atmos_emb, surface_emb)
+            x = blk(x)
 
-        # linear amd softmax after N transformer blocks
-        atmos_emb = self.norm(atmos_emb)
-        x = self.mlp_head(atmos_emb)
-        x = self.sigmoid(x)
+        x = self.norm(x)
+        return x
+
+    def forward(self, x3d, x2d):
+        x = self.forward_features(x3d, x2d)
+        
+        x_head = self.mlp_head(x)
+        x = self.sigmoid(x_head)
         x = self._scale_output(x, x2d)
         
-        return x.squeeze()
-        
+        return x.squeeze() , x_head     
+    
     
     

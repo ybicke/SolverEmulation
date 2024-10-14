@@ -29,7 +29,7 @@ from torchinfo import summary
 
 import torch.autograd.profiler as profiler
 
-from data_loaders import IconColumnIterableDataset
+from data_loaders_new import IconColumnIterableDataset
 
 
 sys.path.append(dirname(__file__))
@@ -115,12 +115,12 @@ def count_parameters(model):
 
 
 def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False):
-    icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp')
+    icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
+    
 
     return DataLoader(
         icon_data, 
         batch_size=args.batch_size, 
-        # shuffle=shuffle, deafult should be shuffle=none
         pin_memory=True, 
         num_workers=args.num_workers, # The number of subprocesses to use for data loading. Each worker will fetch samples from the dataset independently and in parallel.
         prefetch_factor=args.prefetch_factor #  The number of samples to prefetch in the background while the current batch is being processed.
@@ -191,6 +191,60 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)
         
+    elif model_name == 'afno_crossAttention_new_check':
+        from column_files.afno_column_crossAttention_new_check import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)    
+        
+    elif model_name == 'afno_crossAttention_new_check1':
+        from column_files.afno_column_crossAttention_new_check1 import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)    
+        
+    elif model_name == 'afno_crossAttention_new_check2':
+        from column_files.afno_column_crossAttention_new_check2 import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)  
+        
                 
     elif model_name == 'afno_crossAttention_clean':
         from column_files.afno_column_crossAttention_clean import AFNONet
@@ -228,6 +282,61 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)
         
+    elif model_name == 'afno_crossAttention_clean_2dnorm':
+        from column_files.afno_column_crossAttention_clean_2dnorm import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)
+        
+    elif model_name == 'afno_crossAttention_clean_expand':
+        from column_files.afno_column_crossAttention_clean_expand import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)
+        
+    elif model_name == 'afno_crossAttention_clean_expandPos':
+        from column_files.afno_column_crossAttention_clean_expandPos import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)
+        
+        
     elif model_name == 'afno_crossAttention_expanded_clean':
         from column_files.afno_column_crossAttention_expanded_clean import AFNONet
         model = AFNONet(
@@ -264,6 +373,42 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)        
+        
+    elif model_name == 'afno_easyConcat_check':
+        from column_files.afno_column_concatEasy_check import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)           
+        
+    elif model_name == 'afno_easyConcat_check1':
+        from column_files.afno_column_concatEasy_check1 import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device) 
         
     elif model_name == 'afno_easyConcat_clean_debug':
         from column_files.afno_column_concatEasy_clean_debug import AFNONet
@@ -612,17 +757,16 @@ def main():
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
 
-        train_loader = get_column_data_with_disk_cache(train_files, shuffle=args.shuffle)
-        val_loader = get_column_data_with_disk_cache(val_files, subsample=1.0)
+        train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
+        val_loader = get_column_data_with_disk_cache(train_files, shuffle = False, subsample=1.0)
    
-        
         train_model(model, train_loader, val_loader)
 
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')
     
     if args.test:
-        test_loader = get_column_data_with_disk_cache(test_files)
+        test_loader = get_column_data_with_disk_cache(test_files, shuffle=False)
         test_model(model, test_loader)
     
     logger.info('Code ended!')

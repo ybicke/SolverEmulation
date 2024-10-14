@@ -20,9 +20,7 @@ from torch.utils.checkpoint import checkpoint_sequential
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
-# Bring your packages onto the path
-import sys
-sys.path.append('/myhome/AFNO/AFNO-transformer')
+
 from afno.afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
@@ -34,7 +32,6 @@ import matplotlib.pyplot as plt
 import os
 
 _logger = logging.getLogger(__name__)   
-
 
 
     
@@ -90,7 +87,8 @@ class Block(nn.Module):
                  sparsity_threshold=0.01,
                  hard_thresholding_fraction=1.0,
                  hidden_size_factor=1,
-                 double_skip=True):
+                 double_skip=True
+                 ):
         super().__init__()
         
         self.norm1 = norm_layer(dim)
@@ -110,7 +108,6 @@ class Block(nn.Module):
     
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-
         self.double_skip = double_skip
 
     def forward(self, x):
@@ -197,10 +194,11 @@ class AFNONet(nn.Module):
             nn.LayerNorm(embed_dim),
         )
 
-        self.to_patch_embedding_2D = nn.Sequential(
-            nn.Linear(channels_in, embed_dim),
-            nn.LayerNorm(embed_dim)
-        )
+        # not needed in lazy apporach
+        #self.to_patch_embedding_2D = nn.Sequential(
+        #    nn.Linear(channels_in, embed_dim),
+        #    nn.LayerNorm(embed_dim)
+        #)
         
         self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
         

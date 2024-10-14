@@ -21,8 +21,6 @@ from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
 # Bring your packages onto the path
-import sys
-sys.path.append('/myhome/AFNO/AFNO-transformer')
 from afno.afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
@@ -73,6 +71,17 @@ class Mlp(nn.Module):
         x = self.drop(x)
         return x
 
+
+class CrossAttentionBlock(nn.Module):
+    def __init__(self, dim, num_heads=8, dropout=0.):
+        super().__init__()
+        self.mha = nn.MultiheadAttention(dim, num_heads, dropout=dropout, batch_first=True)
+
+    def forward(self, atmos_emb, surface_emb):
+        # Perform multi-head attention
+        attn_output, _ = self.mha(atmos_emb, surface_emb, surface_emb)
+        return attn_output
+    
 
 class Block(nn.Module):
     def __init__(self, 
@@ -144,18 +153,7 @@ class Block(nn.Module):
         
         return atmos_emb
     
-    
-    
-class CrossAttentionBlock(nn.Module):
-    def __init__(self, dim, num_heads=8, dropout=0.):
-        super().__init__()
-        self.mha = nn.MultiheadAttention(dim, num_heads, dropout=dropout, batch_first=True)
 
-    def forward(self, atmos_emb, surface_emb):
-        # Perform multi-head attention
-        attn_output, _ = self.mha(atmos_emb, surface_emb, surface_emb)
-        return attn_output
-    
     
     
 class AFNONet(nn.Module):
@@ -334,7 +332,6 @@ class AFNONet(nn.Module):
         dummy_vector_across_batch = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
         
         x3d = torch.cat((x3d, dummy_vector_across_batch), dim=1)
-
         x3d = self.to_patch_embedding(x3d)
         x2d = self.to_patch_embedding_2D(x2d)
 

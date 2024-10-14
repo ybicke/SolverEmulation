@@ -21,8 +21,6 @@ from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
 # Bring your packages onto the path
-import sys
-sys.path.append('/myhome/AFNO/AFNO-transformer')
 from afno.afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
@@ -97,7 +95,6 @@ class Block(nn.Module):
                  sparsity_threshold=0.01,
                  hard_thresholding_fraction=1.0,
                  hidden_size_factor=1,
-                 cutoff_frequency=0.1,
                  double_skip=True):
         super().__init__()
         
@@ -115,7 +112,7 @@ class Block(nn.Module):
                                  sparsity_threshold=sparsity_threshold,
                                  hard_thresholding_fraction=hard_thresholding_fraction,
                                  hidden_size_factor=1,
-                                 cutoff_frequency=0.1)
+                                 )
         
         self.cross_attn = CrossAttentionBlock(dim)
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
@@ -189,7 +186,6 @@ class AFNONet(nn.Module):
                  mlp_ratio=4.,
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
-                 cutoff_frequency=0.1,
                  *args,
                  **kwargs): 
 
@@ -272,8 +268,8 @@ class AFNONet(nn.Module):
                 h=h,
                 w=w,
                 sparsity_threshold=sparsity_threshold,
-                hard_thresholding_fraction = hard_thresholding_fraction,
-                cutoff_frequency=cutoff_frequency)
+                hard_thresholding_fraction = hard_thresholding_fraction
+                )
                 for i in range(depth)
                 
         ])
@@ -334,10 +330,11 @@ class AFNONet(nn.Module):
 
         x3d = self.to_patch_embedding(x3d)
         x3d = torch.cat((x3d, dummy_vector_embedded), dim=1)
+        
         atmos_emb = x3d + self.pos_embed
         atmos_emb = self.pos_drop(atmos_emb)
-        
         x2d = self.to_patch_embedding_2D(x2d)
+        
         surface_emb = x2d[:, None, :] # Shape: (batch_size, 1, embed_dim)
         surface_emb = surface_emb.expand(-1, atmos_emb.size(1), -1)
         surface_emb = surface_emb + self.surface_pos_embed  

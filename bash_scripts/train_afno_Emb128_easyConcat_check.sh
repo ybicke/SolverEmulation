@@ -25,9 +25,9 @@ echo training$line_number started!
 
 # Run the training script with specified parameters
 python train_column.py \
-    --model afno_crossAttention_expanded_clean \
+    --model afno_easyConcat_check \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_expanded_clean \
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_check \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
