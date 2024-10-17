@@ -25,15 +25,15 @@ echo training$line_number started!
 
 # Run the training script with specified parameters
 python train_column.py \
-    --model afno_crossAttention_clean_expand \
+    --model afno_easyConcat_clean \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean_expand_new \
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00014\
     --percent 0.1 \
     --subsample 0.1 \
-    --num-workers 0 \
+    --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --no-train \
+    --train \
     --test \
     --shuffle \
     --batch-size 2048 \
@@ -45,7 +45,7 @@ python train_column.py \
     --patch-size 1 \
     --vit-hidden-dim 128 \
     --vit-layers 4 \
-    --vit-heads 8        \
+    --vit-heads 8 \
     --vit-dropout 0.0 \
-    --afno-sparsity-threshold 0.01 \
+    --afno-sparsity-threshold 0.0014 \
     --wandb-mode online \

@@ -773,6 +773,11 @@ def main():
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    
+    # Save RNG states before model initialization
+    torch_rng_state = torch.get_rng_state()
+    np_rng_state = np.random.get_state()
+    random_rng_state = random.getstate()
 
     train_files = sorted_files[200:2000]
     val_files = sorted_files[:160] + sorted_files[2020:2180]
@@ -787,9 +792,13 @@ def main():
     stats_file = join(args.dataset, 'normalizer_stats_per_feat.pickle')
     mean2d, var2d, mean3d, var3d = get_normalization_params(stats_file)
     model = get_model(args.model, mean2d, var2d, mean3d, var3d, args.test)
-    
     num_params = count_parameters(model)
     print(f"The model has {num_params:,} trainable parameters.")
+    
+    # Restore RNG states after model initialization
+    torch.set_rng_state(torch_rng_state)
+    np.random.set_state(np_rng_state)
+    random.setstate(random_rng_state)
 
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        

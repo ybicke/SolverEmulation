@@ -30,10 +30,10 @@ python train_column.py \
     --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_clean_smooth30\
     --percent 0.1 \
     --subsample 0.1 \
-    --num-workers 0 \
+    --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --no-train \
+    --train \
     --test \
     --shuffle \
     --batch-size 2048 \
