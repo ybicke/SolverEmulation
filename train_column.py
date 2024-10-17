@@ -48,11 +48,11 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-if torch.cuda.is_available():
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 import argparse
 import os
@@ -114,17 +114,7 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False):
-    icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
-    
 
-    return DataLoader(
-        icon_data, 
-        batch_size=args.batch_size, 
-        pin_memory=True, 
-        num_workers=args.num_workers, # The number of subprocesses to use for data loading. Each worker will fetch samples from the dataset independently and in parallel.
-        prefetch_factor=args.prefetch_factor #  The number of samples to prefetch in the background while the current batch is being processed.
-    )
 
 def get_normalization_params(stats_file):
     with open(stats_file, 'rb') as f:
@@ -190,6 +180,27 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             sparsity_threshold=args.afno_sparsity_threshold,  
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)
+        
+    elif model_name == 'afno_easyConcat':
+        from column_files.afno_column_concatEasy import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            cutoff_frequency=args.cutoff_frequency
+        ).to(device)
+        
         
     elif model_name == 'afno_crossAttention_new_check':
         from column_files.afno_column_crossAttention_new_check import AFNONet
@@ -728,6 +739,25 @@ def test_loading_time(train_files, iter=10):
         logger.info(f'Iteration: {it}: Real time: {t2[0] - t1[0]:.2f}, CPU time: {t2[1]-t1[1]}')
         import gc
         gc.collect()
+        
+        
+def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
+    icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
+
+    # Prepare arguments for DataLoader
+    dataloader_args = {
+        'dataset': icon_data,
+        'batch_size': args.batch_size,
+        'pin_memory': True,
+        'num_workers': num_workers,
+    }
+
+    # Include prefetch_factor only if num_workers > 0
+    if num_workers > 0:
+        dataloader_args['prefetch_factor'] = args.prefetch_factor
+
+    return DataLoader(**dataloader_args)
+
 
 
 def main():
@@ -736,6 +766,13 @@ def main():
     FILENAMES = glob.glob(join(args.dataset, '*.h5'))
     time_indices = [float(re.search( r'\_time_(.*?)\.h5', f).group(1)) for f in FILENAMES]
     sorted_files = [x for _,x in sorted(zip(time_indices, FILENAMES))]
+    
+    seed = 42
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
     train_files = sorted_files[200:2000]
     val_files = sorted_files[:160] + sorted_files[2020:2180]

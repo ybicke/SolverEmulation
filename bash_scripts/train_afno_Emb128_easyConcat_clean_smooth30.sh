@@ -30,10 +30,10 @@ python train_column.py \
     --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_clean_smooth30\
     --percent 0.1 \
     --subsample 0.1 \
-    --num-workers 4 \
+    --num-workers 0 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 2048 \
@@ -44,7 +44,7 @@ python train_column.py \
     --learning-rate 0.0005 \
     --patch-size 1 \
     --vit-hidden-dim 128 \
-    --vit-layers 4 \
+    --vit-layers 1 \
     --vit-heads 8 \
     --vit-dropout 0.0 \
     --afno-sparsity-threshold 0.01 \

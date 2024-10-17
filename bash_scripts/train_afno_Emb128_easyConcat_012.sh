@@ -24,8 +24,8 @@ echo training$line_number started!
 
 
 # Run the training script with specified parameters
-python train_column_metrics.py \
-    --model afno_easyConcat \
+python train_column.py \
+    --model afno_easyConcat_clean \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
     --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_012\
     --percent 0.1 \
@@ -33,7 +33,7 @@ python train_column_metrics.py \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 2048 \

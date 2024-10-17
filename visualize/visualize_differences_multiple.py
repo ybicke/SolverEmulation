@@ -7,18 +7,38 @@ from itertools import cycle
 
 # Define the model names and paths
 model_names = [
+    
     #'afno_column_1percent_Emb128_afno_crossAttention_clean',
-    #'afno_column_1percent_Emb128_afno_crossAttention_clean1'
-    'afno_column_1percent_Emb128_easyConcat_clean_smooth33',
-    'afno_column_1percent_Emb128_easyConcat_clean_smooth34',
-    'afno_column_1percent_Emb128_easyConcat_clean_smooth35'
+    #'afno_column_1percent_Emb128_afno_crossAttention_clean1',
+    
+    #'afno_column_1percent_Emb128_easyConcat_clean_smooth33',
+    #'afno_column_1percent_Emb128_easyConcat_clean_smooth34',
+    #'afno_column_1percent_Emb128_easyConcat_clean_smooth35'
+    
+    'afno_column_1percent_Emb128_easyConcat_004',
+    #'afno_column_1percent_Emb128_easyConcat_008',
+    #'afno_column_1percent_Emb128_easyConcat_012'
+    
+    #'afno_column_1percent_Emb128_easyConcat_clean_smooth31_new',
+    'afno_column_1percent_Emb128_easyConcat_clean_smooth32_new',
+    #'afno_column_1percent_Emb128_easyConcat_clean_smooth30'
+    
+    'afno_column_1percent_Emb128_afno_crossAttention_clean_2dnorm_new',
+    #'afno_column_1percent_Emb128_afno_crossAttention_clean_expand_new',
+    #'afno_column_1percent_Emb128_afno_crossAttention_clean_expandPos_new'
+
+    
+    
 
 ]
 
 model_paths = [
     f'/mydata/deepcloud/yves/results_git/{model_names[0]}/test',
     f'/mydata/deepcloud/yves/results_git/{model_names[1]}/test',
-    f'/mydata/deepcloud/yves/results_git/{model_names[2]}/test'
+    f'/mydata/deepcloud/yves/results_git/{model_names[2]}/test',
+    #f'/mydata/deepcloud/yves/results_git/{model_names[3]}/test',
+    #f'/mydata/deepcloud/yves/results_git/{model_names[4]}/test'
+
 
 ]
 
@@ -85,7 +105,7 @@ def add_subplot(fig, x, y_trues, y_preds, id, models, xlabel=None, ylabel=None, 
 fig = plt.figure(figsize=(20, 13))
 
 # Define the subset slice, e.g., averaging over the first 5 samples
-subset = slice(0, 5)
+subset = slice(0, 50)
 
 # Flux and heating rate plots with adjusted slicing
 add_subplot(fig, x=range(35, 71), y_trues=[y[:, 35:, 3] for y in y_true_list], y_preds=[y[:, 35:, 3] for y in y_pred_list], id=(2, 3, 1), models=models, title='Downward Shortwave', xlabel='Flux Difference [W/m$^2$]', ylabel='Vertical Level', subset_slice=subset)
@@ -107,4 +127,9 @@ fig.legend(handles, labels, loc='lower center', ncol=len(models)+1, fontsize="10
 # Adjust the spacing between subplots to make room for the legend
 plt.tight_layout(rect=[0, 0.05, 1, 0.96])  # Adjust the bottom spacing as needed
 
-plt.savefig(f'/mydata/deepcloud/yves/results_git/easyConcat_clean_smooth_differences.png', bbox_inches='tight', dpi=300)
+# plt.savefig(f'/mydata/deepcloud/yves/results_git/easyConcat_sparse_difference_50.png', bbox_inches='tight', dpi=300)#
+#plt.savefig(f'/mydata/deepcloud/yves/results_git/easyConcat_smooth_difference1_50.png', bbox_inches='tight', dpi=300)#
+# plt.savefig(f'/mydata/deepcloud/yves/results_git/easyConcat_smooth_difference2_50.png', bbox_inches='tight', dpi=300)#
+plt.savefig(f'/mydata/deepcloud/yves/results_git/crossAttentionExp_difference_test.png', bbox_inches='tight', dpi=300)
+#plt.savefig(f'/mydata/deepcloud/yves/results_git/crossAttentionExp_first_difference_50.png', bbox_inches='tight', dpi=300)
+# plt.savefig(f'/mydata/deepcloud/yves/results_git/easyConcat_bestPerf_difference_50.png', bbox_inches='tight', dpi=300)#
