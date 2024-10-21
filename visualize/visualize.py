@@ -34,9 +34,15 @@ models = [
     #{'name': 'AFNO-Emb128_smooth33','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_clean_smooth34/test'},    
     #{'name': 'AFNO-Emb128_smooth33','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_clean_smooth35/test'},    
    
-    {'name': 'AFNO-Emb128_cross_clean','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean/test'},    
-    {'name': 'AFNO-Emb128_cross_clean1','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean1/test'},    
-    {'name': 'AFNO-Emb128_afno_standard','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_test1/test'},    
+    #{'name': 'AFNO-Emb128_cross_clean','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean/test'},    
+    #{'name': 'AFNO-Emb128_cross_clean1','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean1/test'},    
+    #{'name': 'AFNO-Emb128_afno_standard','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_test1/test'},    
+    
+    {'name': 'AFNO-Emb128_sparse000','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_000/test'},   
+    {'name': 'AFNO-Emb128_sparse004','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_004/test'},    
+    {'name': 'AFNO-Emb128_sparse008','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_008/test'},    
+    {'name': 'AFNO-Emb128_sparse012','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_012/test'},    
+ 
 
 
 
@@ -149,4 +155,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/results_git/crossAttention.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/results_git/easyConcat_sparse_error.png', bbox_inches='tight', dpi=300)

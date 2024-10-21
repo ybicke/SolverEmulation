@@ -339,7 +339,8 @@ def plot_flux_histograms_pre_sigmoid(y_pred_pre_sigmoid, epoch, save_directory, 
 
     for i in range(channels_out):
         # Flatten the flux_i to make it 1-dimensional
-        flux_i = y_pred_pre_sigmoid[:, :, i].flatten().numpy()
+        flux_i = y_pred_pre_sigmoid[:, i].cpu().numpy()
+        # flux_i = y_pred_pre_sigmoid[:, :, i].flatten().numpy()
         plt.figure(figsize=(8, 6))
         plt.hist(flux_i, bins=50, alpha=0.7, color=colors[i], edgecolor='black')
         plt.title(f'Epoch {epoch}: Histogram of {flux_labels[i]} Flux Values (Pre-Sigmoid)')
@@ -350,7 +351,7 @@ def plot_flux_histograms_pre_sigmoid(y_pred_pre_sigmoid, epoch, save_directory, 
 
         # Ensure the directory exists before saving
         os.makedirs(save_directory, exist_ok=True)
-        histogram_path = os.path.join(save_directory, f'histogram_{flux_labels[i].replace(" ", "_").lower()}_epoch_{epoch}.png')
+        histogram_path = os.path.join(save_directory, f'histogram4_70_{flux_labels[i].replace(" ", "_").lower()}_epoch_{epoch}.png')
         plt.savefig(histogram_path)
         plt.close()
         print(f'Histogram for {flux_labels[i]} flux saved as {histogram_path}')
@@ -425,40 +426,48 @@ def train_model(model, train_set, valid_set):
         # Training step
         model.train(True)
         
+        # Set the model to evaluation mode
+        model.eval()
+        
         # Accumulators for collecting x_head values
         collected_x_head = []
         columns_collected = 0
+        
+    # Disable gradient computations by wrapping
+        with torch.no_grad():
                 
-        for i, data in enumerate(train_set):
-            
-            t1_1 = time.perf_counter()
-            
-            batch_x3, batch_x2, batch_y = data
-            batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
+            for i, data in enumerate(train_set):
+                
+                t1_1 = time.perf_counter()
+                
+                batch_x3, batch_x2, batch_y = data
+                batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
 
-            outputs , x_head = model(batch_x3, batch_x2)
-            
-            # Accumulate x_head values
-            collected_x_head.append(x_head.detach().cpu())
-            columns_collected += x_head.shape[0] * x_head.shape[1]
-            
-            # Accumulate until reaching target_num_columns
-            if columns_collected >= 10000:
-                break  # Stop accumulating once the target is reached
+                outputs , x_head = model(batch_x3, batch_x2)
                 
-            loss = train_loss(outputs, batch_y)
-            batch_mae = train_mae(outputs, batch_y)
-            
-            if i > 0 and i % vbatch == 0:
-                optimizer.zero_grad()
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
-                optimizer.step()
-                t2_1 = time.perf_counter()
+                # Accumulate x_head values
+                # Select only the last height level (e.g., level 69)
+                x_head_last = x_head[:, 70, :]  # Shape: [batch_size, channels_out]
+                collected_x_head.append(x_head_last.detach().cpu())
+                columns_collected += x_head_last.shape[0]
                 
-                if i % 100 == 99 or vbatch > 1:
-                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
-          
+                # Accumulate until reaching target_num_columns
+                if columns_collected >= 10000:
+                    break  # Stop accumulating once the target is reached
+                    
+                #loss = train_loss(outputs, batch_y)
+                #batch_mae = train_mae(outputs, batch_y)
+                
+                #if i > 0 and i % vbatch == 0:
+                #    optimizer.zero_grad()
+                #    loss.backward()
+                #    torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
+                #    optimizer.step()
+                #    t2_1 = time.perf_counter()
+                    
+                if i % 10 == 9 or vbatch > 1:
+                    print(f'batch {i+1}') # , time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+            
           
           
         # Concatenate collected x_head values into a single tensor
@@ -468,6 +477,12 @@ def train_model(model, train_set, valid_set):
         if all_x_head.shape[0] > 10000:
             all_x_head = all_x_head[:10000]  
 
+
+        # Save the all_x_head tensor to a file
+        save_path = os.path.join(test_path, f'all_x_head70_5_epoch_{epoch_number}.pt')
+        torch.save(all_x_head, save_path)
+        print(f'all_x_head saved at {save_path}')
+    
         # Plot histograms for the pre-sigmoid outputs
         plot_flux_histograms_pre_sigmoid(all_x_head, epoch_number, test_path)
 
