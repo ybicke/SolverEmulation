@@ -33,7 +33,7 @@ python train_column.py \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 2048 \

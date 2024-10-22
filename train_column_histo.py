@@ -351,7 +351,7 @@ def plot_flux_histograms_pre_sigmoid(y_pred_pre_sigmoid, epoch, save_directory, 
 
         # Ensure the directory exists before saving
         os.makedirs(save_directory, exist_ok=True)
-        histogram_path = os.path.join(save_directory, f'histogram4_70_{flux_labels[i].replace(" ", "_").lower()}_epoch_{epoch}.png')
+        histogram_path = os.path.join(save_directory, f'histogram4_68{flux_labels[i].replace(" ", "_").lower()}_epoch_{epoch}.png')
         plt.savefig(histogram_path)
         plt.close()
         print(f'Histogram for {flux_labels[i]} flux saved as {histogram_path}')
@@ -447,7 +447,7 @@ def train_model(model, train_set, valid_set):
                 
                 # Accumulate x_head values
                 # Select only the last height level (e.g., level 69)
-                x_head_last = x_head[:, 70, :]  # Shape: [batch_size, channels_out]
+                x_head_last = x_head[:, 68, :]  # Shape: [batch_size, channels_out]
                 collected_x_head.append(x_head_last.detach().cpu())
                 columns_collected += x_head_last.shape[0]
                 
@@ -479,7 +479,7 @@ def train_model(model, train_set, valid_set):
 
 
         # Save the all_x_head tensor to a file
-        save_path = os.path.join(test_path, f'all_x_head70_5_epoch_{epoch_number}.pt')
+        save_path = os.path.join(test_path, f'all_x_head68_epoch_{epoch_number}.pt')
         torch.save(all_x_head, save_path)
         print(f'all_x_head saved at {save_path}')
     
@@ -672,6 +672,20 @@ def main():
     FILENAMES = glob.glob(join(args.dataset, '*.h5'))
     time_indices = [float(re.search( r'\_time_(.*?)\.h5', f).group(1)) for f in FILENAMES]
     sorted_files = [x for _,x in sorted(zip(time_indices, FILENAMES))]
+    
+    
+    seed = 42
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    
+    # Save RNG states before model initialization
+    torch_rng_state = torch.get_rng_state()
+    np_rng_state = np.random.get_state()
+    random_rng_state = random.getstate()
+
 
     train_files = sorted_files[200:2000]
     val_files = sorted_files[:160] + sorted_files[2020:2180]

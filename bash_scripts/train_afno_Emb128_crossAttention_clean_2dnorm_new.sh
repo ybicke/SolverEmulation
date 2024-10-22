@@ -27,13 +27,13 @@ echo training$line_number started!
 python train_column.py \
     --model afno_crossAttention_clean_2dnorm \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean_2dnorm_new \
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean_2dnorm_second_new \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 2048 \

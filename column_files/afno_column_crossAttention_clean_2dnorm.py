@@ -105,7 +105,8 @@ class Block(nn.Module):
         self.norm1 = norm_layer(dim)
         self.norm2 = norm_layer(dim)
         self.norm3 = norm_layer(dim)
-        self.norm4 = norm_layer(dim)
+        # self.norm4 = norm_layer(dim)
+
 
 
 
@@ -143,13 +144,16 @@ class Block(nn.Module):
             
         # Cross Attention
         atmos_emb = self.norm2(atmos_emb) 
-        surface_emb = self.norm3(surface_emb) 
+        surface_emb = self.norm2(surface_emb) 
+        # surface_emb = self.norm2(surface_emb) 
         atmos_emb = self.cross_attn(atmos_emb, surface_emb)
         atmos_emb = atmos_emb + residual
         
         # Feed Forward Part
         residual = atmos_emb
-        atmos_emb = self.norm4(atmos_emb)
+        atmos_emb = self.norm3(atmos_emb)
+        # atmos_emb = self.norm4(atmos_emb)
+
         atmos_emb = self.mlp(atmos_emb)
         atmos_emb = self.drop_path(atmos_emb)
         atmos_emb = atmos_emb + residual
