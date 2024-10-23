@@ -322,6 +322,7 @@ class AFNONet(nn.Module):
         x = self.forward_features(x3d, x2d)
         
         x_head = self.mlp_head(x)
+        
         x = self.sigmoid(x_head)
         x = self._scale_output(x, x2d)
         
