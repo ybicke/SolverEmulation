@@ -29,8 +29,8 @@ from torchinfo import summary
 
 import torch.autograd.profiler as profiler
 
-from data_loaders_hirarchical import IconColumnIterableDatasetHierarchical
-from utils import load_parent_cell_indices, build_hierarchical_neighborhoods
+from data_loader_neighbours import IconColumnIterableDataset
+from utils.grid_utils import load_parent_cell_indices, build_hierarchical_neighborhoods
 
 
 sys.path.append(dirname(__file__))
@@ -202,10 +202,8 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             cutoff_frequency=args.cutoff_frequency
         ).to(device)
         
-        
-                
-    elif model_name == 'afno_crossAttention_clean':
-        from column_files.afno_column_crossAttention_clean import AFNONet
+    elif model_name == 'afno_neighbours':
+        from column_files.afno_column_clean_neighbours import AFNONet
         model = AFNONet(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -217,122 +215,15 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             mean3d=mean3d, 
             var3d=var3d,
             device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean1':
-        from column_files.afno_column_crossAttention_clean1 import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_2dnorm':
-        from column_files.afno_column_crossAttention_clean_2dnorm import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_expand':
-        from column_files.afno_column_crossAttention_clean_expand import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_expandPos':
-        from column_files.afno_column_crossAttention_clean_expandPos import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-
-    elif model_name == 'afno_easyConcat_clean':
-        from column_files.afno_column_concatEasy_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)        
-        
-        
-    elif model_name == 'afno_easyConcat_clean_smooth':
-        from column_files.afno_column_concatEasy_clean_smoothing import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
             
-        ).to(device)    
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            cutoff_frequency=args.cutoff_frequency
+        ).to(device)
+        
+        
+        
 
         
     else:
@@ -657,11 +548,10 @@ def main():
     test_files = sorted_files[2220:]
     
     grid_file = '/mydata/deepcloud/salman/dataset/icon_grid_0008_R02B05_G.nc'
-    parent_cell_indices, cell_indices = load_parent_cell_indices(grid_file)
-
+    parent_cell_indices = load_parent_cell_indices(grid_file)
+    
     # Ensure that your data aligns with the cell indices from the grid
     # If necessary, reorder your data based on cell_indices
-
     neighborhood_size = args.neighborhood_size
     neighborhoods = build_hierarchical_neighborhoods(parent_cell_indices, neighborhood_size)
     

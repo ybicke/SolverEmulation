@@ -5,6 +5,7 @@ from os.path import join, basename, exists
 import h5py
 import torch
 from torch.utils.data import IterableDataset, DataLoader
+import random
 
 
 class IconColumnIterableDataset(IterableDataset):
@@ -32,26 +33,20 @@ class IconColumnIterableDataset(IterableDataset):
                 continue
             break         
 
-        num_cells = x2d.shape[0]
-        assert num_cells == self.neighborhoods.shape[0], "Mismatch in number of cells and neighborhoods"
-
 
         if self.subsample:
-            total_samples = int(self.subsample * len(self.neighborhoods))
-            indices = torch.randint(0, len(self.neighborhoods), (total_samples,))
-            neighborhoods = self.neighborhoods[indices]
+            total_samples = int(self.subsample * len(self.neighbourhoods))
+            indices = torch.randint(0, len(self.neighbourhoods), (total_samples,))
+            neighbourhoods = self.neighbourhoods[indices]
         else:
-            neighborhoods = self.neighborhoods
-            
-        # Flatten the neighborhood indices to index into x2d and x3d
-        flat_indices = neighborhoods.flatten()
+            neighbourhoods = self.neighbourhoods
 
         # Gather data
-        x2d_neighborhood = x2d[flat_indices].view(-1, neighborhoods.shape[1], x2d.size(1))
-        x3d_neighborhood = x3d[flat_indices].view(-1, neighborhoods.shape[1], x3d.size(1), x3d.size(2))
-        y_neighborhood = y[flat_indices].view(-1, neighborhoods.shape[1], y.size(1))
+        x2d_neighbourhood = x2d[neighbourhoods].view(-1, neighbourhoods.shape[1], x2d.size(1))
+        x3d_neighbourhood = x3d[neighbourhoods].view(-1, neighbourhoods.shape[1], x3d.size(1), x3d.size(2))
+        y_neighbourhood = y[neighbourhoods].view(-1, neighbourhoods.shape[1], y.size(1))
 
-        return x3d_neighborhood, x2d_neighborhood, y_neighborhood
+        return x3d_neighbourhood, x2d_neighbourhood, y_neighbourhood
 
     
     def __iter__(self):
