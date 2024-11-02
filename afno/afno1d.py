@@ -89,9 +89,12 @@ class AFNO1D(nn.Module):
         # shape = torch.Size([batch, frequencies, embed_dim, extra_dim = 1 , real_imaginary = 2])
         
         x = torch.stack([o2_real, o2_imag], dim=-1)
+        
         x = F.softshrink(x, lambd=self.sparsity_threshold)
+        
         x = torch.view_as_complex(x)
         x = x.reshape(B, N // 2 + 1, C)        
         x = torch.fft.irfft(x, n=N, dim=1, norm="ortho")
+        
         x = x.type(dtype)
         return x + bias
