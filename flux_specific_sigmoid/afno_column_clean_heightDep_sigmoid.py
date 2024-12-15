@@ -21,9 +21,7 @@ from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
 # Bring your packages onto the path
-import sys
-sys.path.append('/myhome/AFNO/AFNO-transformer')
-from afno.afno1d import AFNO1D
+from afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
 from afno.ls import AttentionLS
@@ -32,6 +30,11 @@ from afno.gfn import GlobalFilter
 
 import matplotlib.pyplot as plt
 import os
+
+# from hightDep_sigmoid_fct_optimized import HeightDependentSigmoid
+# from fluxSpec_sigmoid_fct_optimized import MultimodalSigmoid
+from FluxSpecificSigmoid import HeightDependentSigmoid, MultimodalSigmoid
+
 
 _logger = logging.getLogger(__name__)   
 
@@ -130,6 +133,7 @@ class Block(nn.Module):
         return x
     
     
+    
 class AFNONet(nn.Module):
     """
     Args:
@@ -150,6 +154,9 @@ class AFNONet(nn.Module):
                  depth, # actually num of blocks, what about the layers?
                  # heads, not used in afno
                  dropout,
+                 gaussian_params_file_LWDown,
+                 gaussian_params_file_LWUp,
+                 # flux_index,  # Adjust flux_index as needed
                  emb_dropout=0.,
                  channels_in=6,
                  channels_out=4,
@@ -168,11 +175,28 @@ class AFNONet(nn.Module):
                  mlp_ratio=4.,
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
+                 flux_index_LWDown=1,
+                 flux_index_LWUp=0,
                  *args,
                  **kwargs): 
 
         super().__init__()
-       
+        
+        
+        self.flux_index_LWDown = flux_index_LWDown
+        self.flux_index_LWUp = flux_index_LWUp
+        
+        # Initialize the HeightDependentSigmoid instance  for LW Down flux (flux_index=1)
+        self.height_dependent_sigmoid = HeightDependentSigmoid(
+            gaussian_params_by_height=gaussian_params_file_LWDown,
+            flux_index=self.flux_index_LWDown
+        )
+        
+        # Initialize MultimodalSigmoid for LW Up flux (flux_index=0)
+        self.multimodal_sigmoid = MultimodalSigmoid(
+            fitted_gaussians=gaussian_params_file_LWUp, 
+            flux_index=self.flux_index_LWUp
+        )
        
         self.num_patches = int(height/patch_size)
         self.num_cells = num_cells
@@ -246,7 +270,6 @@ class AFNONet(nn.Module):
                 
         ])
         
-
     # Radiation task specifics:
     def _unscale_swflx(self, swflx, cosmu0):
         return torch.where(
@@ -310,16 +333,29 @@ class AFNONet(nn.Module):
 
         x = self.norm(x)
         return x
+    
 
     def forward(self, x3d, x2d):
         x = self.forward_features(x3d, x2d)
-        
         x = self.mlp_head(x)
         
-        x = self.sigmoid(x)
+        # Apply the height-dependent sigmoid to the LW Down flux (flux_index=1), (handled by the class)
+        x = self.height_dependent_sigmoid(x)
+
+        # Apply the multimodal sigmoid to the LW Up flux (flux_index=0), (handled by the class)
+        x = self.multimodal_sigmoid(x)
+
+        # Apply the standard sigmoid to the remaining fluxes
+        remaining_fluxes = torch.ones(self.channels_out, dtype=torch.bool, device=x.device)
+        remaining_fluxes[self.flux_index_LWDown] = False
+        remaining_fluxes[self.flux_index_LWUp] = False
+        x[:, :, remaining_fluxes] = torch.sigmoid(x[:, :, remaining_fluxes])
+
         x = self._scale_output(x, x2d)
+
+        return x.squeeze()
+            
         
-        return x.squeeze()    
     
-    
-    
+
+

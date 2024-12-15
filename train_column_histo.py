@@ -474,8 +474,8 @@ def train_model(model, train_set, valid_set):
         all_x_head = torch.cat(collected_x_head, dim=0)  # Shape: [num_columns, channels_out]
 
         # If collected more than 1000 columns, truncate
-        if all_x_head.shape[0] > 10000:
-            all_x_head = all_x_head[:10000]  
+        if all_x_head.shape[0] > 5000:
+            all_x_head = all_x_head[:5000]  
 
 
         # Save the all_x_head tensor to a file

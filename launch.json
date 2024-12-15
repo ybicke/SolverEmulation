@@ -11,44 +11,11 @@
             "program": "${file}",
             "console": "integratedTerminal"
         }, 
-
-        {
-            "name": "Python Debugger: train_vit_column",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "/mydata/deepcloud/yves/SolverEmulation/train_files/train_column_clean.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--model", "vit_column4",
-                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
-                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_edited",
-                "--percent", "0.1",
-                "--subsample", "0.1",
-                "--num-workers", "4",
-                "--prefetch-factor", "2",
-                "--wandb-mode", "disabled",
-                "--num-cells", "81920",
-                "--train",
-                "--test",
-                "--shuffle",
-                "--batch-size", "4",
-                "--vbatch", "1",
-                "--optimizer", "adamw",
-                "--clip", "1.0",
-                "--num-epoch", "1",
-                "--learning-rate", "0.001",
-                "--patch-size", "1",
-                "--vit-hidden-dim", "256",
-                "--vit-layers", "4",
-                "--vit-heads", "6",
-                "--vit-dropout", "0.0"
-            ]
-        },
         {
             "name": "Python Debugger: train_afno_column",
             "type": "debugpy",
             "request": "launch",
-            "program": "/mydata/deepcloud/yves/SolverEmulation/train_files/train_column_clean.py",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_column.py",
             "console": "integratedTerminal",
             "args": [
                 "--model", "afno",
@@ -76,15 +43,15 @@
             ]
         },  
         {
-            "name": "Python Debugger: train_afno_column_crossAttention",
+            "name": "Python Debugger: train_afno_column_hightDepSigmoid",
             "type": "debugpy",
             "request": "launch",
-            "program": "/mydata/deepcloud/yves/SolverEmulation/train_files/train_column_crossAttention.py",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_column.py",
             "console": "integratedTerminal",
             "args": [
-                "--model", "afno",
+                "--model", "afno_clean_heightDepSigmoid",
                 "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
-                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/afno_testing",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/afno_clean_heightDepSigmoid",
                 "--percent", "0.1",
                 "--subsample", "0.1",
                 "--num-workers", "4",
@@ -94,7 +61,7 @@
                 "--train",
                 "--test",
                 "--shuffle", 
-                "--batch-size", "4",
+                "--batch-size", "1",
                 "--vbatch", "1",
                 "--optimizer", "adamw",
                 "--clip", "1.0",
@@ -103,9 +70,15 @@
                 "--patch-size", "1",
                 "--vit-hidden-dim", "8",
                 "--vit-layers", "4",
-                "--vit-dropout", "0.0"
-            ]
-        }
+                "--vit-dropout", "0.0",
+                "--gaussian_params_file_LWUp", "/mydata/deepcloud/yves/results_git/data_histograms/histogram_fit_lwUp/fitted_gaussians_lwUp.npz",
+                "--gaussian_params_file_LWDown", "/mydata/deepcloud/yves/results_git/data_histograms/histogram_fit_lwDown/fitted_gaussians_lwDown.npz",
+
+            ],
+
+            "host": "localhost",
+            "connectTimeout": 30000
+        } 
     ]
 
     

@@ -29,7 +29,10 @@ from torchinfo import summary
 
 import torch.autograd.profiler as profiler
 
+
 from data_loaders_new import IconColumnIterableDataset
+from flux_specific_sigmoid.FluxSpecificSigmoid_lwup import load_gaussian_parameters, construct_gaussian_params_by_height
+
 
 
 sys.path.append(dirname(__file__))
@@ -85,9 +88,8 @@ parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help=
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
 parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
-
-
-
+parser.add_argument('--gaussian_params_file_LWDown', type=str, help='Path to the .npz file containing Gaussian parameters')
+parser.add_argument('--gaussian_params_file_LWUp', type=str, help='Path to the .npz file containing Gaussian parameters')
 args = parser.parse_args()
 
 
@@ -312,7 +314,26 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)        
         
-        
+    elif model_name == 'afno_column_concatEasy_clean_histo':
+        from column_files.afno_column_concatEasy_clean_histo import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
+            
+        ).to(device)    
+            
     elif model_name == 'afno_easyConcat_clean_smooth':
         from column_files.afno_column_concatEasy_clean_smoothing import AFNONet
         model = AFNONet(
@@ -332,6 +353,213 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             zero_freq_indices=args.zero_freq_indices  # Pass the parameter
             
         ).to(device)    
+        
+    elif model_name == 'ViT_heightDepSigmoid':
+        from flux_specific_sigmoid.vit_column_heightDep_sigmoid_diffNorm import ViT
+        
+        # Load Gaussian parameters
+        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
+        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
+        
+        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
+        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
+        gaussian_params_LWUp = fitted_gaussians_LWUp
+
+        # Construct the parameters by height
+        height_start = 70  # Adjust based on your data
+        height_end = 64    # Adjust based on your data
+        gaussian_params_LWDown = construct_gaussian_params_by_height(
+            fitted_gaussians_LWDown,
+            height_start=height_start,
+            height_end=height_end
+        )
+
+        model = ViT(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            dim =args.vit_hidden_dim,
+            mlp_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            heads=args.vit_heads,
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            gaussian_params_file_LWDown= gaussian_params_LWDown,
+            gaussian_params_file_LWUp= gaussian_params_LWUp,
+        ).to(device)    
+            
+        
+        
+    elif model_name == 'afno_clean_heightDepSigmoid':
+        from flux_specific_sigmoid.afno_column_clean_heightDep_sigmoid import AFNONet
+        
+        # Load Gaussian parameters
+        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
+        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
+        
+        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
+        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
+        gaussian_params_LWUp = fitted_gaussians_LWUp
+
+        # Construct the parameters by height
+        height_start = 70  
+        height_end = 64    
+        gaussian_params_LWDown = construct_gaussian_params_by_height(
+            fitted_gaussians_LWDown,
+            height_start=height_start,
+            height_end=height_end
+        )
+
+
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
+            gaussian_params_file_LWDown= gaussian_params_LWDown,
+            gaussian_params_file_LWUp= gaussian_params_LWUp,
+        ).to(device)    
+        
+        
+            
+
+
+         
+    elif model_name == 'afno_clean_heightDepSigmoid_normalized':
+        from flux_specific_sigmoid.afno_column_clean_heightDep_sigmoid_normalized import AFNONet
+        
+        # Load Gaussian parameters
+        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
+        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
+        
+        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
+        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
+        gaussian_params_LWUp = fitted_gaussians_LWUp
+
+        # Construct the parameters by height
+        height_start = 70  # Adjust based on your data
+        height_end = 64    # Adjust based on your data
+        gaussian_params_LWDown = construct_gaussian_params_by_height(
+            fitted_gaussians_LWDown,
+            height_start=height_start,
+            height_end=height_end
+        )
+
+
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
+            gaussian_params_file_LWDown= gaussian_params_LWDown,
+            gaussian_params_file_LWUp= gaussian_params_LWUp,
+        ).to(device)    
+        
+        
+        
+    elif model_name == 'afno_clean_heightDepSigmoid_lwup':
+        from flux_specific_sigmoid.afno_column_clean_heightDep_lwup import AFNONet
+        
+        # Load Gaussian parameters
+        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
+        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
+        
+        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
+        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
+        gaussian_params_LWUp = fitted_gaussians_LWUp
+
+        # Construct the parameters by height
+        height_start = 70  # Adjust based on your data
+        height_end = 64    # Adjust based on your data
+        gaussian_params_LWDown = construct_gaussian_params_by_height(
+            fitted_gaussians_LWDown,
+            height_start=height_start,
+            height_end=height_end
+        )
+
+
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
+            gaussian_params_file_LWDown= gaussian_params_LWDown,
+            gaussian_params_file_LWUp= gaussian_params_LWUp,
+        ).to(device)    
+        
+        
+    elif model_name == 'afno_clean_heightDepSigmoid_lwdown':
+        from flux_specific_sigmoid.afno_column_clean_heightDep_lwdown import AFNONet
+        
+        # Load Gaussian parameters
+        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
+        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
+        
+        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
+        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
+        gaussian_params_LWUp = fitted_gaussians_LWUp
+
+        # Construct the parameters by height
+        height_start = 70  # Adjust based on your data
+        height_end = 64    # Adjust based on your data
+        gaussian_params_LWDown = construct_gaussian_params_by_height(
+            fitted_gaussians_LWDown,
+            height_start=height_start,
+            height_end=height_end
+        )
+
+
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
+            gaussian_params_file_LWDown= gaussian_params_LWDown,
+            gaussian_params_file_LWUp= gaussian_params_LWUp,
+        ).to(device)       
 
         
     else:
