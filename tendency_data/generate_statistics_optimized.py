@@ -84,12 +84,17 @@ def calculate_statistics(loader, device, total_files):
     total_w_samples = 0
     total_2d_samples = 0
     total_3d_samples = 0
+    timesteps_processed = 0
+    timesteps_per_update = 200  # Print every 200 timesteps
 
     for batch_idx, (w, x2d, x3d) in enumerate(loader):
         # Move data to device
         w = w.to(device)      # shape: (1, 81920, 71, 1)
         x2d = x2d.to(device)  # shape: (1, 81920, 3)
         x3d = x3d.to(device)  # shape: (1, 81920, 70, 8)
+        
+        current_batch_timesteps = w.size(0)  # Number of timesteps in this batch
+        timesteps_processed += current_batch_timesteps
 
          # Flatten all dimensions except features
         w_flat = w.reshape(-1, 1)          # Combine batch, cells, and height dimensions
@@ -109,12 +114,11 @@ def calculate_statistics(loader, device, total_files):
         x3d_squared_sum += torch.sum(x3d_flat ** 2, dim=0)
         total_3d_samples += x3d_flat.size(0)
 
-        # Print progress
-        if (batch_idx + 1) % 100 == 0:
+        # Print progress every 200 timesteps
+        if timesteps_processed // timesteps_per_update > (timesteps_processed - current_batch_timesteps) // timesteps_per_update:
             print(f"\nProgress update at {datetime.now()}:", flush=True)
-            files_processed = min((batch_idx + 1) * loader.batch_size, total_files)
-            progress = (files_processed / total_files) * 100
-            print(f"Processed: {files_processed}/{total_files} files ({progress:.2f}%)", flush=True)
+            progress = (timesteps_processed / total_files) * 100
+            print(f"Processed: {timesteps_processed}/{total_files} timesteps ({progress:.2f}%)", flush=True)
 
     # Calculate final statistics
     mean_w = w_sum / total_w_samples
@@ -217,7 +221,7 @@ def main():
     print(f"Using device: {device}")
 
     # Get file list
-    pattern = 'ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_inputs_DOM01_ml_0001_lonlat_idx0000_time_*.h5'
+    pattern = 'ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_inputs_DOM01_ml_0001_lonlat_idx*_time_*.h5'
     files = sorted(glob.glob(os.path.join(args.input_dir, pattern)))
     total_files = len(files)
     print(f"Found {total_files} files")

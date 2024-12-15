@@ -12,7 +12,7 @@ INPUT_DIR="/mydata/deepcloud/yves/h5_tendency_data_all/inputs"
 OUTPUT_DIR="/mydata/deepcloud/yves/h5_tendency_data_all"
 
 # Define processing parameters
-BATCH_SIZE=20  # Adjust based on your GPU memory
+BATCH_SIZE=500  # Adjust based on your GPU memory
 NUM_WORKERS=0  # Adjust based on your CPU cores
 
 # Define output file names
