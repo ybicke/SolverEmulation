@@ -20,7 +20,9 @@ from torch.utils.checkpoint import checkpoint_sequential
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
-
+# Bring your packages onto the path
+import sys
+sys.path.append('/myhome/AFNO/AFNO-transformer')
 from afno.afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
@@ -31,11 +33,16 @@ from afno.gfn import GlobalFilter
 import matplotlib.pyplot as plt
 import os
 
+# from hightDep_sigmoid_fct_optimized import HeightDependentSigmoid
+# from fluxSpec_sigmoid_fct_optimized import MultimodalSigmoid
+from FluxSpecificSigmoid_normalized import HeightDependentSigmoid, MultimodalSigmoid
+
+
 _logger = logging.getLogger(__name__)   
 
 
 
-    
+
 # this class is borrowed from vit_column, here for normalizing the input
 class Normalization(nn.Module):
     """ Normalize the input based on mean and std """    
@@ -51,8 +58,8 @@ class Normalization(nn.Module):
         assert x.size(dim=-1) == self.std.size(dim=0), \
             f'Dimension mismatch ( {x.size(dim=-1)} != {self.std.size(dim=0)})'
         return (x - self.mean)/self.std
-    
-    
+
+
 class Mlp(nn.Module):
     def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
         super().__init__()
@@ -90,7 +97,7 @@ class Block(nn.Module):
                  hidden_size_factor=1,
                  double_skip=True):
         super().__init__()
-        
+
         self.norm1 = norm_layer(dim)
         self.norm2 = norm_layer(dim)
 
@@ -104,9 +111,9 @@ class Block(nn.Module):
                                  hard_thresholding_fraction=hard_thresholding_fraction,
                                  hidden_size_factor=1
                                  )
-        
+
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
-    
+
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
 
@@ -126,8 +133,9 @@ class Block(nn.Module):
         x = self.drop_path(x)
         x = x + residual
         return x
-    
-    
+
+
+
 class AFNONet(nn.Module):
     """
     Args:
@@ -140,7 +148,7 @@ class AFNONet(nn.Module):
         drop_path_rate (float): stochastic depth rate
         norm_layer: (nn.Module): normalization layer
     """
-        
+
     def __init__(self, 
                  patch_size,
                  num_cells,
@@ -148,6 +156,9 @@ class AFNONet(nn.Module):
                  depth, # actually num of blocks, what about the layers?
                  # heads, not used in afno
                  dropout,
+                 gaussian_params_file_LWDown,
+                 gaussian_params_file_LWUp,
+                 # flux_index,  # Adjust flux_index as needed
                  emb_dropout=0.,
                  channels_in=6,
                  channels_out=4,
@@ -166,12 +177,29 @@ class AFNONet(nn.Module):
                  mlp_ratio=4.,
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
+                 flux_index_LWDown=1,
+                 flux_index_LWUp=0,
                  *args,
                  **kwargs): 
 
         super().__init__()
-       
-       
+
+
+        self.flux_index_LWDown = flux_index_LWDown
+        self.flux_index_LWUp = flux_index_LWUp
+
+        # Initialize the HeightDependentSigmoid instance  for LW Down flux (flux_index=1)
+        self.height_dependent_sigmoid = HeightDependentSigmoid(
+            gaussian_params_by_height=gaussian_params_file_LWDown,
+            flux_index=self.flux_index_LWDown
+        )
+
+        # Initialize MultimodalSigmoid for LW Up flux (flux_index=0)
+        self.multimodal_sigmoid = MultimodalSigmoid(
+            fitted_gaussians=gaussian_params_file_LWUp, 
+            flux_index=self.flux_index_LWUp
+        )
+
         self.num_patches = int(height/patch_size)
         self.num_cells = num_cells
         self.height = height
@@ -180,7 +208,7 @@ class AFNONet(nn.Module):
         self.lwflx_idx = lwflx_idx
         self.cosmu0_idx = cosmu0_idx
         self.tsfctrad_idx = tsfctrad_idx
-        
+
         # Initialize normalizers for 2D and 3D inputs
         self.normalizer2d = Normalization(std=torch.sqrt(var2d), mean=mean2d)
         self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
@@ -200,16 +228,16 @@ class AFNONet(nn.Module):
             nn.Linear(channels_in, embed_dim),
             nn.LayerNorm(embed_dim)
         )
-        
+
         self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
         self.pos_drop = nn.Dropout(p=dropout)
         self.norm = nn.LayerNorm(embed_dim)              
-        
+
         # Define the MLP head for final output 
         self.mlp_head = nn.Linear(embed_dim, patch_size*channels_out)
         self.sigmoid = nn.Sigmoid()
 
-      
+
         # With uniform fals and drop_path_rate to 0 not really used. Responsible for calculating the drop path rates for each 
         # "transformer" block based on the uniform_drop flag and the drop_path_rate value. If uniform_drop is True, the same 
         # drop_path_rate is used for all blocks. Otherwise, a linearly increasing drop path rate is used, starting from 0 and 
@@ -222,12 +250,12 @@ class AFNONet(nn.Module):
             print('using linear droppath with expect rate', drop_path_rate * 0.5)
             dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
         # dpr = [drop_path_rate for _ in range(depth)]  # stochastic depth decay rule
-        
-          
+
+
         h=height // patch_size
         w=1
-        
-      
+
+
         self.blocks = nn.ModuleList([
             Block(
                 dim=embed_dim, 
@@ -241,9 +269,9 @@ class AFNONet(nn.Module):
                 hard_thresholding_fraction = hard_thresholding_fraction
                 )
                 for i in range(depth)
-                
+
         ])
-        
+
 
     # Radiation task specifics:
     def _unscale_swflx(self, swflx, cosmu0):
@@ -286,15 +314,15 @@ class AFNONet(nn.Module):
 
         y_pred = torch.cat(y_pred_scaled, dim=-1)
         return y_pred
-        
-            
 
-            
+
+
+
     def forward_features(self, x3d, x2d):
 
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
-         
+
         x3d = self.to_patch_embedding(x3d)
         x2d = self.to_patch_embedding_2D(x2d)
 
@@ -309,15 +337,32 @@ class AFNONet(nn.Module):
         x = self.norm(x)
         return x
 
+
     def forward(self, x3d, x2d):
         x = self.forward_features(x3d, x2d)
-        
         x = self.mlp_head(x)
-        
-        x = self.sigmoid(x)
-        x = self._scale_output(x, x2d)
-        
-        return x.squeeze()    
-    
-    
-    
+
+        # Check the shape of x
+        assert x.shape[1] == self.height, f"Expected height dimension to be {self.height}, but got {x.shape[1]}"
+        assert x.shape[2] == self.channels_out, f"Expected channels_out to be {self.channels_out}, but got {x.shape[2]}"
+
+        # Clone the input tensor to create a new output tensor
+        x_out = x.clone()
+
+        # Apply the height-dependent sigmoid to the LW Down flux (flux_index=1), (handled by the class)
+        x_out = self.height_dependent_sigmoid(x_out)
+
+        # Apply the multimodal sigmoid to the LW Up flux (flux_index=0), (handled by the class)
+        x_out = self.multimodal_sigmoid(x_out)
+
+        # Apply the standard sigmoid to the remaining fluxes
+        remaining_fluxes = torch.ones(self.channels_out, dtype=torch.bool, device=x.device)
+        remaining_fluxes[self.flux_index_LWDown] = False
+        remaining_fluxes[self.flux_index_LWUp] = False
+        x_out[:, :, remaining_fluxes] = torch.sigmoid(x_out[:, :, remaining_fluxes])
+
+        x_out = self._scale_output(x_out, x2d)
+
+        return x_out.squeeze()
+
+

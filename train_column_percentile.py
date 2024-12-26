@@ -580,7 +580,7 @@ def plot_sorted_magnitudes(all_magnitudes_sorted, lambda_1, lambda_2, lambda_5, 
     plt.grid(True)
 
     # Save the plot to the test_path directory
-    plot_file = os.path.join(test_path, 'quantile_plot_new.png')
+    plot_file = os.path.join(test_path, 'quantile_plot_new_test.png')
     plt.savefig(plot_file)
     print(f"Plot saved to {plot_file}")
     plt.close()
@@ -615,9 +615,9 @@ def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_values, test_path,
     plt.axhline(y=lambda_5, color="orange", linestyle="--", label="5% Quantile")
     plt.axhline(y=lambda_10, color="purple", linestyle="--", label="10% Quantile")
     
-    # Add horizontal lines for specified values
-    for value, quantile in specified_values_quantiles.items():
-        plt.axhline(y=value, linestyle=":", label=f"Value {value} (Quantile {quantile:.2%})")
+    # # Add horizontal lines for specified values
+    # for value, quantile in specified_values_quantiles.items():
+    #     plt.axhline(y=value, linestyle=":", label=f"Value {value} (Quantile {quantile:.2%})")
     
     # Add labels and title
     plt.title("Sorted Fourier Magnitudes (Full Range)")
@@ -627,7 +627,7 @@ def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_values, test_path,
     plt.grid(True)
     
     # Save the full-range plot
-    full_plot_file = os.path.join(test_path, 'quantile_plot_full.png')
+    full_plot_file = os.path.join(test_path, 'quantile_plot_full_tetst.png')
     plt.savefig(full_plot_file)
     print(f"Full range plot saved to {full_plot_file}")
     plt.close()
@@ -642,10 +642,10 @@ def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_values, test_path,
     plt.axhline(y=lambda_5, color="orange", linestyle="--", label="5% Quantile")
     plt.axhline(y=lambda_10, color="purple", linestyle="--", label="10% Quantile")
     
-    for value, quantile in specified_values_quantiles.items():
-        plt.axhline(y=value, linestyle=":", label=f"Value {value} (Quantile {quantile:.2%})")
-        # Annotate the quantile
-        plt.text(len(all_magnitudes_sorted) * 0.6, value + 0.001, f"Quantile: {quantile:.2%}", color='black')
+    # for value, quantile in specified_values_quantiles.items():
+    #     plt.axhline(y=value, linestyle=":", label=f"Value {value} (Quantile {quantile:.2%})")
+    #     # Annotate the quantile
+    #     plt.text(len(all_magnitudes_sorted) * 0.6, value + 0.001, f"Quantile: {quantile:.2%}", color='black')
     
     # Add labels and title
     plt.title("Sorted Fourier Magnitudes (Zoomed-In)")
@@ -659,7 +659,7 @@ def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_values, test_path,
     plt.ylim([0, max_value * 1.1])
     
     # Save the zoomed-in plot
-    zoomed_plot_file = os.path.join(test_path, 'quantile_plot_zoomed.png')
+    zoomed_plot_file = os.path.join(test_path, 'quantile_plot_zoomed_test.png')
     plt.savefig(zoomed_plot_file)
     print(f"Zoomed-in plot saved to {zoomed_plot_file}")
     plt.close()
@@ -716,7 +716,7 @@ def test_model(model, test_set):
                 
             # Break the loop if we've reached the maximum number of samples
             if total_samples >= max_samples:
-                break
+                break   
         
         t2 = time.perf_counter(), time.process_time()
         

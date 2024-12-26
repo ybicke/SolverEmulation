@@ -8,16 +8,18 @@ from itertools import cycle
 # Define the model names and paths
 model_names = [
     'afno_column_1percent_Emb128_clean',
-    #vit_column_1percent_emb128_h4',
+    'vit_column_1percent_emb128_h4',
+    'afno_column_1percent_Emb128_easy_concat2'
     #'vit_column_1percent_Emb128_HeightSpecificSigmoid_diffNorm',
     #'afno_column_1percent_Emb128_HeightSpecificSigmoid_diffNorm',
-    'afno_column_1percent_Emb128_HeightSpecificSigmoid_lwup'
+    # 'afno_column_1percent_Emb128_HeightSpecificSigmoid_lwup'
 
 ]
 
 model_paths = [
     f'/mydata/deepcloud/yves/results_git/{model_names[0]}/test',
     f'/mydata/deepcloud/yves/results_git/{model_names[1]}/test',
+    f'/mydata/deepcloud/yves/results_git/{model_names[2]}/test',
 ]
 
 models = [{'name': name, 'path': path} for name, path in zip(model_names, model_paths)]
@@ -147,4 +149,4 @@ fig.legend(handles, labels, loc='lower center', ncol=len(models)+1, fontsize="12
 # Adjust the spacing between subplots to make room for the legend
 plt.tight_layout(rect=[0, 0.05, 1, 0.96])  # Adjust the bottom spacing as needed
 
-plt.savefig(f'/mydata/deepcloud/yves/results_git/HeightDepSigmoid_Difference_all_afno_lwup.png', bbox_inches='tight', dpi=300)
+plt.savefig(f'/mydata/deepcloud/yves/results_git/Difference_all_first_experiments.png', bbox_inches='tight', dpi=300)

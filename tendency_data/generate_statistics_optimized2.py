@@ -6,6 +6,12 @@ from datetime import datetime
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import pickle
+import psutil  # Add this import at the top
+
+
+import time
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Calculate dataset statistics')
@@ -21,12 +27,22 @@ def parse_args():
                         help='Name of the text output file')
     return parser.parse_args()
 
+
+def print_memory_usage(label):
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    rss = mem_info.rss / (1024 ** 2)  # Convert bytes to MB
+    logging.info(f"{label} - Memory Usage: {rss:.2f} MB")
+    
+
 def process_file(filename):
+    start_time = time.time()
+    
     try:
         with h5py.File(filename, 'r') as h:
-            w = h['w'][:]      # Shape: (81920, 71, 1)
-            x2d = h['x2d'][:]  # Shape: (81920, 3)
-            x3d = h['x3d'][:]  # Shape: (81920, 70, 8)
+            w = h['w'][:]      
+            x2d = h['x2d'][:]  
+            x3d = h['x3d'][:]  
 
         # Flatten arrays and compute sums and sums of squares
         w_flat = w.flatten()
@@ -44,23 +60,27 @@ def process_file(filename):
         x3d_sq_sum = np.sum(x3d_flat ** 2, axis=0, dtype=np.float64)
         x3d_count = x3d_flat.shape[0]
 
-        result = {
+        end_time = time.time()
+        processing_time = end_time - start_time
+        logging.info(f"Processed {filename} in {processing_time:.2f} seconds")
+        print_memory_usage(f"After processing {filename}")
+
+        return {
             'w_sum': w_sum,
             'w_sq_sum': w_sq_sum,
             'w_count': w_count,
-
             'x2d_sum': x2d_sum,
             'x2d_sq_sum': x2d_sq_sum,
             'x2d_count': x2d_count,
-
             'x3d_sum': x3d_sum,
             'x3d_sq_sum': x3d_sq_sum,
             'x3d_count': x3d_count,
+            'processing_time': processing_time
         }
-        return result
     except Exception as e:
-        print(f"Error processing file {filename}: {e}")
+        logging.error(f"Error processing file {filename}: {e}")
         return None
+
 
 def save_statistics(stats, output_dir, start_time, pickle_name, txt_name):
     # Save raw statistics
@@ -135,38 +155,26 @@ def save_statistics(stats, output_dir, start_time, pickle_name, txt_name):
 def main():
     args = parse_args()
     start_time = datetime.now()
-    print(f"Processing started at {start_time}")
+    logging.info(f"Processing started at {start_time}")
 
     # Get file list
     pattern = 'ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_inputs_DOM01_ml_0001_lonlat_idx*_time_*.h5'
     files = sorted(glob.glob(os.path.join(args.input_dir, pattern)))
     total_files = len(files)
-    print(f"Found {total_files} files")
+    logging.info(f"Found {total_files} files")
 
-    # Initialize accumulators
-    total_w_sum = 0.0
-    total_w_sq_sum = 0.0
-    total_w_count = 0
-
-    total_x2d_sum = np.zeros(3, dtype=np.float64)
-    total_x2d_sq_sum = np.zeros(3, dtype=np.float64)
-    total_x2d_count = 0
-
-    total_x3d_sum = np.zeros(8, dtype=np.float64)
-    total_x3d_sq_sum = np.zeros(8, dtype=np.float64)
-    total_x3d_count = 0
-
-    timesteps_processed = 0
-    timesteps_per_update = 200
-
-    # Use ProcessPoolExecutor to process files in parallel
+    # Initialize tracking variables
+    processing_times = []
+    
+    # Rest of the main function remains the same until the loop
+    
     with ProcessPoolExecutor(max_workers=args.num_workers) as executor:
         futures = {executor.submit(process_file, f): f for f in files}
 
         for i, future in enumerate(as_completed(futures), 1):
             result = future.result()
             if result is None:
-                continue  # Skip files that failed to process
+                continue
 
             # Update accumulators
             total_w_sum += result['w_sum']
@@ -181,15 +189,19 @@ def main():
             total_x3d_sq_sum += result['x3d_sq_sum']
             total_x3d_count += result['x3d_count']
 
+            processing_times.append(result['processing_time'])
             timesteps_processed += 1
 
             if timesteps_processed % timesteps_per_update == 0 or timesteps_processed == total_files:
-                progress = (timesteps_processed / total_files) * 100
                 current_time = datetime.now()
                 elapsed_time = current_time - start_time
-                print(f"\nProgress update at {current_time}:")
-                print(f"Processed: {timesteps_processed}/{total_files} timesteps ({progress:.2f}%)")
-                print(f"Elapsed time: {elapsed_time}")
+                avg_time_per_file = np.mean(processing_times)
+                
+                logging.info(f"\nProgress update at {current_time}:")
+                logging.info(f"Processed: {timesteps_processed}/{total_files} timesteps ({(timesteps_processed/total_files)*100:.2f}%)")
+                logging.info(f"Average time per file: {avg_time_per_file:.2f} seconds")
+                logging.info(f"Elapsed time: {elapsed_time}")
+                # print_memory_usage("Current total memory usage")
 
     # Calculate final statistics
     mean_w = total_w_sum / total_w_count

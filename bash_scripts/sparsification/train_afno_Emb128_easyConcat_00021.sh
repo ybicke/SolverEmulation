@@ -27,13 +27,13 @@ echo training$line_number started!
 python train_column.py \
     --model afno_easyConcat_clean \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00036\
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00021\
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --no-train \
+    --train \
     --test \
     --shuffle \
     --batch-size 2048 \
@@ -47,5 +47,5 @@ python train_column.py \
     --vit-layers 4 \
     --vit-heads 8 \
     --vit-dropout 0.0 \
-    --afno-sparsity-threshold 0.0036 \
+    --afno-sparsity-threshold 0.0021 \
     --wandb-mode online \

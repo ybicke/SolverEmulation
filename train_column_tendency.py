@@ -30,8 +30,7 @@ from torchinfo import summary
 import torch.autograd.profiler as profiler
 
 
-from data_loaders_new import IconColumnIterableDataset
-# from flux_specific_sigmoid.FluxSpecificSigmoid_lwup import load_gaussian_parameters, construct_gaussian_params_by_height
+from data_loaders_tendency import IconColumnIterableDataset
 
 
 
@@ -62,7 +61,8 @@ import os
 
 parser = argparse.ArgumentParser(description='Train Transformer models.')
 parser.add_argument('--model', type=str, default='vit', help='Name of the model to be trained')
-parser.add_argument('--dataset', type=str, required=True, help='Path to dataset')
+parser.add_argument('--dataset_input', type=str, help='Path to the input dataset')
+parser.add_argument('--dataset_output', type=str, help='Path to the output dataset')
 parser.add_argument('--save', type=str, required=True, help='Path to save the result')
 parser.add_argument('--percent', type=float, default=1.0, help='Percent of data to train on')
 parser.add_argument('--subsample', type=float, default=None, help='Subsampling rate')
@@ -88,8 +88,6 @@ parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help=
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
 parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
-parser.add_argument('--gaussian_params_file_LWDown', type=str, help='Path to the .npz file containing Gaussian parameters')
-parser.add_argument('--gaussian_params_file_LWUp', type=str, help='Path to the .npz file containing Gaussian parameters')
 args = parser.parse_args()
 
 
@@ -183,6 +181,28 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)
         
+    #  AFNO Implementation for Tendency
+    elif model_name == 'afno_tendency':
+        from column_files.afno_column_clean_tendency import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.vit_hidden_dim,
+            # mlp_dim=args.vit_hidden_dim,
+            depth=args.vit_layers, #num blocks
+            dropout=args.vit_dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)
+      
+      
+        
     elif model_name == 'afno_easyConcat':
         from column_files.afno_column_concatEasy import AFNONet
         model = AFNONet(
@@ -203,365 +223,6 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             cutoff_frequency=args.cutoff_frequency
         ).to(device)
         
-        
-                
-    elif model_name == 'afno_crossAttention_clean':
-        from column_files.afno_column_crossAttention_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean1':
-        from column_files.afno_column_crossAttention_clean1 import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_2dnorm':
-        from column_files.afno_column_crossAttention_clean_2dnorm import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_expand':
-        from column_files.afno_column_crossAttention_clean_expand import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_expandPos':
-        from column_files.afno_column_crossAttention_clean_expandPos import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-
-    elif model_name == 'afno_easyConcat_clean':
-        from column_files.afno_column_concatEasy_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)        
-        
-    elif model_name == 'afno_column_concatEasy_clean_histo':
-        from column_files.afno_column_concatEasy_clean_histo import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
-            
-        ).to(device)    
-            
-    elif model_name == 'afno_easyConcat_clean_smooth':
-        from column_files.afno_column_concatEasy_clean_smoothing import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
-            
-        ).to(device)    
-        
-    elif model_name == 'ViT_heightDepSigmoid':
-        from flux_specific_sigmoid.vit_column_heightDep_sigmoid_diffNorm import ViT
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-        model = ViT(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            dim =args.vit_hidden_dim,
-            mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            heads=args.vit_heads,
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)    
-            
-        
-        
-    elif model_name == 'afno_clean_heightDepSigmoid':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_sigmoid import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  
-        height_end = 64    
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)    
-        
-        
-            
-
-
-         
-    elif model_name == 'afno_clean_heightDepSigmoid_normalized':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_sigmoid_normalized import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)    
-        
-        
-        
-    elif model_name == 'afno_clean_heightDepSigmoid_lwup':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_lwup import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)    
-        
-        
-    elif model_name == 'afno_clean_heightDepSigmoid_lwdown':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_lwdown import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)       
-
-        
     else:
         raise NotImplementedError('Model has not implemented yet!')
     return model
@@ -573,6 +234,21 @@ def find_latest_checkpoint(directory):
         return None, None
     idx = [int(re.search( 'checkpoint_epoch_(.*?).pth', cp).group(1)) for cp in ckpts]
     return join(directory, f'checkpoint_epoch_{max(idx)}.pth'), max(idx)
+
+
+
+
+def interpolate_w_to_full_levels_tensor(w):
+    """Linear interpolation"""
+    batch_size, num_half_levels, _ = w.shape
+    num_full_levels = num_half_levels -1
+    
+    w_full = torch.zeros((batch_size, num_full_levels, 1), device=w.device)
+    w_full[:, :, :] = 0.5 * (w[:, :-1, :] + w[:, 1:, :])
+       
+    return w_full
+
+
 
 
 def train_model(model, train_set, valid_set):
@@ -645,8 +321,13 @@ def train_model(model, train_set, valid_set):
             
             t1_1 = time.perf_counter()
             
-            batch_x3, batch_x2, batch_y = data
-            batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
+            batch_x3, batch_x2, batch_y, batch_w = data
+            batch_x3, batch_x2, batch_y, batch_w = batch_x3.to(device), batch_x2.to(device), batch_y.to(device), batch_w.to(device)
+
+            # Interpolate w from half levels to full levels
+            w_full = interpolate_w_to_full_levels_tensor(batch_w)
+            batch_x3 = torch.cat([batch_x3, w_full], dim=-1)
+
 
             outputs = model(batch_x3, batch_x2)
             loss = train_loss(outputs, batch_y)
@@ -669,8 +350,13 @@ def train_model(model, train_set, valid_set):
         with torch.no_grad():
             for i, v_data in enumerate(valid_set):
                 
-                vx3d, vx2d, v_labels = v_data
-                vx3d, vx2d, v_labels = vx3d.to(device), vx2d.to(device), v_labels.to(device)
+                vx3d, vx2d, v_labels, v_w = v_data
+                vx3d, vx2d, v_labels, v_w = vx3d.to(device), vx2d.to(device), v_labels.to(device), v_w.to(device)
+                
+                # Interpolate w from half levels to full levels
+                w_full = interpolate_w_to_full_levels_tensor(v_w)
+                vx3d = torch.cat([vx3d, w_full], dim=-1)
+                
                 v_outputs = model(vx3d, vx2d)        
                 
                 # two different losses         
@@ -774,8 +460,13 @@ def test_model(model, test_set):
     
     for i, data in enumerate(test_set):
         
-        batch_x3, batch_x2, batch_y = data
-        batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
+        batch_x3, batch_x2, batch_y, batch_w = data
+        batch_x3, batch_x2, batch_y, batch_w = batch_x3.to(device), batch_x2.to(device), batch_y.to(device), batch_w.to(device)
+        
+        # Interpolate w from half levels to full levels
+        w_full = interpolate_w_to_full_levels_tensor(batch_w)
+        batch_x3 = torch.cat([batch_x3, w_full], dim=-1)
+        
         model.eval()
         with torch.no_grad():
             outputs = model(batch_x3, batch_x2)
@@ -783,8 +474,8 @@ def test_model(model, test_set):
         # Collect true and predicted values for further analysis
         y_true.append(batch_y.detach().cpu())
         y_pred.append(outputs.detach().cpu())
-        h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
-        h_pred.append(calculate_heating_rates(outputs, batch_x3, batch_x2).detach().cpu())
+        #h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
+        #h_pred.append(calculate_heating_rates(outputs, batch_x3, batch_x2).detach().cpu())
 
         # Calculate and log loss and mean absolute error
         loss = test_loss(outputs, batch_y)
@@ -826,9 +517,9 @@ def test_model(model, test_set):
         pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
 
-def test_loading_time(train_files, iter=10):
+def test_loading_time(input_filenames, output_filenames, iter=10):
     logger.info('Test Loading time started...')
-    dataset = get_data_with_disk_cache(train_files, shuffle=True)
+    dataset = get_column_data_with_disk_cache(input_filenames, output_filenames, shuffle=True)
         
     for it in range(iter):
         t1 = time.perf_counter(), time.process_time()
@@ -841,8 +532,8 @@ def test_loading_time(train_files, iter=10):
         gc.collect()
         
         
-def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
-    icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
+def get_column_data_with_disk_cache(input_filenames, output_filenames, subsample=args.subsample, shuffle=False, num_workers=0):
+    icon_data = IconColumnIterableDataset(input_filenames, output_filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
 
     # Prepare arguments for DataLoader
     dataloader_args = {
@@ -861,11 +552,26 @@ def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle
 
 
 def main():
+        
     logger.info('Code started...')
-    
-    FILENAMES = glob.glob(join(args.dataset, '*.h5'))
-    time_indices = [float(re.search( r'\_time_(.*?)\.h5', f).group(1)) for f in FILENAMES]
-    sorted_files = [x for _,x in sorted(zip(time_indices, FILENAMES))]
+
+    INPUT_FILENAMES = glob.glob(join(args.dataset_input, '*_inputs_*.h5'))
+    OUTPUT_FILENAMES = glob.glob(join(args.dataset_output, '*_tendencies_*.h5'))
+
+    # Extract time indices from input and output file names
+    input_time_indices = [float(re.search(r'_time_(\d+\.\d+)\.h5', f).group(1)) for f in INPUT_FILENAMES]
+    output_time_indices = [float(re.search(r'_time_(\d+\.\d+)\.h5', f).group(1)) for f in OUTPUT_FILENAMES]
+
+    # Sort the time indices
+    sorted_input_time_indices = sorted(input_time_indices)
+    sorted_output_time_indices = sorted(output_time_indices)
+
+    # Ensure that sorted input and output time indices match
+    assert sorted_input_time_indices == sorted_output_time_indices, "Input and output files have mismatched time indices"
+
+    # Sort input and output files based on the sorted time indices
+    sorted_input_files = [INPUT_FILENAMES[input_time_indices.index(time_index)] for time_index in sorted_input_time_indices]
+    sorted_output_files = [OUTPUT_FILENAMES[output_time_indices.index(time_index)] for time_index in sorted_output_time_indices]
     
     seed = 42
     torch.manual_seed(seed)
@@ -878,18 +584,30 @@ def main():
     torch_rng_state = torch.get_rng_state()
     np_rng_state = np.random.get_state()
     random_rng_state = random.getstate()
-
-    train_files = sorted_files[200:2000]
-    val_files = sorted_files[:160] + sorted_files[2020:2180]
-    test_files = sorted_files[2220:]
+    
+    train_input_files = sorted_input_files[200:2000]
+    train_output_files = sorted_output_files[200:2000]
+    val_input_files = sorted_input_files[:160] + sorted_input_files[2020:2180]
+    val_output_files = sorted_output_files[:160] + sorted_output_files[2020:2180]
+    test_input_files = sorted_input_files[2220:]
+    test_output_files = sorted_output_files[2220:]
     
     # Sample dataset
     if args.percent < 1:
-        train_files = prng.choice(train_files, max(1, int(args.percent*len(train_files))))
-        val_files = prng.choice(val_files, max(1, int(args.percent*len(val_files))))
-        test_files = prng.choice(test_files, max(1, int(args.percent*len(test_files))))
+        train_indices = prng.choice(len(train_input_files), max(1, int(args.percent * len(train_input_files))), replace=False)
+        train_input_files = [train_input_files[i] for i in train_indices]
+        train_output_files = [train_output_files[i] for i in train_indices]
+        
+        val_indices = prng.choice(len(val_input_files), max(1, int(args.percent * len(val_input_files))), replace=False)
+        val_input_files = [val_input_files[i] for i in val_indices]
+        val_output_files = [val_output_files[i] for i in val_indices]
+        
+        test_indices = prng.choice(len(test_input_files), max(1, int(args.percent * len(test_input_files))), replace=False)
+        test_input_files = [test_input_files[i] for i in test_indices]
+        test_output_files = [test_output_files[i] for i in test_indices]
 
-    stats_file = join(args.dataset, 'normalizer_stats_per_feat.pickle')
+
+    stats_file = join(args.dataset_input, 'normalizer_stats_per_feat_updated.pickle')
     mean2d, var2d, mean3d, var3d = get_normalization_params(stats_file)
     model = get_model(args.model, mean2d, var2d, mean3d, var3d, args.test)
     num_params = count_parameters(model)
@@ -903,16 +621,17 @@ def main():
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
 
-        train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
-        val_loader = get_column_data_with_disk_cache(train_files, shuffle = False, subsample=1.0)
+        train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=True)
+        val_loader = get_column_data_with_disk_cache(val_input_files, val_output_files, shuffle=False, subsample=1.0)
    
         train_model(model, train_loader, val_loader)
 
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')
+        
     
     if args.test:
-        test_loader = get_column_data_with_disk_cache(test_files, shuffle=False)
+        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False)
         test_model(model, test_loader)
     
     logger.info('Code ended!')

@@ -11,16 +11,19 @@ SCRIPT_DIR="/mydata/deepcloud/yves/SolverEmulation/tendency_data"
 INPUT_DIR="/mydata/deepcloud/yves/h5_tendency_data_all/inputs"
 OUTPUT_DIR="/mydata/deepcloud/yves/h5_tendency_data_all"
 
+# Define output file names
+NAME="2"
+STATS_PICKLE="normalizer_stats_per_feat_${NAME}.pickle"
+STATS_TXT="normalizer_stats_summary_${NAME}.txt"
+
 # Create output directory if it doesn't exist
 mkdir -p "$OUTPUT_DIR"
 
-# Print start time
+# Run the Python script
 echo "Starting statistics calculation at $(date)"
-
-# Run the Python script with both input and output directories
-python "$SCRIPT_DIR/generate_statistics.py" \
+python "$SCRIPT_DIR/generate_statistics3.py" \
     --input_dir "$INPUT_DIR" \
-    --output_dir "$OUTPUT_DIR"
-
-# Print end time
+    --output_dir "$OUTPUT_DIR" \
+    --pickle_name "$STATS_PICKLE" \
+    --txt_name "$STATS_TXT"
 echo "Completed at $(date)"

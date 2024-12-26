@@ -8,6 +8,7 @@ import random
 from torch.utils.data import IterableDataset, DataLoader
 
 
+
 # This dataloader controls randomness better. I use the random module with a seed for reproducability
 class IconColumnIterableDataset(IterableDataset):
     def __init__(self, filenames, shuffle=None, subsample=None, dtype='flaot32', cache_dir=None):

@@ -32,7 +32,9 @@ def calculate_dataset_statistics(input_dir, output_dir):
     
     # Get list of all files
     files = sorted(glob.glob(os.path.join(input_dir, pattern)))
+    total_files = len(files)
     print(f"Found {len(files)} files")
+    print(f"Starting processing of {total_files} files at: {datetime.now()}", flush=True)
 
     # Initialize statistics dictionaries for each feature
     stats = {
@@ -45,33 +47,34 @@ def calculate_dataset_statistics(input_dir, output_dir):
         'M2_3d': None,    # Will be shape (8,) for 8 features
     }
 
-    # Process files
-    for file_path in tqdm(files, desc="Processing files"):
+
+    
+    for file_idx, file_path in enumerate(files):  # Removed tqdm temporarily
         with h5py.File(file_path, 'r') as f:
             
-            # Get data (file reading from disk into RAM)
-            w_data = f['w'][:].reshape(-1, 1)      # Reshape to (81920*71, 1)
-            x2d_data = f['x2d'][:]                 # Shape: (81920, 3)
-            x3d_data = f['x3d'][:].reshape(-1, 8)  # Reshape to (81920*70, 8)
+       
+            
+            w_data = f['w'][:].reshape(-1, 1)
+            x2d_data = f['x2d'][:]
+            x3d_data = f['x3d'][:].reshape(-1, 8)
 
-            # Initialize arrays if first file
             if stats['mean_w'] is None:
-                stats['mean_w'] = np.zeros(1)  # 1 feature for w
+                stats['mean_w'] = np.zeros(1)
                 stats['M2_w'] = np.zeros(1)
-                stats['mean2d'] = np.zeros(3)  # 3 features for x2d
+                stats['mean2d'] = np.zeros(3)
                 stats['M2_2d'] = np.zeros(3)
-                stats['mean3d'] = np.zeros(8)  # 8 features for x3d
+                stats['mean3d'] = np.zeros(8)
                 stats['M2_3d'] = np.zeros(8)
             
             stats['count'] += 1
 
-            # Update w statistics (CPU Processing data from RAM)
+            # Update w statistics
             delta = w_data - stats['mean_w']
             stats['mean_w'] += np.mean(delta, axis=0)
             delta2 = w_data - stats['mean_w']
             stats['M2_w'] += np.sum(delta * delta2, axis=0)
 
-            # Update x2d statistics (3 features)
+            # Update x2d statistics
             for i in range(3):
                 feature_data = x2d_data[:, i]
                 delta = feature_data - stats['mean2d'][i]
@@ -79,13 +82,25 @@ def calculate_dataset_statistics(input_dir, output_dir):
                 delta2 = feature_data - stats['mean2d'][i]
                 stats['M2_2d'][i] += np.sum(delta * delta2)
 
-            # Update x3d statistics (8 features)
-            for i in range(8):
-                feature_data = x3d_data[:, i]
-                delta = feature_data - stats['mean3d'][i]
-                stats['mean3d'][i] += np.mean(delta)
-                delta2 = feature_data - stats['mean3d'][i]
-                stats['M2_3d'][i] += np.sum(delta * delta2)
+            # Update x3d statistics
+            for j in range(8):
+                feature_data = x3d_data[:, j]
+                delta = feature_data - stats['mean3d'][j]
+                stats['mean3d'][j] += np.mean(delta)
+                delta2 = feature_data - stats['mean3d'][j]
+                stats['M2_3d'][j] += np.sum(delta * delta2)
+
+
+                # Print progress every 200 files
+        if (file_idx + 1) % 100 == 0:
+            progress = ((file_idx + 1) / total_files) * 100
+            elapsed_time = time.time() - start_time
+            current_time = datetime.now()
+            print(f"\nProgress update at {current_time}:", flush=True)
+            print(f"Processed: {file_idx+1}/{total_files} files ({progress:.2f}%)", flush=True)
+            print(f"Time elapsed: {elapsed_time/3600:.2f} hours", flush=True)
+            print(f"Current file: {os.path.basename(file_path)}", flush=True)
+            print("-" * 50, flush=True)    
 
     # Calculate final statistics
     final_stats = {
@@ -98,14 +113,10 @@ def calculate_dataset_statistics(input_dir, output_dir):
     }
 
     # Save statistics
-    output_file = os.path.join(output_dir, 'normalizer_stats_per_feat.pickle')
+    output_file = os.path.join(output_dir, 'normalizer_stats_per_feat_statistics1.pickle')
     with open(output_file, 'wb') as f:
         pickle.dump(final_stats, f)
 
-    # Print timing and memory information
-    end_time = time.time()
-    duration = end_time - start_time
-  
     
     # Print and save feature-wise statistics with physical meanings
     output_stats = []  # List to collect all statistics for text file
@@ -149,6 +160,9 @@ def calculate_dataset_statistics(input_dir, output_dir):
         output_stats.append(feature_stats)
 
     # Add timing and memory information
+        # Print timing and memory information
+    end_time = time.time()
+    duration = end_time - start_time
     process = psutil.Process()
     memory_info = process.memory_info()
     memory_gb = memory_info.rss / (1024 * 1024 * 1024)  # Convert bytes to GB
@@ -169,7 +183,7 @@ def calculate_dataset_statistics(input_dir, output_dir):
     print('\n'.join(output_stats))
     
     # Save to text file
-    stats_txt_file = os.path.join(output_dir, 'normalizer_stats_summary.txt')
+    stats_txt_file = os.path.join(output_dir, 'normalizer_stats_per_feat_statistics1.txt')
     with open(stats_txt_file, 'w') as f:
         f.write('\n'.join(output_stats))
     

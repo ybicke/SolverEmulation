@@ -20,8 +20,7 @@ from torch.utils.checkpoint import checkpoint_sequential
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
-
-from afno.afno1d import AFNO1D
+from .afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
 from afno.ls import AttentionLS
@@ -79,9 +78,7 @@ class Block(nn.Module):
                  drop=0.,
                  drop_path=0.,
                  act_layer=nn.GELU,
-                 norm_layer=nn.LayerNorm,
-                 h=14, # I do overwrite them
-                 w=8,
+                 norm_layer=nn.LayerNorm, # maybe check without layernorm??
                  mixing_type="afno",
                  hidden_size=256,
                  fno_blocks=8,
@@ -149,9 +146,10 @@ class AFNONet(nn.Module):
                  # heads, not used in afno
                  dropout,
                  emb_dropout=0.,
-                 channels_in=6,
-                 channels_out=4,
-                 height=71,
+                 channels_in=12,
+                 channels_in_2D = 3, 
+                 channels_out=7,
+                 height=70,
                  swflx_idx=[2, 3],
                  lwflx_idx=[0, 1], 
                  cosmu0_idx=1, 
@@ -181,6 +179,12 @@ class AFNONet(nn.Module):
         self.cosmu0_idx = cosmu0_idx
         self.tsfctrad_idx = tsfctrad_idx
         
+        # Convert statistics variables to torch.float32
+        var2d = var2d.to(dtype=torch.float32)
+        mean2d = mean2d.to(dtype=torch.float32)
+        var3d = var3d.to(dtype=torch.float32)
+        mean3d = mean3d.to(dtype=torch.float32)
+        
         # Initialize normalizers for 2D and 3D inputs
         self.normalizer2d = Normalization(std=torch.sqrt(var2d), mean=mean2d)
         self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
@@ -197,7 +201,7 @@ class AFNONet(nn.Module):
         )
 
         self.to_patch_embedding_2D = nn.Sequential(
-            nn.Linear(channels_in, embed_dim),
+            nn.Linear(channels_in_2D, embed_dim),
             nn.LayerNorm(embed_dim)
         )
         
@@ -235,13 +239,10 @@ class AFNONet(nn.Module):
                 drop=dropout,
                 drop_path=dpr[i],
                 norm_layer=nn.LayerNorm,
-                h=h,
-                w=w,
                 sparsity_threshold=sparsity_threshold,
                 hard_thresholding_fraction = hard_thresholding_fraction
                 )
-                for i in range(depth)
-                
+                for i in range(depth)                
         ])
         
 
@@ -295,10 +296,13 @@ class AFNONet(nn.Module):
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
          
-        x3d = self.to_patch_embedding(x3d)
-        x2d = self.to_patch_embedding_2D(x2d)
-
-        x = torch.cat((x3d, x2d[:, None, :]), axis=-2)
+        x2d_to_70 = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
+        x3d_merged = torch.cat((x3d, x2d_to_70), dim=-1)
+        
+        x = self.to_patch_embedding(x3d_merged)
+        #x3d = self.to_patch_embedding(x3d)
+        #x2d = self.to_patch_embedding_2D(x2d)
+        #x = torch.cat((x3d, x2d[:, None, :]), axis=-2)
 
         x = x + self.pos_embed
         x = self.pos_drop(x)
@@ -314,8 +318,8 @@ class AFNONet(nn.Module):
         
         x = self.mlp_head(x)
         
-        x = self.sigmoid(x)
-        x = self._scale_output(x, x2d)
+        # x = self.sigmoid(x)
+        # x = self._scale_output(x, x2d)
         
         return x.squeeze()    
     

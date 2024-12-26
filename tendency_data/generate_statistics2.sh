@@ -18,7 +18,7 @@ mkdir -p "$OUTPUT_DIR"
 echo "Starting statistics calculation at $(date)"
 
 # Run the Python script with both input and output directories
-python "$SCRIPT_DIR/generate_statistics.py" \
+python "$SCRIPT_DIR/generate_statistics_logging.py" \
     --input_dir "$INPUT_DIR" \
     --output_dir "$OUTPUT_DIR"
 
