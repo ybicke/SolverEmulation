@@ -24,11 +24,10 @@ echo training$line_number started!
 
 
 # Run the training script with specified parameters
-python train_column_tendency.py \
-    --model afno_tendency \
-    --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
-    --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_first \
+python train_column.py \
+    --model afno_column_concatEasy_clean_wO_LayerNorm \
+    --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
+    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_concatEasy_clean_wO_LayerNorm \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \

@@ -11,7 +11,7 @@ source /mydata/deepcloud/yves/online-datasets/workspace/scripts/setup.sh
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation
+myfolder=/mydata/deepcloud/shared/SolverEmulation
 
 
 # run script
@@ -25,9 +25,9 @@ echo training$line_number started!
 
 # Run the training script with specified parameters
 python train_column.py \
-    --model afno_clean_heightDepSigmoid \
+    --model afno_clean_heightDepSigmoid_lwdown \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_new \
+    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwdown \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \

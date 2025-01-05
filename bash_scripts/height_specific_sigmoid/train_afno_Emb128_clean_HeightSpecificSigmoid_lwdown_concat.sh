@@ -24,11 +24,10 @@ echo training$line_number started!
 
 
 # Run the training script with specified parameters
-python train_column_tendency.py \
-    --model afno_tendency \
-    --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
-    --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_first \
+python train_column.py \
+    --model afno_clean_heightDepSigmoid_lwdown_concat \
+    --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
+    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwdown_concat \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -49,4 +48,6 @@ python train_column_tendency.py \
     --vit-heads 8        \
     --vit-dropout 0.0 \
     --afno-sparsity-threshold 0.01 \
+    --gaussian_params_file_LWDown /mydata/deepcloud/yves/results_git/data_histograms/histogram_fit_lwDown/fitted_gaussians_lwDown.npz \
+    --gaussian_params_file_LWUp /mydata/deepcloud/yves/results_git/data_histograms/histogram_fit_lwUp/fitted_gaussians_lwUp.npz \
     --wandb-mode online \

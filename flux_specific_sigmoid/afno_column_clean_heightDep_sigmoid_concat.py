@@ -21,7 +21,7 @@ from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
 # Bring your packages onto the path
-from afno.afno1d import AFNO1D
+from .afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
 from afno.ls import AttentionLS
@@ -33,7 +33,7 @@ import os
 
 # from hightDep_sigmoid_fct_optimized import HeightDependentSigmoid
 # from fluxSpec_sigmoid_fct_optimized import MultimodalSigmoid
-from .FluxSpecificSigmoid_lwdown import HeightDependentSigmoid, MultimodalSigmoid
+from .FluxSpecificSigmoid import HeightDependentSigmoid, MultimodalSigmoid
 
 
 _logger = logging.getLogger(__name__)   
@@ -158,7 +158,7 @@ class AFNONet(nn.Module):
                  gaussian_params_file_LWUp,
                  # flux_index,  # Adjust flux_index as needed
                  emb_dropout=0.,
-                 channels_in=6,
+                 channels_in=12,
                  channels_out=4,
                  height=71,
                  swflx_idx=[2, 3],
@@ -222,10 +222,12 @@ class AFNONet(nn.Module):
             nn.LayerNorm(embed_dim),
         )
 
-        self.to_patch_embedding_2D = nn.Sequential(
-            nn.Linear(channels_in, embed_dim),
-            nn.LayerNorm(embed_dim)
-        )
+        self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
+
+        #self.to_patch_embedding_2D = nn.Sequential(
+        #    nn.Linear(channels_in, embed_dim),
+        #    nn.LayerNorm(embed_dim)
+        #)
 
         self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
         self.pos_drop = nn.Dropout(p=dropout)
@@ -320,11 +322,17 @@ class AFNONet(nn.Module):
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
 
-        x3d = self.to_patch_embedding(x3d)
-        x2d = self.to_patch_embedding_2D(x2d)
-
-        x = torch.cat((x3d, x2d[:, None, :]), axis=-2)
-
+        # Repeat x2d along the height dimension to match the shape of x3d
+        x2d_repeated = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
+        x_concat = torch.cat((x3d, x2d_repeated), dim=-1)
+        
+        # Repeat the dummy vector along the batch dimension, same random nr accross the batch
+        dummy_vector_repeated = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
+        concat_with_x2d = torch.cat((dummy_vector_repeated, x2d.unsqueeze(1)), dim=-1)
+        
+        # Concatenate the resulting tensor as an additional height level
+        x_concat = torch.cat((x_concat, concat_with_x2d), dim=1)
+        x = self.to_patch_embedding(x_concat)
         x = x + self.pos_embed
         x = self.pos_drop(x)
 
@@ -343,17 +351,15 @@ class AFNONet(nn.Module):
         x = self.height_dependent_sigmoid(x)
 
         # Apply the multimodal sigmoid to the LW Up flux (flux_index=0), (handled by the class)
-        # x = self.multimodal_sigmoid(x)
+        x = self.multimodal_sigmoid(x)
 
         # Apply the standard sigmoid to the remaining fluxes
         remaining_fluxes = torch.ones(self.channels_out, dtype=torch.bool, device=x.device)
         remaining_fluxes[self.flux_index_LWDown] = False
-        # remaining_fluxes[self.flux_index_LWUp] = False
+        remaining_fluxes[self.flux_index_LWUp] = False
         x[:, :, remaining_fluxes] = torch.sigmoid(x[:, :, remaining_fluxes])
 
         x = self._scale_output(x, x2d)
 
         return x.squeeze()
-
-
 

@@ -100,8 +100,11 @@ models = [
     #{'name': 'ViT-Test_year', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1year_30percent/test_year_checkpoint'},
 
 
-    {'name': 'AFNO-Emb128-SpecSigmoid','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_diffNorm/test'},
-    {'name': 'AFNO-Emb128-SpecSigmoid-lwUp','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwup/test'},
+    #{'name': 'AFNO-Emb128-SpecSigmoid','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_diffNorm/test'},
+    #{'name': 'ViT-Emb128-SpecSigmoid','path': '/mydata/deepcloud/yves/results_git/vit_column_1percent_Emb128_HeightSpecificSigmoid_diffNorm/test'},
+    #{'name': 'AFNO-Emb128-SpecSigmoid-lwUp','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwup/test'},
+    
+    
 
 
 
@@ -181,4 +184,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/results_git/comparing_heightSpecific.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/shared/results-temp/comparing_heightSpecific.png', bbox_inches='tight', dpi=300)

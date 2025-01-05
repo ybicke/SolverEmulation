@@ -67,14 +67,14 @@ class IconColumnIterableDataset(IterableDataset):
         for _ in range(10):
             try:
                 with h5py.File(local_input_file, 'r') as h_input:
-                    x3d = torch.tensor(h_input['x3d'][:, :, [0, 1, 3, 4, 5, 6, 7]], dtype=self.dtype)
+                    x3d = torch.tensor(h_input['x3d'][:, :, :], dtype=self.dtype) # disabled geopotential
                     x2d = torch.tensor(h_input['x2d'][:], dtype=self.dtype)
                     w = torch.tensor(h_input['w'][:], dtype=self.dtype)  # Shape: [samples, 71, 1]
 
                 with h5py.File(local_output_file, 'r') as h_output:
-                    y = torch.tensor(h_output['y'][:, :, [0, 2, 3, 4, 5, 6, 7]], dtype=self.dtype)
+                    y = torch.tensor(h_output['y'][:, :, [0, 2, 3, 4, 5, 6, 7]], dtype=self.dtype) # disabled temp
                     # Extract 'temp' from y
-                    temp = torch.tensor(h_output['y'][:, :, 1:2], dtype=self.dtype)  
+                    temp = torch.tensor(h_output['y'][:, :, 1:2], dtype=self.dtype)  # extract temp from y
 
             except OSError as e:
                 print(f"Error reading files: {e}. Retrying...")

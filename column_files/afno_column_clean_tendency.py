@@ -146,7 +146,7 @@ class AFNONet(nn.Module):
                  # heads, not used in afno
                  dropout,
                  emb_dropout=0.,
-                 channels_in=12,
+                 channels_in=13,
                  channels_in_2D = 3, 
                  channels_out=7,
                  height=70,

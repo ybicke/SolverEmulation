@@ -11,6 +11,61 @@
             "program": "${file}",
             "console": "integratedTerminal"
         }, 
+
+        {
+            "name": "Debug Output Dataset Generator",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/tendency_data/generate_chunked_dataset_output_key.py",
+            "args": [
+                "-n", "/s3/deepcloud/deepcloud/icon_tendencies/year1/ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_DOM01_ml_0001_lonlat.nc",
+                "-s", "/mydata/deepcloud/yves/h5_tendency_data_all/outputs",
+                "-l", "71"
+            ],
+
+        },
+
+        {
+            "name": "Debug Statistics Generator",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/tendency_data/generate_statistics2.py",
+            "args": [
+                "--input_dir", "/mydata/deepcloud/yves/h5_tendency_data_all/inputs",
+                "--output_dir", "/mydata/deepcloud/yves/h5_tendency_data_all/statistics"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
+            "name": "Debug Statistics Calculator2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/tendency_data/generate_statistics2.py",
+            "args": [
+                "--input_dir", "/mydata/deepcloud/yves/h5_tendency_data_all/inputs",
+                "--output_dir", "/mydata/deepcloud/yves/h5_tendency_data_all/statistics",
+                "--pickle_name", "normalizer_stats_per_feat_testpickle",
+                "--txt_name", "normalizer_stats_summary_test.txt"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+        },
+
+
+        {
+            "name": "Debug Input Dataset Generator",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/tendency_data/generate_chunked_dataset_input_interpolated.py",
+            "args": [
+                "-n", "/s3/deepcloud/deepcloud/icon_tendencies/year1/ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_inputs_DOM01_ml_0001_lonlat.nc",
+                "-s", "/mydata/deepcloud/yves/h5_tendency_data_all/inputs",
+                "-l", "71"
+            ],
+        },
+        
         {
             "name": "Python Debugger: train_afno_column",
             "type": "debugpy",
@@ -43,15 +98,16 @@
             ]
         },  
         {
-            "name": "Python Debugger: train_afno_column_hightDepSigmoid",
+            "name": "Python Debugger: train_afno_column_tendency",
             "type": "debugpy",
             "request": "launch",
-            "program": "/mydata/deepcloud/yves/SolverEmulation/train_column.py",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_column_tendency.py",
             "console": "integratedTerminal",
             "args": [
-                "--model", "afno_clean_heightDepSigmoid",
-                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
-                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/afno_clean_heightDepSigmoid",
+                "--model", "afno_tendency",
+                "--dataset_input", "/mydata/deepcloud/yves/h5_tendency_data_all/inputs",
+                "--dataset_output", "/mydata/deepcloud/yves/h5_tendency_data_all/outputs",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/afno_testing_tendency",
                 "--percent", "0.1",
                 "--subsample", "0.1",
                 "--num-workers", "4",
@@ -61,7 +117,38 @@
                 "--train",
                 "--test",
                 "--shuffle", 
-                "--batch-size", "1",
+                "--batch-size", "4",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--patch-size", "1",
+                "--vit-hidden-dim", "8",
+                "--vit-layers", "4",
+                "--vit-dropout", "0.0",
+            ]
+        },  
+        {
+            "name": "Python Debugger: train_afno_column_hightDepSigmoid",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_column.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "afno_clean_heightDepSigmoid_lwup",
+                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/afno_clean_heightDepSigmoid_lwup",
+                "--percent", "0.1",
+                "--subsample", "0.1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--train",
+                "--test",
+                "--shuffle", 
+                "--batch-size", "2",
                 "--vbatch", "1",
                 "--optimizer", "adamw",
                 "--clip", "1.0",
@@ -76,9 +163,105 @@
 
             ],
 
-            "host": "localhost",
-            "connectTimeout": 30000
-        } 
+        },
+        {
+            "name": "Python Debugger: train_afno_column_hightDepSigmoid_concat",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/shared/SolverEmulation/train_column.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "afno_clean_heightDepSigmoid_concat",
+                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+                "--save", "/mydata/deepcloud/shared/results-temp/afno_clean_heightDepSigmoid_concat",
+                "--percent", "0.1",
+                "--subsample", "0.1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--train",
+                "--test",
+                "--shuffle", 
+                "--batch-size", "2",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--patch-size", "1",
+                "--vit-hidden-dim", "8",
+                "--vit-layers", "4",
+                "--vit-dropout", "0.0",
+                "--gaussian_params_file_LWUp", "/mydata/deepcloud/yves/results_git/data_histograms/histogram_fit_lwUp/fitted_gaussians_lwUp.npz",
+                "--gaussian_params_file_LWDown", "/mydata/deepcloud/yves/results_git/data_histograms/histogram_fit_lwDown/fitted_gaussians_lwDown.npz",
+
+            ],
+
+        },
+
+        {
+            "name": "Python Debugger: train_afno_column_histo",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_column_histo.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "afno_easyConcat_clean_histo",
+                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/afno_testing_histo",
+                "--percent", "0.1",
+                "--subsample", "0.1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--train",
+                "--test",
+                "--shuffle", 
+                "--batch-size", "1000",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--patch-size", "1",
+                "--vit-hidden-dim", "8",
+                "--vit-layers", "4",
+                "--vit-dropout", "0.0",
+            ]
+        } ,
+        {
+            "name": "Python Debugger: train_afno_column_percentile",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_column_percentile.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "afno_easyConcat_percentile",
+                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+                "--save", "/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_000",
+                "--percent", "0.1",
+                "--subsample", "0.1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--no-train",
+                "--test",
+                "--shuffle", 
+                "--batch-size", "1000",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--patch-size", "1",
+                "--vit-hidden-dim", "128",
+                "--vit-layers", "4",
+                "--vit-dropout", "0.0",
+            ]
+        }   
     ]
 
     

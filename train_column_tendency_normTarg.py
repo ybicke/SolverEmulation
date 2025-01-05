@@ -251,7 +251,7 @@ def interpolate_w_to_full_levels_tensor(w):
 
 
 
-def train_model(model, train_set, valid_set):
+def train_model(model, train_set, valid_set, target_means, target_vars):
     
     # Log the start of training
     logger.info('Train started...')
@@ -327,11 +327,14 @@ def train_model(model, train_set, valid_set):
             # Interpolate w from half levels to full levels
             w_full = interpolate_w_to_full_levels_tensor(batch_w)
             batch_x3 = torch.cat([batch_x3, w_full], dim=-1)
-
+            
+            # Transform targets
+            batch_y_transformed = transform_targets(batch_y, target_means, target_vars)
+    
 
             outputs = model(batch_x3, batch_x2)
-            loss = train_loss(outputs, batch_y)
-            batch_mae = train_mae(outputs, batch_y)
+            loss = train_loss(outputs, batch_y_transformed)
+            batch_mae = train_mae(outputs, batch_y_transformed)
             
             if i > 0 and i % vbatch == 0:
                 optimizer.zero_grad()
@@ -357,11 +360,14 @@ def train_model(model, train_set, valid_set):
                 w_full = interpolate_w_to_full_levels_tensor(v_w)
                 vx3d = torch.cat([vx3d, w_full], dim=-1)
                 
+                # Transform targets
+                v_labels_transformed = transform_targets(v_labels, target_means, target_vars)
+                
                 v_outputs = model(vx3d, vx2d)        
                 
                 # two different losses         
-                valid_loss.update(v_outputs, v_labels)
-                valid_mae.update(v_outputs, v_labels)                
+                valid_loss.update(v_outputs, v_labels_transformed)
+                valid_mae.update(v_outputs, v_labels_transformed)                
 
         # Compute total losses and metrics
         total_train_loss = train_loss.compute()
@@ -434,7 +440,7 @@ def calculate_heating_rates(y, x3d, x2d):
     return heating_rate
 
 
-def test_model(model, test_set):
+def test_model(model, test_set, target_means, target_vars):
     logger.info('Test started...')    
  
     # Load the best model checkpoint
@@ -462,19 +468,25 @@ def test_model(model, test_set):
         w_full = interpolate_w_to_full_levels_tensor(batch_w)
         batch_x3 = torch.cat([batch_x3, w_full], dim=-1)
         
+        # Transform targets
+        batch_y_transformed = transform_targets(batch_y, target_means, target_vars)
+        
         model.eval()
         with torch.no_grad():
             outputs = model(batch_x3, batch_x2)
             
+        # Inverse transform targets
+        outputs_original = inverse_transform_targets(outputs, target_means, target_vars)
+        
         # Collect true and predicted values for further analysis
         y_true.append(batch_y.detach().cpu())
-        y_pred.append(outputs.detach().cpu())
+        y_pred.append(outputs_original.detach().cpu())
         #h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
         #h_pred.append(calculate_heating_rates(outputs, batch_x3, batch_x2).detach().cpu())
 
         # Calculate and log loss and mean absolute error
-        loss = test_loss(outputs, batch_y)
-        mae = test_mae(outputs, batch_y)
+        loss = test_loss(outputs, batch_y_transformed)
+        mae = test_mae(outputs, batch_y_transformed )
         # print(i+1)
         if i % 1000 == 999:
             print(f'batch {i+1} loss: {loss:.4f}, '
@@ -545,6 +557,49 @@ def get_column_data_with_disk_cache(input_filenames, output_filenames, subsample
     return DataLoader(**dataloader_args)
 
 
+def transform_targets(batch_y, means, variances, k=4, min_scale=1e-6):
+    # batch_y: Tensor of shape (batch_size, num_levels, num_features)
+    # means: Tensor of shape (num_features,)
+    # variances: Tensor of shape (num_features,)
+    
+    # Compute standard deviations
+    std_devs = torch.sqrt(variances)
+    
+    # Compute scaling factors
+    scale_factors = k * std_devs
+    # scale_factors = torch.clamp(scale_factors, min=min_scale)
+    
+    # Reshape means and scales to match batch_y dimensions
+    means = means.view(1, 1, -1).expand_as(batch_y)
+    scales = scale_factors.view(1, 1, -1).expand_as(batch_y)
+    
+    # Transform targets
+    batch_y_transformed = (batch_y - means) / scales
+    
+    return batch_y_transformed
+
+def inverse_transform_targets(batch_y_transformed, means, variances, k=4, min_scale=1e-6):
+    # batch_y_transformed: Tensor of shape (batch_size, num_levels, num_features)
+    # means: Tensor of shape (num_features,)
+    # variances: Tensor of shape (num_features,)
+    
+    # Compute standard deviations
+    std_devs = torch.sqrt(variances)
+    
+    # Compute scaling factors
+    scale_factors = k * std_devs
+    # scale_factors = torch.clamp(scale_factors, min=min_scale)
+    
+    # Reshape means and scales to match batch_y_transformed dimensions
+    means = means.view(1, 1, -1).expand_as(batch_y_transformed)
+    scales = scale_factors.view(1, 1, -1).expand_as(batch_y_transformed)
+    
+    # Inverse transform targets
+    batch_y_original = batch_y_transformed * scales + means
+    
+    return batch_y_original
+
+
 
 def main():
         
@@ -602,10 +657,19 @@ def main():
         test_output_files = [test_output_files[i] for i in test_indices]
 
 
-    stats_file = join(args.dataset_input, 'normalizer_stats_per_feat_updated.pickle')
+    # stats_file = join(args.dataset_input, 'normalizer_stats_per_feat_updated.pickle')
+    stats_file = '/mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_updated.pickle'
     mean2d, var2d, mean3d, var3d = get_normalization_params(stats_file)
     
     
+    # Load target statistics
+    # target_stats_file = join(args.dataset_input, 'normalizer_stats_per_feat_y2_no_temp.pickle')
+    target_stats_file = '/mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_y2_no_temp.pickle'
+    with open(target_stats_file, 'rb') as f:
+        target_stats = pickle.load(f)
+
+    target_means = torch.tensor(target_stats['mean'], dtype=torch.float32).to(device)  # Shape: (num_features,)
+    target_vars = torch.tensor(target_stats['var'], dtype=torch.float32).to(device)    # Shape: (num_features,)
     
     
     
@@ -624,14 +688,14 @@ def main():
         train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=True)
         val_loader = get_column_data_with_disk_cache(val_input_files, val_output_files, shuffle=False, subsample=1.0)
    
-        train_model(model, train_loader, val_loader)
+        train_model(model, train_loader, val_loader, target_means, target_vars)
 
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')
         
     
     if args.test:
-        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False)
+        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, target_means, target_vars, shuffle=False)
         test_model(model, test_loader)
     
     logger.info('Code ended!')
