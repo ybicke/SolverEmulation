@@ -7,13 +7,13 @@ import matplotlib.ticker as ticker
 
 models = [
     {
-        'name': 'AFNO-Emb128-concat-tendency',
-        'path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_first/test'
+        'name': 'AFNO-Emb128-concat-tendency-norm',
+        'path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
     },
 ]
 
-
 y_mae_hs = []
+train_target_means = []
 
 for model in models:
     test_path = model['path']
@@ -27,6 +27,10 @@ for model in models:
         y_pred = pickle.load(handle)
     print(f'y_pred shape: {y_pred.shape}')
 
+    with open(join(test_path, 'train_target_mean_first.pickle'), 'rb') as handle:
+        train_target_mean = pickle.load(handle)
+    train_target_means.append(train_target_mean)
+
     # Calculate mean absolute error along the batch/time dimension(s).
     # Adjust 'dim' depending on your shapes (e.g. [batch, time, height, 7] -> dim=[0,1])
     if len(y_true.shape) == 7:
@@ -38,13 +42,21 @@ for model in models:
     # y_mae_h should now have shape [height, 7] (or [7, height], check accordingly).
 
     # Optionally flip the vertical dimension so that index=0 corresponds to the top
-    y_mae_h = torch.flip(y_mae_h, dims=[0])
+    # y_mae_h = torch.flip(y_mae_h, dims=[0])
 
     y_mae_hs.append(y_mae_h)
-
+    
+    
+    # Calculate MSE metrics
+    baseline_mse = torch.mean((y_true - train_target_mean)**2)
+    model_mse = torch.mean((y_true - y_pred)**2)
+    print(f'Baseline MSE: {baseline_mse:.15f}')
+    print(f'Model MSE: {model_mse:.15f}')
+    print(f'MSE Ratio (Model / Baseline): {model_mse / baseline_mse:.15f}')
+    
 
 target_units = {
-    "Sum of Temperature Tendency": "K s-1",
+    "Sum of Temperature Tendency": "K s-1", 
     "Dynamical Temperature Tendency": "K s-1",
     "Sum of Zonal Wind Tendency": "m s-2",
     "Sum of Meridional Wind Tendency": "m s-2",
@@ -54,13 +66,14 @@ target_units = {
 }
 
 def add_supplot(fig, x, ys, id, models_name, xlabel=None, ylabel=None, 
-                title=None, log_scale=True, mask=None):
+                title=None, log_scale=True, mask=None, train_target_means=None):
     """
     Helper function to add a subplot to 'fig'.
     - 'x' is the array for the vertical axis (e.g. range(70)).
     - 'ys' is a list of y-values (MAEs), one for each model, each shaped (70,).
     - 'id' is a tuple (nrows, ncols, index) for subplot placement.
     - 'mask' is a list of booleans indicating which models to plot.
+    - 'train_target_means' is a list of mean values for each model.
     """
     ax = fig.add_subplot(*id)
     for y, model_name, msk in zip(ys, models_name, mask):
@@ -93,13 +106,12 @@ def add_supplot(fig, x, ys, id, models_name, xlabel=None, ylabel=None,
         
     return ax
 
-
 # Prepare the figure
 models_name = [model['name'] for model in models]
 mask = [True] * len(models_name)
 
 # If y_mae_hs[0] has shape (70, 7), the first dimension is height=70.
-height_range = range(y_mae_hs[0].shape[0])  
+height_range = range(y_mae_hs[0].shape[0])      
 
 fig = plt.figure(figsize=(12, 18))
 
@@ -126,14 +138,16 @@ for i, (label, units) in enumerate(target_units.items()):
         title=label,
         ylabel='Height index' if i in [0, 3, 6] else None,  # just an example for labeling
         xlabel=f'MAE [{units}]',
-        mask=mask
+        mask=mask,
+        # train_target_means=[mean[:, i] for mean in train_target_means]
     )
     ax_list.append(ax)
-
+    
+    
 # Add legend to the first subplot (or any axis of your choice)
 ax_list[0].legend(fontsize="10", loc='best')
 
 plt.tight_layout()
-plt.savefig('/mydata/deepcloud/shared/results-temp/tendency-data-first.png',
+plt.savefig('/mydata/deepcloud/shared/results-temp/tendency-data-first-norm-targetMean.png',
             bbox_inches='tight', dpi=300)   
 plt.show()

@@ -64,7 +64,7 @@ parser.add_argument('--model', type=str, default='vit', help='Name of the model 
 parser.add_argument('--dataset_input', type=str, help='Path to the input dataset')
 parser.add_argument('--dataset_output', type=str, help='Path to the output dataset')
 parser.add_argument('--save', type=str, required=True, help='Path to save the result')
-parser.add_argument('--percent', type=float, default=1.0, help='Percent of data to train on')
+parser.add_argument('--percent', type=float, default=None, help='Percentage of data to use')
 parser.add_argument('--subsample', type=float, default=None, help='Subsampling rate')
 parser.add_argument('--num-workers', type=int, default=os.cpu_count(), help='Number of workers to load data')
 parser.add_argument('--prefetch-factor', type=int, default=2, help='Prefetch factor')
@@ -88,6 +88,7 @@ parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help=
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
 parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
+parser.add_argument("--test_singele_time_2d", type=float, default=None, help="If set, test on this single time step across all columns.")
 args = parser.parse_args()
 
 
@@ -440,7 +441,19 @@ def calculate_heating_rates(y, x3d, x2d):
     return heating_rate
 
 
-def test_model(model, test_set, target_means, target_vars):
+
+def precompute_train_target_mean(train_set):
+    train_targets = []
+    for _, _, batch_y, _ in train_set:
+        train_targets.append(batch_y)
+    train_targets = torch.cat(train_targets, dim=0)
+    train_target_mean = torch.mean(train_targets, dim=0)  # Compute mean along batch dimension
+    return train_target_mean
+        
+        
+
+
+def test_model(model, test_set, target_means, target_vars, train_target_mean):
     logger.info('Test started...')    
  
     # Load the best model checkpoint
@@ -458,6 +471,10 @@ def test_model(model, test_set, target_means, target_vars):
     
     t1 = time.perf_counter(), time.process_time()
     
+        # Load the precomputed train_target_mean from file
+    with open(join(test_path, 'train_target_mean.pkl'), 'rb') as file:
+        train_target_mean = pickle.load(file) 
+        
     
     for i, data in enumerate(test_set):
         
@@ -507,9 +524,17 @@ def test_model(model, test_set, target_means, target_vars):
     print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} ',
             f'mean_absolute_error: {total_test_mae:.4f}')
     
+    # Calculate the MSE of the baseline and model predictions
+    baseline_mse = torch.mean((y_true - train_target_mean)**2)
+    model_mse = torch.mean((y_true - y_pred)**2)
+    
+    print(f'Baseline MSE: {baseline_mse:.4f}')
+    print(f'Model MSE: {model_mse:.4f}')
+    print(f'MSE Ratio (Model / Baseline): {model_mse / baseline_mse:.4f}')
+    
     # mean_err = torch.mean(torch.abs(y_true - y_pred), dim=0)
     # heat_err = torch.mean(torch.abs(h_true - h_pred), dim=0)
-
+    
     # Save true and predicted values to files for further analysis
     with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
         pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -601,6 +626,55 @@ def inverse_transform_targets(batch_y_transformed, means, variances, k=4, min_sc
 
 
 
+def test_model_single_time_2d(model, test_loader, target_means, target_vars, save_path, time_chosen):
+    model.eval()
+    device = next(model.parameters()).device
+
+    all_mae_values = []
+    all_y_true = []
+    all_y_pred = []
+
+    with torch.no_grad():
+        for batch in test_loader:
+            batch_x = batch[0].to(device)
+            batch_y = batch[1].to(device)
+
+            # Transform targets using mean and variance
+            batch_y_transformed = transform_targets(batch_y, target_means, target_vars)
+
+            # Forward pass
+            pred = model(batch_x)
+
+            # Inverse transform predictions
+            pred_original = inverse_transform_targets(pred, target_means, target_vars)
+
+            # Compute MAE
+            mae = torch.abs(pred_original - batch_y).mean(dim=1)  # Compute MAE over height dimension
+            all_mae_values.append(mae.cpu().numpy())
+
+            # Collect true and predicted values
+            all_y_true.append(batch_y.cpu().numpy())
+            all_y_pred.append(pred_original.cpu().numpy())
+
+    # Concatenate MAE, true, and predicted values from all batches
+    mae_2d = np.concatenate(all_mae_values, axis=0)
+    y_true = np.concatenate(all_y_true, axis=0)
+    y_pred = np.concatenate(all_y_pred, axis=0)
+
+    # Save MAE, true, and predicted values to files with specific naming
+    os.makedirs(save_path, exist_ok=True)
+    with open(os.path.join(save_path, f"test_mae_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
+        pickle.dump(mae_2d, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(os.path.join(save_path, f"y_true_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
+        pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(os.path.join(save_path, f"y_pred_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
+        pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return mae_2d, y_true, y_pred
+
+
+
+
 def main():
         
     logger.info('Code started...')
@@ -643,7 +717,7 @@ def main():
     test_output_files = sorted_output_files[2220:]
     
     # Sample dataset
-    if args.percent < 1:
+    if args.percent is not None and args.percent < 1:
         train_indices = prng.choice(len(train_input_files), max(1, int(args.percent * len(train_input_files))), replace=False)
         train_input_files = [train_input_files[i] for i in train_indices]
         train_output_files = [train_output_files[i] for i in train_indices]
@@ -685,18 +759,76 @@ def main():
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
 
-        train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=True)
+        train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=False)
         val_loader = get_column_data_with_disk_cache(val_input_files, val_output_files, shuffle=False, subsample=1.0)
    
         train_model(model, train_loader, val_loader, target_means, target_vars)
 
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')
+              
         
     
     if args.test:
-        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, target_means, target_vars, shuffle=False)
-        test_model(model, test_loader)
+        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False)
+        
+        
+        
+        
+        if args.test_single_time_2d is not None: 
+            
+            time_chosen = args.test_single_time
+            if time_chosen not in sorted_input_time_indices:
+                raise ValueError(f"Time {time_chosen} not found in sorted_input_time_indices!")
+
+            idx_single = sorted_input_time_indices.index(time_chosen)
+            single_time_input_file = [sorted_input_files[idx_single]]
+            single_time_output_file = [sorted_output_files[idx_single]]
+
+            test_loader_for_single_time = get_column_data_with_disk_cache(
+                single_time_input_file,
+                single_time_output_file,
+                shuffle=False,
+                subsample=None  # Use all columns
+            )
+
+            # Load the best model checkpoint
+            best_ckpt_path = os.path.join(checkpoint_path, "best_model.pth")
+            checkpoint = torch.load(best_ckpt_path, map_location=device)
+
+            model = get_model(args.model, mean2d, var2d, mean3d, var3d, is_test=True)
+            model.load_state_dict(checkpoint["model_state_dict"])
+            model.to(device)
+
+            # Run inference to get per-column MAE, aggregated over height
+            mae_array = test_model_single_time(
+                model,
+                test_loader_for_single_time,
+                target_means,
+                target_vars,
+                save_path=checkpoint_path,
+                save_filename=f"test_mae_per_column_time_{time_chosen:.1f}.npy"
+            )
+        
+        
+        
+        else: 
+
+        # Check if the precomputed mean file exists
+        train_target_mean_file = join(test_path, 'train_target_mean.pickle')
+        if not isfile(train_target_mean_file):
+            
+            print(f'Precomputing train_target_mean and saving to {train_target_mean_file}')
+            train_loader_for_mean = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=False)
+            train_target_mean = precompute_train_target_mean(train_loader_for_mean)
+            
+            with open(train_target_mean_file, 'wb') as handle:
+                pickle.dump(train_target_mean, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            print(f'Loading train_target_mean from {train_target_mean_file}')
+            with open(train_target_mean_file, 'rb') as handle:
+                train_target_mean = pickle.load(handle)
+        test_model(model, test_loader, target_means, target_vars, train_target_mean)
     
     logger.info('Code ended!')
 

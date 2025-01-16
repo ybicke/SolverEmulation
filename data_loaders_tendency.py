@@ -24,12 +24,12 @@ class IconColumnIterableDataset(IterableDataset):
         # 3D features (x3d)
                     ['u - Zonal wind [m/s]',
                     'v - Meridional wind [m/s]',
-                    'pres - Pressure [hPa]',
                     'geopot - Geopotential [m²/s²]',
+                    'pres - Pressure [hPa]',
+                    'clc - Cloud cover fraction [-]']
                     'qc - Cloud water content [kg/kg]',
                     'qi - Cloud ice content [kg/kg]',
                     'qv - Water vapor specific humidity [kg/kg]',
-                    'clc - Cloud cover fraction [-]']
                     --- 'temp' added in the end
                     --- 'w' added later
                         

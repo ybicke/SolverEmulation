@@ -26,14 +26,15 @@
         },
 
         {
-            "name": "Debug Statistics Generator",
+            "name": "Debug Statistics Generator 1",
             "type": "debugpy",
             "request": "launch",
-            "program": "/mydata/deepcloud/yves/SolverEmulation/tendency_data/generate_statistics2.py",
+            "program": "/mydata/deepcloud/shared/SolverEmulation/tendency_data/generate_statistics.py",
             "args": [
                 "--input_dir", "/mydata/deepcloud/yves/h5_tendency_data_all/inputs",
                 "--output_dir", "/mydata/deepcloud/yves/h5_tendency_data_all/statistics"
             ],
+
             "console": "integratedTerminal",
             "justMyCode": true
         },
@@ -55,16 +56,45 @@
 
 
         {
-            "name": "Debug Input Dataset Generator",
+            "name": "Debug Input Dataset Generator New",
             "type": "debugpy",
             "request": "launch",
-            "program": "/mydata/deepcloud/yves/SolverEmulation/tendency_data/generate_chunked_dataset_input_interpolated.py",
+            "program": "/mydata/deepcloud/shared/SolverEmulation/tendency_data/generate_chuncked_dataset_inputs_new.py",
             "args": [
-                "-n", "/s3/deepcloud/deepcloud/icon_tendencies/year1/ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_inputs_DOM01_ml_0001_lonlat.nc",
-                "-s", "/mydata/deepcloud/yves/h5_tendency_data_all/inputs",
-                "-l", "71"
+                "-i", "/s3/deepcloud/deepcloud/icon_tendencies/year1/ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_inputs_DOM01_ml_0001_lonlat.nc",
+                "-o", "/s3/deepcloud/deepcloud/icon_tendencies/year1/ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_DOM01_ml_0001_lonlat.nc",
+                "-s", "/mydata/deepcloud/shared/h5_tendency_all/inputs_new",
+                "-l", "71",
+                "-f","u", "v", "w", "pres", "geopot", "qc", "qi", "qv", "clc", "temp", "pres_sfc", "cosmu0", "qv_s"
             ],
+            "console": "integratedTerminal",
+            "justMyCode": false
         },
+
+        {
+            "name": "Python Debugger: train_rf_column",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/shared/SolverEmulation/train_column_tendency_RF.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "rf",
+                "--dataset_input", "/mydata/deepcloud/yves/h5_tendency_data_all/inputs",
+                "--dataset_output", "/mydata/deepcloud/yves/h5_tendency_data_all/outputs",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/rf_testing",
+                "--percent", "0.001",
+                "--subsample", "0.01",
+                "--num-workers", "0",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--train",
+                "--test",
+                "--shuffle",
+                "--batch-size", "256"
+            ]
+        },    
+
+
         
         {
             "name": "Python Debugger: train_afno_column",
@@ -97,6 +127,42 @@
                 "--vit-dropout", "0.0",
             ]
         },  
+
+
+        {
+            "name": "Python Debugger: test_afno_column_tendency_normTarg_2d",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/shared/SolverEmulation/train_column_tendency_normTarg.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "afno_tendency",
+                "--dataset_input", "/mydata/deepcloud/yves/h5_tendency_data_all/inputs",
+                "--dataset_output", "/mydata/deepcloud/yves/h5_tendency_data_all/outputs",
+                "--save", "/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg",
+                "--subsample", "1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--no-train",
+                "--test",
+                "--test_single_time", "100.0",
+                "--shuffle", 
+                "--batch-size", "4",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--patch-size", "1",
+                "--vit-hidden-dim", "8",
+                "--vit-layers", "4",
+                "--vit-dropout", "0.0",
+            ]
+        },  
+
+
         {
             "name": "Python Debugger: train_afno_column_tendency",
             "type": "debugpy",
@@ -129,6 +195,11 @@
                 "--vit-dropout", "0.0",
             ]
         },  
+
+
+
+
+        
         {
             "name": "Python Debugger: train_afno_column_hightDepSigmoid",
             "type": "debugpy",

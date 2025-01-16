@@ -57,9 +57,13 @@ models = [
     # {'name': 'AFNO-Emb128-lamb-008','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_008/test'},   
     # {'name': 'AFNO-Emb128-lamb-012','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_012/test'},   
 
-    # {'name': 'AFNO-Emb128-lamb-00071','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00071/test'},   
-    # {'name': 'AFNO-Emb128-lamb-00036','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00036/test'},   
-    # # {'name': 'AFNO-Emb128-lamb-00014','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00014/test'},   
+    #{'name': 'AFNO-Emb128-lamb-00021','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00021/test'},   
+    # {'name': 'AFNO-Emb128-lamb-00043','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00043/test'},   
+    # {'name': 'AFNO-Emb128-lamb-00106','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00106/test'},   
+    # {'name': 'AFNO-Emb128-lamb-00172','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00172/test'},  
+    # {'name': 'AFNO-Emb128-lamb-00208','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00208/test'},   
+ 
+
 
 
 
@@ -102,9 +106,16 @@ models = [
 
     #{'name': 'AFNO-Emb128-SpecSigmoid','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_diffNorm/test'},
     #{'name': 'ViT-Emb128-SpecSigmoid','path': '/mydata/deepcloud/yves/results_git/vit_column_1percent_Emb128_HeightSpecificSigmoid_diffNorm/test'},
-    #{'name': 'AFNO-Emb128-SpecSigmoid-lwUp','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwup/test'},
+    #{'name': 'AFNO-Emb128-SpecSig-lwUp','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwup/test'},
     
     
+
+    #{'name': 'AFNO-Emb128-SpecSigmoid-lwDown','path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwdown/test'},
+    #{'name': 'AFNO-Emb128-SpecSig-lw-Down','path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwdown_concat/test'},
+    #{'name': 'AFNO-Emb128-SpecSig-lw-DownUp','path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_concat/test'},
+
+
+    {'name': 'AFNO-Emb128-concat_w0_layerNorm','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_concatEasy_clean_wO_LayerNorm/test'},
 
 
 
@@ -184,4 +195,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/shared/results-temp/comparing_heightSpecific.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/shared/results-temp/comparing_wO_layernorm.png', bbox_inches='tight', dpi=300)

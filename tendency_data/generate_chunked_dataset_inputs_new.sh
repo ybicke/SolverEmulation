@@ -13,7 +13,7 @@ OUTPUT_DIR="/mydata/deepcloud/shared/h5_tendency_all/inputs_new"
 # Create the output directory if it doesn't exist
 mkdir -p "$OUTPUT_DIR"
 
-# Loop through years 1 to 12
+# Loop through years 1 to 12    
 for year in {1..12}
 do
     # Construct input and output file paths

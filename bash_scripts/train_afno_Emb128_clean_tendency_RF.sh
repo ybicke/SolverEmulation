@@ -24,29 +24,17 @@ echo training$line_number started!
 
 
 # Run the training script with specified parameters
-python train_column_tendency_normTarg.py \
-    --model afno_tendency \
+python train_column_tendency_RF.py \
+    --model rf \
     --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg \
+    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_RF \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
     --prefetch-factor 2 \
-    --num-cells 81920 \
-    --no-train \
+    --train \
     --test \
     --shuffle \
     --batch-size 2048 \
-    --vbatch 1 \
-    --optimizer adamw \
-    --clip 1.0 \
-    --num-epoch 100 \
-    --learning-rate 0.0005 \
-    --patch-size 1 \
-    --vit-hidden-dim 128 \
-    --vit-layers 4 \
-    --vit-heads 8        \
-    --vit-dropout 0.0 \
-    --afno-sparsity-threshold 0.01 \
     --wandb-mode online \

@@ -46,7 +46,7 @@ parser.add_argument(
     '-s', '--save-path', type=str, default='.', help='path to save output files'
 )
 
-parser.add_argument(
+parser.add_argument( # the loop goes in this order through the arguments
     '-f', '--features', nargs='+',
     default=[
         # Wind components
@@ -69,13 +69,10 @@ parser.add_argument(
         'qc',              # Cloud water content
         'qi',              # Cloud ice content
         'qv',              # Specific humidity
-        
-        # Boundary coordinates (if needed)
-        #'clon_bnds',       # Longitude boundaries
-        #'clat_bnds',       # Latitude boundaries
-        #'height_bnds'      # Height boundaries
     ]
 )
+
+
 
 args = parser.parse_args()  # Parse the arguments
 
@@ -88,8 +85,9 @@ def load_ncfile(file, features, height_layers):
         # Get time values
         time_values = ds['time'][:]
         
-        # Define feature categories
-        x3d_features = ['u', 'v', 'pres', 'geopot', 'qc', 'qi', 'qv', 'clc']
+        # Define feature categories ensured the input order by investigating the loop
+        x3d_features = ['u', 'v', 'geopot', 'pres', 'clc', 'qc', 'qi', 'qv']
+        
         x2d_features = ['pres_sfc', 'cosmu0', 'qv_s']
         y_features = ['w']  # Vertical velocity as target
 
