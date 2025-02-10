@@ -88,7 +88,7 @@ parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help=
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
 parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
-parser.add_argument("--test_singele_time_2d", type=float, default=None, help="If set, test on this single time step across all columns.")
+parser.add_argument("--test_single_time_2d", type=float, default=None, help="If set, test on this single time step across all columns.")
 args = parser.parse_args()
 
 
@@ -472,7 +472,7 @@ def test_model(model, test_set, target_means, target_vars, train_target_mean):
     t1 = time.perf_counter(), time.process_time()
     
         # Load the precomputed train_target_mean from file
-    with open(join(test_path, 'train_target_mean.pkl'), 'rb') as file:
+    with open(join(test_path, 'train_target_mean.pickle'), 'rb') as file:
         train_target_mean = pickle.load(file) 
         
     
@@ -535,18 +535,26 @@ def test_model(model, test_set, target_means, target_vars, train_target_mean):
     # mean_err = torch.mean(torch.abs(y_true - y_pred), dim=0)
     # heat_err = torch.mean(torch.abs(h_true - h_pred), dim=0)
     
-    # Save true and predicted values to files for further analysis
-    with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
-        pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
-    with open(join(test_path, 'y_pred.pickle'), 'wb') as handle:
-        pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    if args.test_single_time_2d is not None:
+        with open(join(test_path, 'y_true_2d.pickle'), 'wb') as handle:
+            pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)    
+            
+        with open(join(test_path, 'y_pred_2d.pickle'), 'wb') as handle:
+            pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    #with open(join(test_path, 'h_true.pickle'), 'wb') as handle:
-    #    pickle.dump(h_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
-    #with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
-    #    pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    else:        
+        # Save true and predicted values to files for further analysis
+        with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
+            pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        
+        with open(join(test_path, 'y_pred.pickle'), 'wb') as handle:
+            pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        #with open(join(test_path, 'h_true.pickle'), 'wb') as handle:
+        #    pickle.dump(h_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        
+        #with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
+        #    pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
 
 def test_loading_time(input_filenames, output_filenames, iter=10):
@@ -635,9 +643,10 @@ def test_model_single_time_2d(model, test_loader, target_means, target_vars, sav
     all_y_pred = []
 
     with torch.no_grad():
+        
         for batch in test_loader:
             batch_x = batch[0].to(device)
-            batch_y = batch[1].to(device)
+            batch_y = batch[2].to(device)
 
             # Transform targets using mean and variance
             batch_y_transformed = transform_targets(batch_y, target_means, target_vars)
@@ -772,12 +781,8 @@ def main():
     if args.test:
         test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False)
         
-        
-        
-        
         if args.test_single_time_2d is not None: 
-            
-            time_chosen = args.test_single_time
+            time_chosen = args.test_single_time_2d
             if time_chosen not in sorted_input_time_indices:
                 raise ValueError(f"Time {time_chosen} not found in sorted_input_time_indices!")
 
@@ -785,50 +790,59 @@ def main():
             single_time_input_file = [sorted_input_files[idx_single]]
             single_time_output_file = [sorted_output_files[idx_single]]
 
-            test_loader_for_single_time = get_column_data_with_disk_cache(
+            test_loader_for_single_time_2d = get_column_data_with_disk_cache(
                 single_time_input_file,
                 single_time_output_file,
                 shuffle=False,
                 subsample=None  # Use all columns
             )
+            
+            train_target_mean_file = join(test_path, 'train_target_mean.pickle')
+            print(f'Loading train_target_mean from {train_target_mean_file}')
+            with open(train_target_mean_file, 'rb') as handle:
+                    train_target_mean = pickle.load(handle)
+            test_model(model, test_loader_for_single_time_2d, target_means, target_vars, train_target_mean)
+            
+            
+            
 
             # Load the best model checkpoint
-            best_ckpt_path = os.path.join(checkpoint_path, "best_model.pth")
-            checkpoint = torch.load(best_ckpt_path, map_location=device)
+            #best_ckpt_path = os.path.join(checkpoint_path, "best_model.pth")
+            #checkpoint = torch.load(best_ckpt_path, map_location=device)
+            #model.load_state_dict(checkpoint["model_state_dict"])
 
-            model = get_model(args.model, mean2d, var2d, mean3d, var3d, is_test=True)
-            model.load_state_dict(checkpoint["model_state_dict"])
-            model.to(device)
+            #model = get_model(args.model, mean2d, var2d, mean3d, var3d, is_test=True)
+            #model.to(device)
 
             # Run inference to get per-column MAE, aggregated over height
-            mae_array = test_model_single_time(
-                model,
-                test_loader_for_single_time,
-                target_means,
-                target_vars,
-                save_path=checkpoint_path,
-                save_filename=f"test_mae_per_column_time_{time_chosen:.1f}.npy"
-            )
+            #test_model_single_time_2d(
+            #    model,
+            #    test_loader_for_single_time_2d,
+            #    target_means,
+            #    target_vars,
+            #    save_path=checkpoint_path,
+            #    time_chosen=time_chosen,
+            #)
         
         
         
         else: 
 
-        # Check if the precomputed mean file exists
-        train_target_mean_file = join(test_path, 'train_target_mean.pickle')
-        if not isfile(train_target_mean_file):
-            
-            print(f'Precomputing train_target_mean and saving to {train_target_mean_file}')
-            train_loader_for_mean = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=False)
-            train_target_mean = precompute_train_target_mean(train_loader_for_mean)
-            
-            with open(train_target_mean_file, 'wb') as handle:
-                pickle.dump(train_target_mean, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            print(f'Loading train_target_mean from {train_target_mean_file}')
-            with open(train_target_mean_file, 'rb') as handle:
-                train_target_mean = pickle.load(handle)
-        test_model(model, test_loader, target_means, target_vars, train_target_mean)
+            # Check if the precomputed mean file exists
+            train_target_mean_file = join(test_path, 'train_target_mean.pickle')
+            if not isfile(train_target_mean_file):
+                
+                print(f'Precomputing train_target_mean and saving to {train_target_mean_file}')
+                train_loader_for_mean = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=False)
+                train_target_mean = precompute_train_target_mean(train_loader_for_mean)
+                
+                with open(train_target_mean_file, 'wb') as handle:
+                    pickle.dump(train_target_mean, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            else:
+                print(f'Loading train_target_mean from {train_target_mean_file}')
+                with open(train_target_mean_file, 'rb') as handle:
+                    train_target_mean = pickle.load(handle)
+            test_model(model, test_loader, target_means, target_vars, train_target_mean)
     
     logger.info('Code ended!')
 

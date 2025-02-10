@@ -28,7 +28,7 @@ python train_column_tendency_RF.py \
     --model rf \
     --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_RF \
+    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_RF_3 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -38,3 +38,5 @@ python train_column_tendency_RF.py \
     --shuffle \
     --batch-size 2048 \
     --wandb-mode online \
+    --n-estimators 40 \
+    --max-depth 30 \

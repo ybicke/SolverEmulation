@@ -6,10 +6,14 @@ from matplotlib import pyplot as plt
 
 # Define your models
 models = [
-    {
-        'name': 'AFNO-Emb128-concat-tendency-norm',
-        'path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
-    },
+    {'name': 'AFNO','path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'},
+    
+    # {
+    #     'name': 'RF-concat-tendency-norm',
+    #     'path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_RF/test'
+    # },
+    
+    
     # Add more models here if needed
 ]
 
@@ -36,6 +40,19 @@ for mdl in models:
     with open(join(test_path, 'train_target_mean.pickle'), 'rb') as f:
         train_target_mean = pickle.load(f)
     print(f'train_target_mean shape: {train_target_mean.shape}')  # Expected: [70, 7]
+    
+        # Convert y_true and y_pred to PyTorch tensors if they are numpy arrays
+    if isinstance(y_true, np.ndarray):
+        y_true = torch.tensor(y_true)
+    if isinstance(y_pred, np.ndarray):
+        y_pred = torch.tensor(y_pred)
+    
+    # Check and reshape if necessary
+    if y_true.shape[-1] == 490:  # Flattened shape detected
+        y_true = y_true.reshape(-1, 70, 7)  # Reshape to [batch, height, features]
+        y_pred = y_pred.reshape(-1, 70, 7)
+        print(f'Reshaped y_true: {y_true.shape}')
+        print(f'Reshaped y_pred: {y_pred.shape}')
 
     # Convert to tensors
     y_true_tensor = torch.tensor(y_true)   # [540672, 70, 7]
@@ -113,13 +130,19 @@ def add_subplot_prediction(
         ax.set_xscale('log')
 
     ax.grid(True)
-    ax.invert_yaxis()  # So that higher heights are at the top
+    ax.invert_yaxis()
+    # Increase tick label size
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.ticklabel_format(axis='x', style='sci', scilimits=(0, 0))
+    # Increase the font size of the scientific notation
+    ax.xaxis.get_offset_text().set_fontsize(12)
+    
     if title:
-        ax.set_title(title)
+        ax.set_title(title if title else '', fontsize=13.5)  # Increase title size
     if ylabel:
-        ax.set_ylabel(ylabel)
+        ax.set_ylabel(ylabel if ylabel else '', fontsize=14)  # Increase label size
     if xlabel:
-        ax.set_xlabel(xlabel)
+        ax.set_xlabel(xlabel if xlabel else '', fontsize=14)  # Increase label size
 
     return ax
 
@@ -149,11 +172,12 @@ for i, (feat_label, units) in enumerate(target_units.items()):
 # Step 4: Add a Single Legend to Avoid Clutter
 # Extract handles and labels from the first subplot
 handles, labels = ax_list[0].get_legend_handles_labels()
-# Create a custom legend
-fig.legend(handles, labels, fontsize=9, loc='lower right')
+# Legend on the first subplot
+ax_list[0].legend(fontsize=12, loc='best')
 
 # Adjust layout and save the figure
 plt.tight_layout(rect=[0, 0, 0.90, 1])  # Make space for the global legend
-plt.savefig('/mydata/deepcloud/shared/results-temp/tendency-data-prediction-true-predicted.png',
+plt.savefig('/mydata/deepcloud/shared/results-temp/tendency-data-prediction-true-new.png',
             bbox_inches='tight', dpi=300)
 plt.show()
+ 

@@ -69,6 +69,7 @@ parser.add_argument('--train', action=argparse.BooleanOptionalAction, default=Tr
 parser.add_argument('--test', action=argparse.BooleanOptionalAction, default=True, help='Specify if test takes place')
 parser.add_argument('--shuffle', action=argparse.BooleanOptionalAction, default=True, help='Shuffling the train dataset')
 parser.add_argument('--batch-size', type=int, default=4, help='Batch size for data loading (not used in RF training)')
+# parser.add_argument('--min-samples-leaf', type=int, default=2, help='Minimum number of samples required to be at a leaf node')
 args = parser.parse_args()
 
 
@@ -217,13 +218,28 @@ def train_random_forest(
     y_train = y_train.astype(np.float32)
 
     logger.info("Initializing RandomForestRegressor...")
+
+        
+    # min_samples_leaf must be 10^-2% (i.e., 0.001) times 'n'.
+    min_samples_for_leaf = int(0.01 * len(X_train))
+
     rf = RandomForestRegressor(
         n_estimators=10,
-        max_depth=20,
+        min_samples_leaf=min_samples_for_leaf,
+        max_depth=None,     
         random_state=42,
-        verbose=2,  # Add verbosity for monitoring
+        verbose=2,
         n_jobs=-1
     )
+    
+    #rf = RandomForestRegressor(
+    #    n_estimators=args.n_estimators,
+    #    max_depth=args.max_depth,
+    #    # min_samples_leaf=args.min_samples_leaf,
+    #    random_state=42,
+    #    verbose=2,  # Add verbosity for monitoring
+    #    n_jobs=-1
+    #)
 
     logger.info(f"Fitting RandomForestRegressor on shape X={X_train.shape}, y={y_train.shape}")
     t0 = time.time()
