@@ -4,7 +4,7 @@
 set -e
 
 # Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
-source /mydata/deepcloud/yves/online-datasets/workspace/scripts/setup.sh
+source /mydata/deepcloud/yves/SolverEmulation/bash_scripts/setup.sh
 
 # Check if GPU available
 #nvidia-smi
@@ -24,17 +24,26 @@ echo training$line_number started!
 
 
 # Run the training script with specified parameters
-python train_column_tendency_RF.py \
-    --model rf \
-    --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
-    --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_RF_1_new \
+python train_column.py \
+    --model gnn_column_geometric \
+    --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
+    --save /mydata/deepcloud/yves/results_git/gnn_column_1percent_Emb128_L2 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
     --prefetch-factor 2 \
+    --num-cells 81920 \
     --train \
     --test \
     --shuffle \
     --batch-size 2048 \
+    --vbatch 1 \
+    --optimizer adamw \
+    --clip 1.0 \
+    --num-epoch 100 \
+    --learning-rate 0.0005 \
+    --patch-size 1 \
+    --hidden-dim 128 \
+    --layers 2 \
+    --vit-dropout 0.0 \
     --wandb-mode online \

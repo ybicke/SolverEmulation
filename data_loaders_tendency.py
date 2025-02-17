@@ -67,14 +67,30 @@ class IconColumnIterableDataset(IterableDataset):
         for _ in range(10):
             try:
                 with h5py.File(local_input_file, 'r') as h_input:
-                    x3d = torch.tensor(h_input['x3d'][:, :, :], dtype=self.dtype) # disabled geopotential
+                    x3d = torch.tensor(h_input['x3d'][:, :, :], dtype=self.dtype)
                     x2d = torch.tensor(h_input['x2d'][:], dtype=self.dtype)
-                    w = torch.tensor(h_input['w'][:], dtype=self.dtype)  # Shape: [samples, 71, 1]
+                    w = torch.tensor(h_input['w'][:], dtype=self.dtype)
+                                       
 
                 with h5py.File(local_output_file, 'r') as h_output:
-                    y = torch.tensor(h_output['y'][:, :, [0, 2, 3, 4, 5, 6, 7]], dtype=self.dtype) # disabled temp
-                    # Extract 'temp' from y
-                    temp = torch.tensor(h_output['y'][:, :, 1:2], dtype=self.dtype)  # extract temp from y
+                    
+                    # Scale input features based on their units
+                    seconds_in_3hours = 3 * 60 * 60  # 10800 seconds
+                    
+                    # Get raw y values
+                    y = torch.tensor(h_output['y'][:, :, [0, 2, 3, 4, 5, 6, 7]], dtype=self.dtype)
+                    temp = torch.tensor(h_output['y'][:, :, 1:2], dtype=self.dtype)
+                    
+                    # Scale each tendency based on its units
+                    # Order: [ddt_temp_sum, ddt_temp_dyn, ddt_u_sum, ddt_v_sum, ddt_qv_conv, ddt_qc_conv, ddt_qi_conv]
+                    y_scaling_factors = torch.ones(7, dtype=self.dtype)
+                    y_scaling_factors[0:2] *= seconds_in_3hours    # Temperature tendencies: K s^-1 -> K/(3h)
+                    y_scaling_factors[2:4] *= (seconds_in_3hours ** 2)    # Wind tendencies: m s^-2 -> m/(3h)^2
+                    y_scaling_factors[4:] *= seconds_in_3hours    # Mass density tendencies: kg m^-3 s^-1 -> kg m^-3/(3h)
+                    
+                    
+                    # Apply scaling factors to y
+                    y = y * y_scaling_factors.to(y.device)
 
             except OSError as e:
                 print(f"Error reading files: {e}. Retrying...")
@@ -87,9 +103,7 @@ class IconColumnIterableDataset(IterableDataset):
         if x3d is None or x2d is None or y is None:
             raise ValueError(f"Failed to read data from files after retries: {input_filename}, {output_filename}")
         
-        #if temp is not None:
-        x3d = torch.cat((x3d, temp), dim=-1)  # New shape: [batch_size, spatial_dim, features + 1]
-
+        x3d = torch.cat((x3d, temp), dim=-1)
 
         if self.subsample:
             indices = torch.randint(0, y.size(0), (int(self.subsample * y.size(0)),))

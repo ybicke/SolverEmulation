@@ -11,7 +11,7 @@ source /mydata/deepcloud/yves/online-datasets/workspace/scripts/setup.sh
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/shared/SolverEmulation
+myfolder=/mydata/deepcloud/yves/SolverEmulation
 
 
 # run script
@@ -28,7 +28,7 @@ python train_column_tendency_RF.py \
     --model rf \
     --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_RF_3 \
+    --save /mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_RF_3 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \

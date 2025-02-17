@@ -8,13 +8,15 @@ This script processes ICON (Icosahedral Nonhydrostatic) weather model grid data:
 5. Saves each sample as a separate H5 file
 """
 
+import numpy as np
+import h5py
+from netCDF4 import Dataset
+
 import os
 import logging
 import argparse
 
-import numpy as np
-import h5py
-from netCDF4 import Dataset
+
 
 # Set up logging configuration
 logging.basicConfig(format='%(asctime)s %(message)s')
