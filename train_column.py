@@ -80,8 +80,8 @@ parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of epochs')
 parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
 parser.add_argument('--patch-size', type=int, default=2, help='Patch size')
-parser.add_argument('--hidden-dim', type=int, default=256, help='hidden dimension')
-parser.add_argument('--layers', type=int, default=4, help='layers')
+parser.add_argument('--vit-hidden-dim', type=int, default=256, help='Vit hidden dimension')
+parser.add_argument('--vit-layers', type=int, default=4, help='Vit layers')
 parser.add_argument('--vit-heads', type=int, default=6, help='Vit heads')
 parser.add_argument('--vit-dropout', type=float, default=0.0, help='Vit dropout')
 parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
@@ -90,8 +90,6 @@ parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff 
 parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
 parser.add_argument('--gaussian_params_file_LWDown', type=str, help='Path to the .npz file containing Gaussian parameters')
 parser.add_argument('--gaussian_params_file_LWUp', type=str, help='Path to the .npz file containing Gaussian parameters')
-parser.add_argument('--heads', type=int, default=4, help='Number of heads for GAT')
-parser.add_argument('--use-scheduler', action='store_true', default=False, help='Use learning rate scheduler')
 args = parser.parse_args()
 
 
@@ -666,69 +664,8 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             gaussian_params_file_LWUp= gaussian_params_LWUp,
         ).to(device)       
         
-    
-    elif model_name == 'gnn_mp_column':
-        from column_files.gnn_mp_column import GNNColumnNet
-        model = GNNColumnNet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        
-            
-        ).to(device)  
-        
-        
-    elif model_name == 'gnn_gat_column':
-        from column_files.gnn_gat_column import GNNColumnNet    
-        model = GNNColumnNet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            heads=args.heads
-                        
-            
-        ).to(device)   
-        
-    elif model_name == 'gnn_graphCast_column':
-        from column_files.gnn_graphCast import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)  
-           
     else:
         raise NotImplementedError('Model has not implemented yet!')
-
-    # Example custom weight initialization after moving model to device
-    for name, param in model.named_parameters():
-        if param.dim() > 1:
-            nn.init.xavier_uniform_(param, gain=0.01)
-
     return model
         
     
@@ -759,7 +696,7 @@ def train_model(model, train_set, valid_set):
     )
     wandb.watch(model, log_freq=100)
 
-    # Set up the optimizer
+    # Set up the optimizer based on the specified type
     if args.optimizer == 'adam':
         optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     elif args.optimizer == 'adamw':
@@ -767,21 +704,10 @@ def train_model(model, train_set, valid_set):
             model.parameters(), 
             lr=args.learning_rate,
             eps=1e-8,
-            weight_decay=0.01
+            weight_decay=0.01  # basically applying ridge regression L2
         )
     else:
         raise NameError('optimizer not supported.')
-    
-    # Conditionally instantiate the scheduler
-    if args.use_scheduler:
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer,
-            mode='min',
-            factor=0.2,
-            patience=5
-        )
-    else:
-        scheduler = None
     
     # Initialize loss and metric trackers
     train_loss = MeanSquaredError().to(device)
@@ -799,14 +725,17 @@ def train_model(model, train_set, valid_set):
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         init_epoch = cp_id
+        # vbatch = min(args.vbatch + (init_epoch/2), 20)
         logger.info(f'Training will continue from epoch: {init_epoch}/{args.num_epoch}')
     else:
         init_epoch = 0
+        # vbatch = args.vbatch
 
     vbatch = args.vbatch
     epoch_number = init_epoch
     best_loss = 1e9999999 
       
+
     # Training loop
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
@@ -822,7 +751,6 @@ def train_model(model, train_set, valid_set):
             batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
 
             outputs = model(batch_x3, batch_x2)
-
             loss = train_loss(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
             
@@ -891,14 +819,6 @@ def train_model(model, train_set, valid_set):
             torch.save(checkpoint, join(checkpoint_path, 'best_model.pth'))
             best_loss = total_valid_loss
             
-        # Step the scheduler with validation loss
-        val_loss_value = valid_loss.compute().item()
-        if scheduler is not None:
-            scheduler.step(val_loss_value)
-            current_lr = optimizer.param_groups[0]['lr']
-            logger.info(f'Epoch {epoch_number}: Learning rate adjusted to {current_lr}')
-            wandb.log({'learning_rate': current_lr})
-        
         # Reset metrics for the next epoch
         train_mae.reset()
         valid_mae.reset()

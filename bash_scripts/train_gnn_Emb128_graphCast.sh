@@ -27,7 +27,7 @@ echo training$line_number started!
 python train_column.py \
     --model gnn_graphCast_column \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/gnn_graphCast_Emb128 \
+    --save /mydata/deepcloud/yves/results_git/gnn_graphCast_Emb128_0 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -39,7 +39,7 @@ python train_column.py \
     --batch-size 2048 \
     --vbatch 1 \
     --optimizer adamw \
-    --clip 1.0 \
+    --clip 32 \
     --num-epoch 100 \
     --learning-rate 0.0005 \
     --patch-size 1 \

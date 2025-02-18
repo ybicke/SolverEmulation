@@ -1,4 +1,3 @@
-    
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -50,7 +49,7 @@ class AtmosphericColumnGNN(nn.Module):
         self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
 
         self.encoder = Encoder(channels_in, embed_dim, emb_dropout)
-        self.processor = Processor(embed_dim, depth, dropout)
+        self.processor = Processor(embed_dim, depth = depth, dropout = dropout)
         self.decoder = Decoder(embed_dim, channels_out)
         
         self.sigmoid = nn.Sigmoid()
@@ -113,6 +112,112 @@ class AtmosphericColumnGNN(nn.Module):
     
     
 
+
+
+class Encoder(nn.Module):
+    """
+    Input shape: [B, L+1, channels_in].
+    Output shape: [B*(L+1), embed_dim].
+    """
+    def __init__(self, channels_in , embed_dim, emb_dropout):
+        super().__init__()
+        self.dropout = nn.Dropout(emb_dropout)
+        self.mlp = nn.Sequential(
+            nn.Linear(channels_in, embed_dim),  
+            nn.SiLU(),
+            nn.Dropout(emb_dropout),
+            nn.LayerNorm(embed_dim),
+        )
+
+    def forward(self, x):
+        x = self.mlp(x)
+        x = self.dropout(x)
+        
+        # flatten allows the GNN to treat each node (each level in each batch) independently during message passing
+        # GNN operations are typically designed to work on a list of nodes, where each node can be processed in parallel.
+        B, N, E = x.shape
+        x = x.view(B*N, E)
+        return x
+    
+    
+
+class Processor(nn.Module):
+    """
+    Applies multiple GNN layers (message passing) with skip connections.
+    Input shape: [B*(L+1), embed_dim].
+    Output shape (unreshaped): same [B*(L+1), embed_dim].
+    """
+    def __init__(self, embed_dim, depth=16, dropout=0.0):
+        super().__init__()
+        self.layers = nn.ModuleList([
+            GNNLayer(embed_dim=embed_dim, dropout=dropout)
+            for _ in range(depth)
+        ])
+
+    def forward(self, x, edge_index):
+        for layer in self.layers:
+            # Skip connection
+            x = x + layer(x, edge_index) 
+        return x
+    
+
+class Decoder(nn.Module):
+    """
+    Input shape (reshaped): [B, L+1, embed_dim].
+    Output shape: [B, L+1, channels_out], 
+    """
+    def __init__(self, embed_dim, channels_out, dropout=0.0):
+        super().__init__()
+        self.mlp = nn.Sequential(
+            nn.Linear(embed_dim, embed_dim),
+            nn.SiLU(),
+            nn.Dropout(dropout),
+            nn.LayerNorm(embed_dim),
+            nn.Linear(embed_dim, channels_out),
+        )
+
+    def forward(self, x):
+        B, N, E = x.shape
+        x = x.view(B*N, E)
+        x = self.mlp(x)
+        x = x.view(B, N, )
+        return x
+    
+    
+class GNNLayer(MessagePassing):
+    """
+    A single GNN layer for the Processor.
+    
+    - Performs message passing to aggregate neighbor features.
+    - An MLP updates node features, with skip connections for stability.
+    - Iteratively captures complex dependencies across the graph.
+
+    Input: [B*(L+1), embed_dim]
+    Output: [B*(L+1), embed_dim]
+    """
+    def __init__(self, embed_dim, dropout=0.0):
+        super().__init__(aggr='add')
+        self.mlp = nn.Sequential(
+            nn.Linear(embed_dim, embed_dim),
+            nn.SiLU(),
+            nn.Dropout(dropout),
+            nn.LayerNorm(embed_dim),
+            nn.Linear(embed_dim, embed_dim), 
+            # GraphCast suggested single linear layer. Need to check if this is correct.
+        )
+
+    def forward(self, x, edge_index):
+        # Message passing
+        x = self.propagate(edge_index, x=x)
+        # MLP
+        x = self.mlp(x)
+        return x
+
+    def message(self, x_j):
+        return x_j
+    
+    
+    
     def _unscale_swflx(self, swflx, cosmu0):
         return torch.where(
             cosmu0 >= torch.tensor(1e-4, dtype=torch.float32),
@@ -144,89 +249,3 @@ class AtmosphericColumnGNN(nn.Module):
                 scaled.append(f_pred)
 
         return torch.cat(scaled, dim=-1)
-
-
-
-class Encoder(nn.Module):
-    """
-    Input shape: [B, L+1, channels_in].
-    Output shape: [B*(L+1), embed_dim].
-    """
-    def __init__(self, channels_in, embed_dim, emb_dropout):
-        super().__init__()
-        self.node_encoder = GNNLayer(channels_in, embed_dim, emb_dropout)
-        self.input_drop = nn.Dropout(emb_dropout)
-
-    def forward(self, x):
-        x = self.node_encoder(x)
-        x = self.input_drop(x)
-        
-        # flatten allows the GNN to treat each node (each level in each batch) independently during message passing
-        # GNN operations are typically designed to work on a list of nodes, where each node can be processed in parallel.
-        x = x.view(x.size(0) * x.size(1), -1)
-        return x
-    
-    
-
-class Processor(nn.Module):
-    """
-    Input shape: [B*(L+1), embed_dim].
-    Output shape (unreshaped): same [B*(L+1), embed_dim].
-    """
-    def __init__(self, embed_dim, depth=16, dropout=0.0):
-        super().__init__()
-        self.layers = nn.ModuleList([
-            GNNLayer(embed_dim, embed_dim, dropout) for _ in range(depth)
-        ])
-
-    def forward(self, x, edge_index):
-        for layer in self.layers:
-            x = x + layer(x, edge_index)  # Skip connection
-        # Reshape using the original batch size and number of levels
-        return x
-    
-
-class Decoder(nn.Module):
-    """
-    Input shape (reshaped): [B, L+1, embed_dim].
-    Output shape: [B, L+1, channels_out], or with
-    a final residual connection as required.
-    """
-    def __init__(self, embed_dim, channels_out):
-        super().__init__()
-        self.output_decoder = GNNLayer(embed_dim, channels_out, dropout=0.0)
-
-    def forward(self, x):
-        x = self.output_decoder(x)
-        return x
-    
-    
-class GNNLayer(MessagePassing):
-    """
-    The Processor refines node embeddings through multiple GNN layers.
-    
-    - Each GNNLayer performs message passing, aggregating neighbor features.
-    - An MLP updates node features, with skip connections for stability.
-    - Iteratively captures complex dependencies across the graph.
-
-    Input: [B*(L+1), embed_dim]
-    Output: [B*(L+1), embed_dim]
-    """
-    def __init__(self, in_channels, out_channels, dropout=0.0):
-        super().__init__(aggr='add')
-        self.mlp = nn.Sequential(
-            nn.Linear(in_channels, out_channels),
-            nn.ReLU(),
-            nn.Dropout(dropout)
-        )
-
-    def forward(self, x, edge_index=None):
-        if edge_index is not None:
-            # Message passing
-            x = self.propagate(edge_index, x=x)
-        # Apply MLP
-        x = self.mlp(x)
-        return x
-
-    def message(self, x_j):
-        return x_j
