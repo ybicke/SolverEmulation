@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from itertools import cycle
 
 # Define the model name
-model_name = 'afno_column_1percent_Emb128_easyConcat_012'
+model_name = 'gnn_graphCast_Emb512_plateau_00005' 
 model_path = f'/mydata/deepcloud/yves/results_git/{model_name}/test'
 
 # Define the model dictionary
@@ -46,23 +46,19 @@ def add_subplot(fig, x, y_trues, y_preds, id, models, xlabel=None, ylabel=None, 
         else:
             raise ValueError("Unexpected number of dimensions in data tensor")
 
-        if flux:
-            ax.plot(y_true_mean, x, label=f'{model["name"]} True', linestyle='-', color=color)
-            ax.plot(y_pred_mean, x, linestyle='--', color=color)
-        else:
-            ax.plot(y_true_mean, x, label=f'{model["name"]} True HR', linestyle='-', color=color)
-            ax.plot(y_pred_mean, x, linestyle='--', color=color)
+        ax.plot(y_true_mean, x, label='True Values', linestyle='-', color=color)
+        ax.plot(y_pred_mean, x, label='Predicted Values', linestyle='--', color=color)
     ax.grid()
     ax.set_xlabel(xlabel if xlabel else '')
     ax.set_ylabel(ylabel if ylabel else '')
     ax.set_title(title if title else '')
-    # ax.legend(fontsize="10", loc='lower left')  # Add legend at the bottom left
+    ax.legend(fontsize="8", loc='upper right')  # Add legend at the top right with smaller font size
     return ax
 
-fig = plt.figure(figsize=(10, 13))
+fig = plt.figure(figsize=(12, 13))  # Increase the figure width
 
 # Define the subset slice, e.g., averaging over the first 50 samples
-subset = slice(0, 5)
+subset = slice(130, 131)
 
 # Flux and heating rate plots with adjusted slicing
 add_subplot(fig, x=range(71), y_trues=[y[:, :, 3] for y in y_true_list], y_preds=[y[:, :, 3] for y in y_pred_list], id=(2, 3, 1), models=models, title='Downward Shortwave Flux', xlabel='Flux [W/m$^2$]', ylabel='Vertical Level', subset_slice=subset)
@@ -71,11 +67,11 @@ add_subplot(fig, x=range(71), y_trues=[y[:, :, 2] for y in y_true_list], y_preds
 add_subplot(fig, x=range(71), y_trues=[y[:, :, 0] for y in y_true_list], y_preds=[y[:, :, 0] for y in y_pred_list], id=(2, 3, 5), models=models, title='Upward Longwave Flux', xlabel='Flux [W/m$^2$]', ylabel='Vertical Level', subset_slice=subset)
 
 # Heating rate plots
-add_subplot(fig, x=range(70), y_trues=[h[:, :, 1] for h in h_true_list], y_preds=[h[:, :, 1] for h in h_pred_list], id=(2, 3, 3), models=models, title='Heating Rates (Shortwave)', xlabel='MAE [K/day]', ylabel='Vertical Level', flux=False, subset_slice=subset)
-add_subplot(fig, x=range(70), y_trues=[h[:, :, 0] for h in h_true_list], y_preds=[h[:, :, 0] for h in h_pred_list], id=(2, 3, 6), models=models, title='Heating Rates (Longwave)', xlabel='MAE [K/day]', ylabel='Vertical Level', flux=False, subset_slice=subset)
+add_subplot(fig, x=range(70), y_trues=[h[:, :, 1] for h in h_true_list], y_preds=[h[:, :, 1] for h in h_pred_list], id=(2, 3, 3), models=models, title='Heating Rates (Shortwave)', xlabel='Heating Rate [K/day]', ylabel='Vertical Level', flux=False, subset_slice=subset)
+add_subplot(fig, x=range(70), y_trues=[h[:, :, 0] for h in h_true_list], y_preds=[h[:, :, 0] for h in h_pred_list], id=(2, 3, 6), models=models, title='Heating Rates (Longwave)', xlabel='Heating Rate [K/day]', ylabel='Vertical Level', flux=False, subset_slice=subset)
 
 # Create a single title for the entire plot
-fig.suptitle(f'{model_name}', fontsize=16)
+fig.suptitle(f'{model_name} - True vs Predicted Values (Sample {subset.start})', fontsize=16)
 
 plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to make room for the suptitle
-plt.savefig(f'/mydata/deepcloud/yves/results_git/{model_name}_real.png', bbox_inches='tight', dpi=300)
+plt.savefig(f'/mydata/deepcloud/yves/results_git/{model_name}_real_values.png', bbox_inches='tight', dpi=300)

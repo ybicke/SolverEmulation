@@ -198,11 +198,13 @@ class Processor(nn.Module):
             GNNLayer(embed_dim=embed_dim, dropout=dropout)
             for _ in range(depth)
         ])
-
+        self.layer_norm = nn.LayerNorm(embed_dim) 
+        
     def forward(self, x, edge_index):
         for layer in self.layers:
-            # Skip connection
-            x = x + layer(x, edge_index) 
+            
+            # Residual connection with LayerNorm.
+            x = x + self.layer_norm(layer(x, edge_index))
         return x
     
 
@@ -224,7 +226,7 @@ class Decoder(nn.Module):
             B, N, E = x.shape
             x = x.view(B*N, E)
             x = self.mlp(x)
-            x = x.view(B, N, 4)
+            x = x.view(B, N, self.mlp[-1].out_features)
             return x
     
     
@@ -241,29 +243,46 @@ class GNNLayer(MessagePassing):
     """
     def __init__(self, embed_dim, dropout=0.0):
         super().__init__(aggr='add')
-        self.mlp = nn.Sequential(
+        
+        self.edge_mlp = nn.Sequential(
             nn.Linear(embed_dim, embed_dim),
             nn.SiLU(),
             nn.Dropout(dropout),
             nn.LayerNorm(embed_dim),
             nn.Linear(embed_dim, embed_dim), 
-            # GraphCast suggested single linear layer. Need to check if this is correct.
         )
-
+        
+        self.node_mlp = nn.Sequential(
+            nn.Linear(2 * embed_dim, embed_dim),
+            nn.SiLU(),
+            nn.Dropout(dropout),
+            nn.LayerNorm(embed_dim),
+            nn.Linear(embed_dim, embed_dim), 
+        )
+        
     def forward(self, x, edge_index):
         # edge indices guide which nodes send and receive messages
         # aggregation is implicitly defined by the propagate function
-        x = self.propagate(edge_index, x=x)
         
-        # MLP to update the node featureswha
-        x = self.mlp(x)
+        # propagate() handles message passing.  It calls message(), aggregate(), and update().
+        aggregated_messages = self.propagate(edge_index, x=x)
+        
+        # Concatenate original node features with aggregated messages.
+        x = torch.cat([x, aggregated_messages], dim=1)
+        
+        # MLP to update the node features
+        x = self.node_mlp(x)
         return x
-
+    
     def message(self, x_j):
-        # message from node j to node i is the node features of node j
-        return x_j
+        # x_j: Features of the *source* node (j) of each edge.
+        # Apply the learned edge transformation.  This is crucial, even without explicit edge features.
+        return self.edge_mlp(x_j)
     
-    
+    def update(self, aggr_out):
+        # The GraphCast paper doesn't use a custom update function.
+        # The aggregation result is directly used in the concatenation.
+        return aggr_out
     
     
 

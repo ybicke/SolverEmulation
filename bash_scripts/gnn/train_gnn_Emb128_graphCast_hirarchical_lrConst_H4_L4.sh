@@ -24,10 +24,10 @@ echo training$line_number started!
 
 
 # Run the training script with specified parameters
-python train_column.py \
-    --model gnn_graphCast_column \
+python train_column_gnn.py \
+    --model gnn_graphCast_hirarchical \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/gnn_graphCast_Emb128_2 \
+    --save /mydata/deepcloud/yves/results_git/gnn_graphCast_hirarchical_Emb128_lrConst_H4_L4 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -36,15 +36,14 @@ python train_column.py \
     --train \
     --test \
     --shuffle \
-    --batch-size 2048 \
-    --vbatch 1 \
+    --batch-size 512 \
     --optimizer adamw \
-    --clip 1.0 \
-    --num-epoch 100 \
-    --learning-rate 0.0001 \
-    --patch-size 1 \
+    --clip 1 \
+    --num-epoch 30 \
+    --learning-rate 0.0005 \
     --hidden-dim 128 \
-    --vit-dropout 0.0 \
-    --layers 16 \
-    --use-scheduler \
+    --dropout 0.0 \
+    --layers 4 \
+    --lr-schedule-type none \
+    --max-scale 4 \
     --wandb-mode online \

@@ -67,3 +67,6 @@ class IconColumnIterableDataset(IterableDataset):
             x3d, x2d, y = self.read_file(filename)
             for x3d_, x2d_, y_ in zip(x3d, x2d, y):
                 yield x3d_, x2d_, y_
+
+    def __len__(self):
+        return len(self.filenames)

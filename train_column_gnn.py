@@ -32,7 +32,6 @@ import torch.autograd.profiler as profiler
 
 
 from data_loaders_new import IconColumnIterableDataset
-from flux_specific_sigmoid.FluxSpecificSigmoid_lwdown import load_gaussian_parameters, construct_gaussian_params_by_height
 
 
 
@@ -75,20 +74,16 @@ parser.add_argument('--train', action=argparse.BooleanOptionalAction, default=Tr
 parser.add_argument('--test', action=argparse.BooleanOptionalAction, default=True, help='Specify if test takes place')
 parser.add_argument('--shuffle', action=argparse.BooleanOptionalAction, default=True, help='Shuffling the train dataset')
 parser.add_argument('--batch-size', type=int, default=4, help='Batch size')
-parser.add_argument('--vbatch', type=int, default=1, help='Virtual batch: gradients will be applied after vbatch epoch')
 parser.add_argument('--optimizer', type=str, default='adamw', help='Optimizer')
 parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of epochs')
 parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
-parser.add_argument('--patch-size', type=int, default=2, help='Patch size')
 parser.add_argument('--hidden-dim', type=int, default=256, help='hidden dimension')
 parser.add_argument('--layers', type=int, default=4, help='layers')
-parser.add_argument('--vit-heads', type=int, default=6, help='Vit heads')
-parser.add_argument('--vit-dropout', type=float, default=0.0, help='Vit dropout')
-parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
-parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
-parser.add_argument('--heads', type=int, default=4, help='Number of heads for GAT')
+parser.add_argument('--dropout', type=float, default=0.0, help='dropout')
 parser.add_argument('--lr-schedule-type', type=str, default='none', choices=['none', 'plateau', 'graphcast'], help='LR schedule mode to use')
+parser.add_argument('--warmup-steps', type=int, default=1000, help='Warmup steps for GraphCast')
+parser.add_argument('--max-scale', type=int, default=3, help='Max scale for the GNN')
 args = parser.parse_args()
 
 
@@ -124,6 +119,8 @@ def get_normalization_params(stats_file):
             torch.tensor(stats['var2d']).to(device), \
                 torch.tensor(stats['mean3d']).to(device), \
                     torch.tensor(stats['var3d']).to(device)
+                    
+                    
     
 def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
     logger.info('Preparing the model...')
@@ -144,92 +141,48 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             device=device
         ).to(device)
         
-    elif model_name == 'vit_column4':
-        from vit_column import ViT4
-        model = ViT4(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            dim=args.vit_hidden_dim,
-            mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers,
-            heads=args.vit_heads,
-            dropout=args.vit_dropout,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device
-        ).to(device)
-        
     
-    # AFNO Implementation
-    elif model_name == 'afno':
-        from column_files.afno_column_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            # mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-
-    
-    elif model_name == 'gnn_mp_column':
-        from column_files.gnn_mp_column import GNNColumnNet
-        model = GNNColumnNet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        
-            
-        ).to(device)  
-        
-        
-    elif model_name == 'gnn_gat_column':
-        from column_files.gnn_gat_column import GNNColumnNet    
-        model = GNNColumnNet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            heads=args.heads
-                        
-            
-        ).to(device)   
+   
         
     elif model_name == 'gnn_graphCast_column':
         from column_files.gnn_graphCast import AtmosphericColumnGNN    
         model = AtmosphericColumnGNN(
             num_cells=args.num_cells,
-            patch_size=args.patch_size,
             embed_dim=args.hidden_dim,
             depth=args.layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
+            dropout=args.dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+        ).to(device)  
+        
+        
+    elif model_name == 'gnn_graphCast_new':
+        from column_files.gnn_graphCast_new import AtmosphericColumnGNN    
+        model = AtmosphericColumnGNN(
+            num_cells=args.num_cells,
+            embed_dim=args.hidden_dim,
+            depth=args.layers, #num blocks
+            dropout=args.dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+        ).to(device)
+        
+    elif model_name == 'gnn_graphCast_hirarchical':
+        from column_files.gnn_graphCast_hirarchical import ChainGraphCast1D    
+        model = ChainGraphCast1D(
+            num_cells=args.num_cells,
+            embed_dim=args.hidden_dim,
+            depth=args.layers, #num blocks
+            max_scale=args.max_scale,
+            dropout=args.dropout, # used in the mlp
             mean2d=mean2d,
             var2d=var2d, 
             mean3d=mean3d, 
@@ -257,7 +210,7 @@ def find_latest_checkpoint(directory):
     return join(directory, f'checkpoint_epoch_{max(idx)}.pth'), max(idx)
 
 
-def train_model(model, train_set, valid_set):
+def train_model(model, train_set, valid_set, steps_per_epoch):
     logger.info('Train started...')
 
     wandb.init(
@@ -332,8 +285,9 @@ def train_model(model, train_set, valid_set):
     best_loss = float('inf') 
 
     # For GraphCast scheduler:
-    warmup_steps = 1000
-    total_steps = args.num_epoch * len(train_set)
+    warmup_steps = args.warmup_steps
+    total_optimization_steps = args.num_epoch * steps_per_epoch
+    print(f'total_optimization_steps: {total_optimization_steps}')
     global_step = 0
 
     #####################################################################
@@ -362,7 +316,7 @@ def train_model(model, train_set, valid_set):
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
             optimizer.step()
 
-            # If we're using the GraphCast schedule, we manually adjust LR each batch
+            # If we're using the GraphCast schedule, we manually adjust LR after each batchstep
             if scheduler_mode == 'graphcast':
                 global_step += 1
                 if global_step <= warmup_steps:
@@ -372,17 +326,18 @@ def train_model(model, train_set, valid_set):
                     # Phase 2: half-cosine decay from max LR -> 0
                     # local_step = steps into the decay phase
                     local_step = global_step - warmup_steps
-                    decay_steps = max(1, total_steps - warmup_steps)
+                    decay_steps = max(1, total_optimization_steps - warmup_steps)
                     lr_scale = 0.5 * (1.0 + math.cos(math.pi * local_step / decay_steps))
                     lr = args.learning_rate * lr_scale
                 
+                # Update the LR for the optimizer
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = lr
 
             # Optional: print info
             if i % 100 == 0:
                 curr_lr = optimizer.param_groups[0]['lr']
-                logger.info(f'Epoch={epoch_number}, batch={i}, LR={curr_lr:.6f}, loss={loss.item():.4f}')
+                logger.info(f'Epoch={epoch_number}, batch={i}, LR={curr_lr:.6f}, loss={loss.item():.4f}, mae={batch_mae.item():.4f}')
 
         # VALIDATION
         model.eval()
@@ -441,7 +396,7 @@ def train_model(model, train_set, valid_set):
 
         # Save checkpoints
         checkpoint = {
-            'epoch': epoch_number,
+            'epoch': epoch + 1,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': valid_loss,
@@ -486,6 +441,7 @@ def calculate_heating_rates(y, x3d, x2d):
     ((y[..., :-1, [0, 2]] - y[..., :-1, [1, 3]]) - \
     (y[..., 1:, [0, 2]] - y[..., 1:, [1, 3]])) * 24*60*60
     return heating_rate
+
 
 
 def test_model(model, test_set):
@@ -576,6 +532,15 @@ def test_loading_time(train_files, iter=10):
         gc.collect()
         
         
+def estimate_num_columns(train_files, subsample):
+    columns_per_file = 81920
+    actual_file_count = len(train_files)
+    total_cols_subsampled = int(columns_per_file * subsample)
+    approx_total_cols = actual_file_count * total_cols_subsampled
+    return approx_total_cols
+
+        
+        
 def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
     icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
 
@@ -640,8 +605,19 @@ def main():
 
         train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
         val_loader = get_column_data_with_disk_cache(train_files, shuffle = False, subsample=1.0)
-   
-        train_model(model, train_loader, val_loader)
+
+        
+        # Logic to estimate the number of columns and steps per epoch for GraphCast scheduler
+        # Warmup steps is sugesteted to be 1-2 epochs and depends on the batch size 
+        total_columns = estimate_num_columns(train_files, args.subsample)
+        steps_per_epoch = total_columns // args.batch_size
+        if total_columns % args.batch_size != 0:
+            steps_per_epoch += 1
+        logger.info(f"Estimated {total_columns} total columns with subsample={args.subsample}. "
+                    f"Steps per epoch {steps_per_epoch} at batch_size={args.batch_size}.")
+        
+        
+        train_model(model, train_loader, val_loader, steps_per_epoch)
 
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')

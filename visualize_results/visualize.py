@@ -115,7 +115,8 @@ models = [
     #{'name': 'AFNO-Emb128-SpecSig-lw-DownUp','path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_concat/test'},
 
 
-    {'name': 'AFNO-Emb128-concat_w0_layerNorm','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_concatEasy_clean_wO_LayerNorm/test'},
+    # {'name': 'AFNO-Emb128-concat_w0_layerNorm','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_concatEasy_clean_wO_LayerNorm/test'},
+    {'name': 'GNN-Emb512-plateau-00005','path': '/mydata/deepcloud/yves/results_git/gnn_graphCast_Emb512_plateau_00005/test'},
 
 
 
@@ -140,6 +141,14 @@ for model in models:
     with open(join(test_path, 'h_pred.pickle'), 'rb') as handle:
         h_pred = pickle.load(handle)
     print(f'h_pred: {h_pred.shape}')
+
+
+    # Select a specific sample index
+    sample_index = 0  # Change this to the desired sample index
+    y_true = y_true[sample_index]
+    y_pred = y_pred[sample_index]
+    h_true = h_true[sample_index]
+    h_pred = h_pred[sample_index]
 
     print('calculating errors...')
     # y_mae_g = torch.mean(torch.abs(y_true - y_pred), dim=0)
@@ -195,4 +204,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/shared/results-temp/comparing_wO_layernorm.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/shared/results-temp/comparing_gnn_plateau_1sample.png', bbox_inches='tight', dpi=300)
