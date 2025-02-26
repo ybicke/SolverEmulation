@@ -24,7 +24,6 @@ class AtmosphericColumnGNN(nn.Module):
                  embed_dim,
                  depth,
                  dropout,
-                 max_skip,
                  emb_dropout=0.0,
                  channels_in=6,
                  channels_out=4,
@@ -45,8 +44,6 @@ class AtmosphericColumnGNN(nn.Module):
         self.lwflx_idx = lwflx_idx
         self.cosmu0_idx = cosmu0_idx
         self.tsfctrad_idx = tsfctrad_idx
-        
-        self.max_skip = max_skip
 
         self.normalizer2d = Normalization(std=torch.sqrt(var2d), mean=mean2d)
         self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
@@ -56,57 +53,40 @@ class AtmosphericColumnGNN(nn.Module):
         self.decoder = Decoder(embed_dim, channels_out)
         
         self.sigmoid = nn.Sigmoid()
-        
 
 
 
-    def create_edge_index_hirarchical(num_nodes, batch_size, device, max_skip=3):
+    def create_edge_index(self, num_nodes, batch_size, device):
         """
-        Creates a bidirectional edge index for a 1D chain with a hierarchical skip distance.
-        
-        Args:
-            num_nodes (int): Number of nodes in a single chain.
-            batch_size (int): Number of chains (batches).
-            device (torch.device): The device to push edge_index onto.
-            max_skip (int): Maximum skip distance (inclusive).
-            
+        Creates edge indices for a batch of 1D chain graphs.
+        Each graph represents a linear chain where nodes are sequentially connected.
+        Ensures unique node indices across graphs in the batch.
+
         Returns:
-            edge_index (torch.LongTensor of shape [2, E]):
-                Bidirectional edge indices for the 1D chain.
+        - edge_index (torch.Tensor): A tensor of shape [2, num_edges * batch_size]
+        containing the source and target node indices for all edges in the batch.
         """
-        all_edges = []
-        
-        for skip in range(1, max_skip + 1):
-            if skip >= num_nodes:
-                break  # Skip distance is too large
-                
-            # Forward edges (i -> i + skip)
-            forward_edges = torch.stack([
-                torch.arange(num_nodes - skip, device=device),
-                torch.arange(skip, num_nodes, device=device)
-            ], dim=0)
-            
-            # Reverse edges (i + skip -> i)
-            reverse_edges = torch.stack([
-                torch.arange(skip, num_nodes, device=device),
-                torch.arange(num_nodes - skip, device=device)
-            ], dim=0)
-            
-            # Combine forward and reverse
-            base_edges = torch.cat([forward_edges, reverse_edges], dim=1)
-            
-            # Repeat for batch_size
-            base_edges = base_edges.repeat(1, batch_size)
-            
-            # Offset node indices for each chain in the batch
-            offset = torch.arange(batch_size, device=device) * num_nodes
-            offset = offset.repeat_interleave(base_edges.shape[1] // batch_size)
-            base_edges += offset.view(1, -1)
-            
-            all_edges.append(base_edges)
-        
-        # Concatenate edges from all skip distances
-        edge_index = torch.cat(all_edges, dim=1)
+        # Create edges for the 1D chain graph
+        edge_index = torch.stack([
+            torch.arange(num_nodes - 1, device=device),
+            torch.arange(1, num_nodes, device=device)
+        ], dim=0)
+
+        # Repeat edge_index for each graph in the batch
+        edge_index = edge_index.repeat(1, batch_size)
+
+        # Offset the node indices for each graph in the batch
+        batch_offset = (torch.arange(batch_size, device=device) * num_nodes)
+        batch_offset = batch_offset.repeat_interleave(num_nodes - 1)
+
+        # Optionally ensure edge_index is also explicitly on the device:
+        edge_index = edge_index.to(device)
+        edge_index += batch_offset.view(1, -1)
+
+        # Create bidirectional edges:
+        reverse_edge_index = torch.stack([edge_index[1], edge_index[0]], dim=0)
+        edge_index = torch.cat([edge_index, reverse_edge_index], dim=1)
+
         return edge_index
 
 
@@ -124,7 +104,7 @@ class AtmosphericColumnGNN(nn.Module):
         x = self.encoder(x)
         
         # create the edge indices for the 1D chain graph and process the data with the GNN layers
-        edge_index = self.create_edge_index_hirarchical(L+1, B, x.device, self.max_skip)
+        edge_index = self.create_edge_index(L+1, B, x.device)
         x = self.processor(x, edge_index)
         
         # reshape the output to the original shape and decode the output variables
@@ -300,6 +280,11 @@ class GNNLayer(MessagePassing):
         # Concatenate original node features with aggregated messages.
         x = torch.cat([x, aggregated_messages], dim=1)
         
+        # MLP to update the node features. Residual connection proposed. Helps that the node doesn't forget its original features.
+        # Without, the node_mlp would have to learn to both process the aggregated information and reconstruct the original information, which is a much harder task. 
+        # Smoother Optimization Landscape: Residual connections create "shortcuts" in the optimization landscape. This makes it easier for the optimizer to find good solutions and avoids getting stuck in local minima.
+        # the internal residual connection within each GNNLayer effectively makes each layer "deeper" in terms of its ability to learn complex transformations.
+        # The GNNLayer-level residuals allow each GNNLayer to learn more complex transformations and preserve information.
         x = x_org + self.node_mlp(x) # without residual was slightly better
         return x
     
@@ -308,6 +293,7 @@ class GNNLayer(MessagePassing):
         # Apply the learned edge transformation.  This is crucial, even without explicit edge features.
         
         #TODO: could implement edge features here. Would probably need a residual connection then. 
+        # Currently I have no edge features. Therefore, there is no "edge state" to update with a residual connection.
         # The edge_mlp transforms the source node features (x_j), and that transformed representation is used directly in the message aggregation. There's nothing to "add back" to.
         return self.edge_mlp(x_j)
     

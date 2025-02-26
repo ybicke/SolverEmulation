@@ -55,6 +55,7 @@ class AtmosphericColumnGNN(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
 
+
     def create_edge_index(self, num_nodes, batch_size, device):
         """
         Creates edge indices for a batch of 1D chain graphs.
@@ -63,7 +64,7 @@ class AtmosphericColumnGNN(nn.Module):
 
         Returns:
         - edge_index (torch.Tensor): A tensor of shape [2, num_edges * batch_size]
-          containing the source and target node indices for all edges in the batch.
+        containing the source and target node indices for all edges in the batch.
         """
         # Create edges for the 1D chain graph
         edge_index = torch.stack([
@@ -80,14 +81,20 @@ class AtmosphericColumnGNN(nn.Module):
 
         # Optionally ensure edge_index is also explicitly on the device:
         edge_index = edge_index.to(device)
-
         edge_index += batch_offset.view(1, -1)
+
+        # Create bidirectional edges:
+        reverse_edge_index = torch.stack([edge_index[1], edge_index[0]], dim=0)
+        edge_index = torch.cat([edge_index, reverse_edge_index], dim=1)
+
         return edge_index
 
 
 
     def forward(self, x3d, x2d):
         B, L, _ = x3d.shape
+
+        x2d_org = x2d.clone()
 
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
@@ -106,7 +113,7 @@ class AtmosphericColumnGNN(nn.Module):
         
         # scale the output variables to the original range
         x = self.sigmoid(x)
-        x = self._scale_output(x, x2d)
+        x = self._scale_output(x, x2d_org)
 
         return x.squeeze()
     
@@ -176,7 +183,6 @@ class Encoder(nn.Module):
 
     def forward(self, x):
         x = self.mlp(x)
-        x = self.dropout(x)
         
         # flatten allows the GNN to treat each node (each level in each batch) independently during message passing
         # GNN operations are typically designed to work on a list of nodes, where each node can be processed in parallel.
@@ -203,7 +209,8 @@ class Processor(nn.Module):
     def forward(self, x, edge_index):
         for layer in self.layers:
             
-            # Residual connection with LayerNorm.
+            # Residual connection with LayerNorm for deep stack of GNN layers.
+            # Helps with vanishing gradient problem.
             x = x + self.layer_norm(layer(x, edge_index))
         return x
     
@@ -220,6 +227,7 @@ class Decoder(nn.Module):
             nn.SiLU(),
             nn.Dropout(dropout),
             nn.Linear(embed_dim, channels_out),
+            # TODO: could test with a layer norm here. Different from GraphCast.
         )
 
     def forward(self, x):
@@ -259,6 +267,7 @@ class GNNLayer(MessagePassing):
             nn.LayerNorm(embed_dim),
             nn.Linear(embed_dim, embed_dim), 
         )
+    
         
     def forward(self, x, edge_index):
         # edge indices guide which nodes send and receive messages
@@ -270,7 +279,11 @@ class GNNLayer(MessagePassing):
         # Concatenate original node features with aggregated messages.
         x = torch.cat([x, aggregated_messages], dim=1)
         
-        # MLP to update the node features
+        # MLP to update the node features. Residual connection proposed. Helps that the node doesn't forget its original features.
+        # Without, the node_mlp would have to learn to both process the aggregated information and reconstruct the original information, which is a much harder task. 
+        # Smoother Optimization Landscape: Residual connections create "shortcuts" in the optimization landscape. This makes it easier for the optimizer to find good solutions and avoids getting stuck in local minima.
+        # the internal residual connection within each GNNLayer effectively makes each layer "deeper" in terms of its ability to learn complex transformations.
+        # The GNNLayer-level residuals allow each GNNLayer to learn more complex transformations and preserve information.
         x = self.node_mlp(x)
         return x
     

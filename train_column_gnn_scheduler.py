@@ -11,7 +11,6 @@ import shutil
 import logging
 import tempfile
 import random
-import math
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -27,11 +26,13 @@ from torch import optim, nn
 from torch.utils.data import Dataset, DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 from torchinfo import summary
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 import torch.autograd.profiler as profiler
 
 
 from data_loaders_new import IconColumnIterableDataset
+from flux_specific_sigmoid.FluxSpecificSigmoid_lwdown import load_gaussian_parameters, construct_gaussian_params_by_height
 
 
 
@@ -78,12 +79,14 @@ parser.add_argument('--optimizer', type=str, default='adamw', help='Optimizer')
 parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of epochs')
 parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
+parser.add_argument('--patch-size', type=int, default=2, help='Patch size')
 parser.add_argument('--hidden-dim', type=int, default=256, help='hidden dimension')
-parser.add_argument('--layers', type=int, default=4, help='layers')
 parser.add_argument('--dropout', type=float, default=0.0, help='dropout')
+parser.add_argument('--layers', type=int, default=4, help='layers')
+parser.add_argument('--heads', type=int, default=6, help='heads')
+parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
+parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--lr-schedule-type', type=str, default='none', choices=['none', 'plateau', 'graphcast'], help='LR schedule mode to use')
-parser.add_argument('--warmup-steps', type=int, default=1000, help='Warmup steps for GraphCast')
-parser.add_argument('--max-scale', type=int, default=3, help='Max scale for the GNN')
 args = parser.parse_args()
 
 
@@ -119,14 +122,12 @@ def get_normalization_params(stats_file):
             torch.tensor(stats['var2d']).to(device), \
                 torch.tensor(stats['mean3d']).to(device), \
                     torch.tensor(stats['var3d']).to(device)
-                    
-                    
+    
     
 def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
     logger.info('Preparing the model...')
-         
-    if model_name == 'gnn_graphCast_new':
-        from column_files.gnn_graphCast_new import AtmosphericColumnGNN    
+    if model_name == 'gnn_graphCast_new_residual':
+        from column_files.gnn_graphCast_new_residual import AtmosphericColumnGNN    
         model = AtmosphericColumnGNN(
             num_cells=args.num_cells,
             embed_dim=args.hidden_dim,
@@ -139,14 +140,14 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             device=device,
             is_test=args.test,  
         ).to(device)
-        
-    elif model_name == 'gnn_graphCast_hirarchical':
-        from column_files.gnn_graphCast_hirarchical import ChainGraphCast1D    
-        model = ChainGraphCast1D(
+
+
+    elif model_name == 'gnn_graphCast_new':
+        from column_files.gnn_graphCast_new import AtmosphericColumnGNN    
+        model = AtmosphericColumnGNN(
             num_cells=args.num_cells,
             embed_dim=args.hidden_dim,
             depth=args.layers, #num blocks
-            max_scale=args.max_scale,
             dropout=args.dropout, # used in the mlp
             mean2d=mean2d,
             var2d=var2d, 
@@ -154,17 +155,68 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             var3d=var3d,
             device=device,
             is_test=args.test,  
-        ).to(device)  
+        ).to(device)        
         
-           
+    elif model_name == 'gnn_graphCast_new_residual_check':
+        from column_files.gnn_graphCast_new_residual_check import AtmosphericColumnGNN    
+        model = AtmosphericColumnGNN(
+            num_cells=args.num_cells,
+            embed_dim=args.hidden_dim,
+            depth=args.layers, #num blocks
+            dropout=args.dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+        ).to(device)        
+        
+
+    
+    # AFNO Implementation
+    elif model_name == 'afno':
+        from column_files.afno_column_clean import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.hidden_dim,
+            # mlp_dim=args.vit_hidden_dim,
+            depth=args.layers, #num blocks
+            dropout=args.dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)
+    
+    elif model_name == 'afno_check':
+        from column_files.afno_column_clean_check import AFNONet
+        model = AFNONet(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            embed_dim=args.hidden_dim,
+            # mlp_dim=args.vit_hidden_dim,
+            depth=args.layers, #num blocks
+            dropout=args.dropout, # used in the mlp
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+            sparsity_threshold=args.afno_sparsity_threshold,  
+            hard_thresholding_fraction = args.hard_thresholding_fraction,
+        ).to(device)
+    
+    
+    
     else:
         raise NotImplementedError('Model has not implemented yet!')
-
-    # Example custom weight initialization after moving model to device
-    for name, param in model.named_parameters():
-        if param.dim() > 1:
-            nn.init.xavier_uniform_(param, gain=0.01)
-
     return model
         
     
@@ -176,64 +228,73 @@ def find_latest_checkpoint(directory):
     return join(directory, f'checkpoint_epoch_{max(idx)}.pth'), max(idx)
 
 
-def train_model(model, train_set, valid_set, steps_per_epoch):
+def train_model(model, train_set, valid_set):
+    
+    # Log the start of training
     logger.info('Train started...')
-
+    
+    # Initialize Weights & Biases 
     wandb.init(
-        project='deepcloud-yves',
-        name=save_id,
-        id=save_id,
-        config={**wandb_config, **args.__dict__},
-        sync_tensorboard=True,
+        project='deepcloud-yves', 
+        name=save_id, 
+        id=save_id, 
+        config={**wandb_config, **args.__dict__}, 
+        sync_tensorboard=True, 
         save_code=True,
-        resume='allow',
-        tags=['icon grid',],
+        resume='allow', 
+        tags=['icon grid',],    
         mode=args.wandb_mode
     )
     wandb.watch(model, log_freq=100)
 
-    # Set up the optimizer
-    if args.optimizer == 'adamw':
-        optimizer = torch.optim.AdamW(
-            model.parameters(),
-            lr=args.learning_rate,  # Will be max_lr when using GraphCast schedule
-            betas=(0.9, 0.95),
-            weight_decay=0.1
-        )
-    else:
-        raise NameError('optimizer not supported.')
+
+
+    optimizer = optim.AdamW(
+        model.parameters(),
+        lr=args.learning_rate,
+        eps=1e-8,
+        weight_decay=0.01,
+        betas=(0.9, 0.95)  # Use GraphCast betas
+    )
     
-    #####################################################################
-    # 1) Determine which scheduler to create based on args.lr_schedule_type
-    #####################################################################
     scheduler_mode = args.lr_schedule_type  # e.g. 'none', 'plateau', or 'graphcast'
     scheduler = None
-    
+
     if scheduler_mode == 'plateau':
-        # A standard PyTorch scheduler that reduces LR on plateau in validation loss
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
             mode='min',
             factor=0.2,
-            patience=5
+            patience=3,
+            verbose=True,
+            min_lr=1e-7,
+            threshold=1e-3,
         )
         logger.info('Using ReduceLROnPlateau scheduler.')
-    
+
+        
+    # TODO: Implement GraphCast two-phase (warmup + half-cosine) scheduling.
     elif scheduler_mode == 'graphcast':
         # We will manually implement warmup + half-cosine in the loop below
         logger.info('Using GraphCast two-phase (warmup + half-cosine) scheduling.')
-    
     else:
         logger.info('No scheduler. Using constant LR = args.learning_rate')
     
-    #####################################################################
-    # 2) Initialize losses, metrics, checkpoint, etc.
-    #####################################################################
+    
+    # He initialization (recommended)
+    for name, param in model.named_parameters():
+        if param.dim() > 1:
+            nn.init.kaiming_uniform_(param)
+            
+            
+
+    # Initialize loss and metric trackers
     train_loss = MeanSquaredError().to(device)
     valid_loss = MeanSquaredError().to(device)
     train_mae = MeanAbsoluteError().to(device)
     valid_mae = MeanAbsoluteError().to(device)
-
+    
+    # Load the latest checkpoint if available
     cp_path = None
     p_path, cp_id = find_latest_checkpoint(checkpoint_path)
     if p_path is not None:
@@ -248,86 +309,64 @@ def train_model(model, train_set, valid_set, steps_per_epoch):
         init_epoch = 0
 
     epoch_number = init_epoch
-    best_loss = float('inf') 
+    best_loss = 1e9999999 
+      
 
-    # For GraphCast scheduler:
-    warmup_steps = args.warmup_steps
-    total_optimization_steps = args.num_epoch * steps_per_epoch
-    print(f'total_optimization_steps: {total_optimization_steps}')
-    global_step = 0
-
-    #####################################################################
-    # 3) Main training loop
-    #####################################################################
+    # Training loop
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
         
-        # TRAIN
-        model.train(True)
+        # Training step
+        model.train(True)        
         for i, data in enumerate(train_set):
+            
+            t1_1 = time.perf_counter()
+            
             batch_x3, batch_x2, batch_y = data
-            batch_x3, batch_x2, batch_y = (
-                batch_x3.to(device), 
-                batch_x2.to(device), 
-                batch_y.to(device)
-            )
-            outputs = model(batch_x3, batch_x2)
+            batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
 
+            optimizer.zero_grad()
+
+            outputs = model(batch_x3, batch_x2)
             loss = train_loss(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
             
-            optimizer.zero_grad()
             loss.backward()
+            
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
+            
             optimizer.step()
-
-            # If we're using the GraphCast schedule, we manually adjust LR after each batchstep
-            if scheduler_mode == 'graphcast':
-                global_step += 1
-                if global_step <= warmup_steps:
-                    # Phase 1: linear warmup 0 -> max LR
-                    lr = args.learning_rate * (global_step / warmup_steps)
-                else:
-                    # Phase 2: half-cosine decay from max LR -> 0
-                    # local_step = steps into the decay phase
-                    local_step = global_step - warmup_steps
-                    decay_steps = max(1, total_optimization_steps - warmup_steps)
-                    lr_scale = 0.5 * (1.0 + math.cos(math.pi * local_step / decay_steps))
-                    lr = args.learning_rate * lr_scale
-                
-                # Update the LR for the optimizer
-                for param_group in optimizer.param_groups:
-                    param_group['lr'] = lr
-
-            # Optional: print info
-            if i % 100 == 0:
+            t2_1 = time.perf_counter()
+            
+            if i % 100 == 99:
                 curr_lr = optimizer.param_groups[0]['lr']
-                logger.info(f'Epoch={epoch_number}, batch={i}, LR={curr_lr:.6f}, loss={loss.item():.4f}, mae={batch_mae.item():.4f}')
+                print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, lr: {curr_lr:.6f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+            
 
-        # VALIDATION
+        # Validation step
         model.eval()
+        
         with torch.no_grad():
-            for v_data in valid_set:
-                vx3d, vx2d, v_labels = v_data
-                vx3d, vx2d, v_labels = (
-                    vx3d.to(device),
-                    vx2d.to(device),
-                    v_labels.to(device)
-                )
-                v_outputs = model(vx3d, vx2d)
+            for i, v_data in enumerate(valid_set):
                 
+                vx3d, vx2d, v_labels = v_data
+                vx3d, vx2d, v_labels = vx3d.to(device), vx2d.to(device), v_labels.to(device)
+                v_outputs = model(vx3d, vx2d)        
+                
+                # two different losses         
                 valid_loss.update(v_outputs, v_labels)
-                valid_mae.update(v_outputs, v_labels)
+                valid_mae.update(v_outputs, v_labels)                
 
-        # Compute final epoch losses
+        # Compute total losses and metrics
         total_train_loss = train_loss.compute()
         total_valid_loss = valid_loss.compute()
         total_train_mae = train_mae.compute()
         total_valid_mae = valid_mae.compute()
-        t2 = time.perf_counter()
 
-        # Step the standard scheduler if using 'plateau'
+        t2 = time.perf_counter()
+        
+        # Step the standard scheduler if using 'plateau' 
         if scheduler_mode == 'plateau':
             scheduler.step(total_valid_loss)
             curr_lr = optimizer.param_groups[0]['lr']
@@ -340,7 +379,7 @@ def train_model(model, train_set, valid_set, steps_per_epoch):
         else:
             curr_lr = optimizer.param_groups[0]['lr']  # constant LR
 
-        # Log epoch metrics
+        # Log metrics to W&B
         wandb.log({
             'epoch': epoch_number, 
             'loss': total_train_loss,
@@ -348,18 +387,17 @@ def train_model(model, train_set, valid_set, steps_per_epoch):
             'mean_absolute_error': total_train_mae,
             'val_mean_absolute_error': total_valid_mae,
             'learning_rate': curr_lr
-        })
+            })
 
-        logger.info(
-            f'{epoch_number:03}/{args.num_epoch} | '
-            f'Time {t2 - t1:.3f}s | '
-            f'LR {curr_lr:.6f} | '
-            f'loss {total_train_loss:.4f} | '
-            f'mae {total_train_mae:.4f} | '
-            f'val_loss {total_valid_loss:.4f} | '
-            f'val_mae {total_valid_mae:.4f}'
-        )
-
+        # Print epoch summary
+        print(f'{epoch_number:03}/{args.num_epoch}: ',
+              f'time: {t2-t1:.3f}', 
+              f'lr: {curr_lr:.6f}',
+              f'loss: {total_train_loss:.4f} ',
+              f'mean_absolute_error: {total_train_mae:.4f}, ',
+              f'val_loss: {total_valid_loss:.4f}, ',
+              f'val_mean_absolute_error: {total_valid_mae:.4f}')
+        
         # Save checkpoints
         checkpoint = {
             'epoch': epoch + 1,
@@ -367,17 +405,19 @@ def train_model(model, train_set, valid_set, steps_per_epoch):
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': valid_loss,
         }
-        torch.save(checkpoint, join(checkpoint_path, f'checkpoint_epoch_{epoch_number}.pth'))
+        torch.save(
+            checkpoint, 
+            join(checkpoint_path, f'checkpoint_epoch_{epoch_number}.pth')
+        )
         if total_valid_loss < best_loss:
             torch.save(checkpoint, join(checkpoint_path, 'best_model.pth'))
             best_loss = total_valid_loss
-
-        # Reset metrics for next epoch
+            
+        # Reset metrics for the next epoch
         train_mae.reset()
         valid_mae.reset()
         train_loss.reset()
         valid_loss.reset()
-
     return model
 
 
@@ -407,7 +447,6 @@ def calculate_heating_rates(y, x3d, x2d):
     ((y[..., :-1, [0, 2]] - y[..., :-1, [1, 3]]) - \
     (y[..., 1:, [0, 2]] - y[..., 1:, [1, 3]])) * 24*60*60
     return heating_rate
-
 
 
 def test_model(model, test_set):
@@ -485,7 +524,7 @@ def test_model(model, test_set):
 
 def test_loading_time(train_files, iter=10):
     logger.info('Test Loading time started...')
-    dataset = get_column_data_with_disk_cache(train_files, shuffle=True)
+    dataset = get_data_with_disk_cache(train_files, shuffle=True)
         
     for it in range(iter):
         t1 = time.perf_counter(), time.process_time()
@@ -496,15 +535,6 @@ def test_loading_time(train_files, iter=10):
         logger.info(f'Iteration: {it}: Real time: {t2[0] - t1[0]:.2f}, CPU time: {t2[1]-t1[1]}')
         import gc
         gc.collect()
-        
-        
-def estimate_num_columns(train_files, subsample):
-    columns_per_file = 81920
-    actual_file_count = len(train_files)
-    total_cols_subsampled = int(columns_per_file * subsample)
-    approx_total_cols = actual_file_count * total_cols_subsampled
-    return approx_total_cols
-
         
         
 def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
@@ -571,19 +601,8 @@ def main():
 
         train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
         val_loader = get_column_data_with_disk_cache(val_files, shuffle = False, subsample=1.0)
-
-        
-        # Logic to estimate the number of columns and steps per epoch for GraphCast scheduler
-        # Warmup steps is sugesteted to be 1-2 epochs and depends on the batch size 
-        total_columns = estimate_num_columns(train_files, args.subsample)
-        steps_per_epoch = total_columns // args.batch_size
-        if total_columns % args.batch_size != 0:
-            steps_per_epoch += 1
-        logger.info(f"Estimated {total_columns} total columns with subsample={args.subsample}. "
-                    f"Steps per epoch {steps_per_epoch} at batch_size={args.batch_size}.")
-        
-        
-        train_model(model, train_loader, val_loader, steps_per_epoch)
+   
+        train_model(model, train_loader, val_loader)
 
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')

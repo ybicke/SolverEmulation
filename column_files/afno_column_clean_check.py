@@ -290,7 +290,8 @@ class AFNONet(nn.Module):
             
 
             
-    def forward_features(self, x3d, x2d):
+            
+    def forward(self, x3d, x2d):
 
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
@@ -307,19 +308,12 @@ class AFNONet(nn.Module):
             x = blk(x)
 
         x = self.norm(x)
-        return x
-
-
-    # when we use the forward feature like this, we do use the original x2d shape and not the embedded one!!!
-    def forward(self, x3d, x2d):
-        x = self.forward_features(x3d, x2d)
         
         x = self.mlp_head(x)
         
         x = self.sigmoid(x)
         x = self._scale_output(x, x2d)
         
-        return x.squeeze()    
-    
+        return x.squeeze()
     
     

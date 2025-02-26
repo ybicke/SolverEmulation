@@ -1006,7 +1006,7 @@ def main():
         tr1 = time.perf_counter(), time.process_time()                        
 
         train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
-        val_loader = get_column_data_with_disk_cache(train_files, shuffle = False, subsample=1.0)
+        val_loader = get_column_data_with_disk_cache(val_files, shuffle = False, subsample=1.0)
    
         train_model(model, train_loader, val_loader)
 
