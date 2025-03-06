@@ -12,7 +12,7 @@ models = [
     #{'name': 'AFNO-Emb128-lamb-000','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_000/test'},   
     # {'name': 'AFNO-Emb128-lamb-00000','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_noSparsification/test'},      
     
-    {'name': 'AFNO-Emb128-concat-standard','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_easy_concat2/test'},
+    #{'name': 'AFNO-Emb128-concat-standard','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_easy_concat2/test'},
     #{'name': 'AFNO-Emb128_concat_mlp','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_128_easy_concat_mlp/test'},
     #{'name': 'AFNO-Emb128_crossAttention','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_128_crossAttention/test'},    
 
@@ -39,7 +39,8 @@ models = [
     #{'name': 'AFNO-Emb128_cross_clean1','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean1/test'},    
     #{'name': 'AFNO-Emb128_afno_standard','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_test1/test'},    
     
-    # {'name': 'AFNO-Emb128-standard','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},   
+    {'name': 'AFNO-Emb128-standard','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},   
+    
     # # {'name': 'AFNO-Emb128-concat','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_control/test'},   
     # {'name': 'ViT-Emb128-standard','path': '/mydata/deepcloud/yves/results_git/vit_column_1percent_emb128_h4/test'},   
 
@@ -116,7 +117,7 @@ models = [
 
 
     # {'name': 'AFNO-Emb128-concat_w0_layerNorm','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_concatEasy_clean_wO_LayerNorm/test'},
-    {'name': 'GNN-Emb512-plateau-00005','path': '/mydata/deepcloud/yves/results_git/gnn_graphCast_Emb512_plateau_00005/test'},
+    # {'name': 'GNN-Hirarchical-Emb128-l4-h5','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256/test'},
 
 
 
@@ -204,4 +205,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/shared/results-temp/comparing_gnn_plateau_1sample.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/results-temp/comparing_graphCast_hirarchical_afno.png', bbox_inches='tight', dpi=300)

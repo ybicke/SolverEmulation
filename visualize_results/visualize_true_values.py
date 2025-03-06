@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from itertools import cycle
 
 # Define the model name
-model_name = 'gnn_graphCast_Emb512_plateau_00005' 
+model_name = 'gnn_graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256' 
 model_path = f'/mydata/deepcloud/yves/results_git/{model_name}/test'
 
 # Define the model dictionary

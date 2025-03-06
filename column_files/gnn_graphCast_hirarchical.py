@@ -56,59 +56,7 @@ class AtmosphericColumnGNN(nn.Module):
         self.decoder = Decoder(embed_dim, channels_out)
         
         self.sigmoid = nn.Sigmoid()
-        
-
-
-
-    def create_edge_index_hirarchical(num_nodes, batch_size, device, max_skip=3):
-        """
-        Creates a bidirectional edge index for a 1D chain with a hierarchical skip distance.
-        
-        Args:
-            num_nodes (int): Number of nodes in a single chain.
-            batch_size (int): Number of chains (batches).
-            device (torch.device): The device to push edge_index onto.
-            max_skip (int): Maximum skip distance (inclusive).
-            
-        Returns:
-            edge_index (torch.LongTensor of shape [2, E]):
-                Bidirectional edge indices for the 1D chain.
-        """
-        all_edges = []
-        
-        for skip in range(1, max_skip + 1):
-            if skip >= num_nodes:
-                break  # Skip distance is too large
-                
-            # Forward edges (i -> i + skip)
-            forward_edges = torch.stack([
-                torch.arange(num_nodes - skip, device=device),
-                torch.arange(skip, num_nodes, device=device)
-            ], dim=0)
-            
-            # Reverse edges (i + skip -> i)
-            reverse_edges = torch.stack([
-                torch.arange(skip, num_nodes, device=device),
-                torch.arange(num_nodes - skip, device=device)
-            ], dim=0)
-            
-            # Combine forward and reverse
-            base_edges = torch.cat([forward_edges, reverse_edges], dim=1)
-            
-            # Repeat for batch_size
-            base_edges = base_edges.repeat(1, batch_size)
-            
-            # Offset node indices for each chain in the batch
-            offset = torch.arange(batch_size, device=device) * num_nodes
-            offset = offset.repeat_interleave(base_edges.shape[1] // batch_size)
-            base_edges += offset.view(1, -1)
-            
-            all_edges.append(base_edges)
-        
-        # Concatenate edges from all skip distances
-        edge_index = torch.cat(all_edges, dim=1)
-        return edge_index
-
+    
 
 
     def forward(self, x3d, x2d):
@@ -124,7 +72,7 @@ class AtmosphericColumnGNN(nn.Module):
         x = self.encoder(x)
         
         # create the edge indices for the 1D chain graph and process the data with the GNN layers
-        edge_index = self.create_edge_index_hirarchical(L+1, B, x.device, self.max_skip)
+        edge_index = create_edge_index_hirarchical(L+1, B, x.device, self.max_skip)
         x = self.processor(x, edge_index)
         
         # reshape the output to the original shape and decode the output variables
@@ -182,8 +130,6 @@ class AtmosphericColumnGNN(nn.Module):
         return y_pred
         
     
-    
-
 
 
 class Encoder(nn.Module):
@@ -317,4 +263,74 @@ class GNNLayer(MessagePassing):
         return aggr_out
     
     
+
+
+
+def create_edge_index_hirarchical(num_nodes, batch_size, device, max_skip):
+    """
+    Creates a bidirectional edge index for a 1D chain with a hierarchical skip distance.
+    
+    Args:
+        num_nodes (int): Number of nodes in a single chain.
+        batch_size (int): Number of chains (batches).
+        device (torch.device): The device to push edge_index onto.
+        max_skip (int): Maximum skip distance (inclusive).
+        
+    Returns:
+        edge_index (torch.LongTensor of shape [2, E]):
+            Bidirectional edge indices for the 1D chain.
+            
+    Skip = 1:
+    Forward: [0→1, 1→2, 2→3, 3→4, 4→5]
+    Reverse: [1→0, 2→1, 3→2, 4→3, 5→4]
+
+    Skip = 2:
+    Forward: [0→2, 1→3, 2→4, 3→5]
+    Reverse: [2→0, 3→1, 4→2, 5→3]
+
+    Skip = 3:
+    Forward: [0→3, 1→4, 2→5]
+    Reverse: [3→0, 4→1, 5→2]
+    
+    edge_index = [
+    [0,1,2,3,4, 1,2,3,4,5, 0,1,2,3, 2,3,4,5, 0,1,2, 3,4,5],  # source nodes
+    [1,2,3,4,5, 0,1,2,3,4, 2,3,4,5, 0,1,2,3, 3,4,5, 0,1,2]   # target nodes
+    ]
+    """
+    all_edges = []
+    
+    for skip in range(1, max_skip + 1):
+        if skip >= num_nodes:
+            break  # Skip distance is too large
+            
+        # Forward edges (i -> i + skip), first row contains the indices of the source nodes, 
+        # second row contains the indices of the target nodes
+        forward_edges = torch.stack([
+            torch.arange(num_nodes - skip, device=device),
+            torch.arange(skip, num_nodes, device=device)
+        ], dim=0)
+        
+        # Reverse edges (i + skip -> i)
+        reverse_edges = torch.stack([
+            torch.arange(skip, num_nodes, device=device),
+            torch.arange(num_nodes - skip, device=device)
+        ], dim=0)
+        
+        # Combine forward and reverse
+        base_edges = torch.cat([forward_edges, reverse_edges], dim=1)
+        
+        # Repeat for batch_size
+        base_edges = base_edges.repeat(1, batch_size)
+        
+        # Offset node indices for each chain in the batch
+        offset = torch.arange(batch_size, device=device) * num_nodes
+        offset = offset.repeat_interleave(base_edges.shape[1] // batch_size)
+        base_edges += offset.view(1, -1)
+        
+        all_edges.append(base_edges)
+    
+    # Concatenate edges from all skip distances
+    edge_index = torch.cat(all_edges, dim=1)
+    return edge_index
+
 

@@ -44,4 +44,6 @@ python train_column_gnn_new.py \
     --hidden-dim 128 \
     --dropout 0.0 \
     --layers 4 \
+    --model-type lr-const \
+    --max-skip 3 \
     --wandb-mode online \

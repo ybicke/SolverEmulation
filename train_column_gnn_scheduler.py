@@ -87,6 +87,7 @@ parser.add_argument('--heads', type=int, default=6, help='heads')
 parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
 parser.add_argument('--lr-schedule-type', type=str, default='none', choices=['none', 'plateau', 'graphcast'], help='LR schedule mode to use')
+parser.add_argument('--max-skip', type=int, default=3, help='max skip')
 args = parser.parse_args()
 
 
@@ -157,13 +158,14 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             is_test=args.test,  
         ).to(device)        
         
-    elif model_name == 'gnn_graphCast_new_residual_check':
-        from column_files.gnn_graphCast_new_residual_check import AtmosphericColumnGNN    
+    elif model_name == 'gnn_graphCast_hirarchical':
+        from column_files.gnn_graphCast_hirarchical import AtmosphericColumnGNN    
         model = AtmosphericColumnGNN(
             num_cells=args.num_cells,
             embed_dim=args.hidden_dim,
             depth=args.layers, #num blocks
             dropout=args.dropout, # used in the mlp
+            max_skip=args.max_skip,
             mean2d=mean2d,
             var2d=var2d, 
             mean3d=mean3d, 
@@ -172,7 +174,22 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             is_test=args.test,  
         ).to(device)        
         
-
+    elif model_name == 'gnn_graphCast_hirarchical2':
+        from column_files.gnn_graphCast_hirarchical2 import AtmosphericColumnGNN    
+        model = AtmosphericColumnGNN(
+            num_cells=args.num_cells,
+            embed_dim=args.hidden_dim,
+            depth=args.layers, #num blocks
+            dropout=args.dropout, # used in the mlp
+            max_skip=args.max_skip,
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+        ).to(device)        
+        
     
     # AFNO Implementation
     elif model_name == 'afno':
