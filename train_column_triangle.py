@@ -11,7 +11,7 @@ import shutil
 import logging
 import tempfile
 import random
-
+import xarray as xr
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from os.path import join, dirname, basename, normpath, isfile, exists
@@ -64,7 +64,6 @@ parser.add_argument('--model', type=str, default='vit', help='Name of the model 
 parser.add_argument('--dataset', type=str, required=True, help='Path to dataset')
 parser.add_argument('--save', type=str, required=True, help='Path to save the result')
 parser.add_argument('--percent', type=float, default=1.0, help='Percent of data to train on')
-parser.add_argument('--subsample', type=float, default=None, help='Subsampling rate')
 parser.add_argument('--num-workers', type=int, default=os.cpu_count(), help='Number of workers to load data')
 parser.add_argument('--prefetch-factor', type=int, default=2, help='Prefetch factor')
 parser.add_argument('--wandb-mode', type=str, default='disabled', choices={'online', 'offline', 'disabled'}, help='Operating mode for W&B')
@@ -78,17 +77,9 @@ parser.add_argument('--optimizer', type=str, default='adamw', help='Optimizer')
 parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of epochs')
 parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
-parser.add_argument('--patch-size', type=int, default=2, help='Patch size')
-parser.add_argument('--vit-hidden-dim', type=int, default=256, help='Vit hidden dimension')
-parser.add_argument('--vit-layers', type=int, default=4, help='Vit layers')
-parser.add_argument('--vit-heads', type=int, default=6, help='Vit heads')
-parser.add_argument('--vit-dropout', type=float, default=0.0, help='Vit dropout')
-parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
-parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
-parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff frequency low pass filtering in AFNO')
-parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
-parser.add_argument('--gaussian_params_file_LWDown', type=str, help='Path to the .npz file containing Gaussian parameters')
-parser.add_argument('--gaussian_params_file_LWUp', type=str, help='Path to the .npz file containing Gaussian parameters')
+parser.add_argument('--hidden-dim', type=int, default=256, help='hidden dimension')
+parser.add_argument('--layers', type=int, default=4, help='layers')
+parser.add_argument('--dropout', type=float, default=0.0, help='dropout')
 args = parser.parse_args()
 
 
@@ -127,542 +118,29 @@ def get_normalization_params(stats_file):
     
 def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
     logger.info('Preparing the model...')
-    if model_name == 'vit':
-        from vit import ViT
-        model = ViT(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            dim=args.vit_hidden_dim,
-            mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers,
-            heads=args.vit_heads,
-            dropout=args.vit_dropout,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device
-        ).to(device)
-        
-    elif model_name == 'vit_column4':
-        from vit_column import ViT4
-        model = ViT4(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            dim=args.vit_hidden_dim,
-            mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers,
-            heads=args.vit_heads,
-            dropout=args.vit_dropout,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device
-        ).to(device)
-        
     
-    # AFNO Implementation
-    elif model_name == 'afno':
-        from column_files.afno_column_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            # mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
+    if model_name == 'gnn_graphCast_triangle':
+        from triangle_files.graphCast_triangle import GraphCastTriangle
+        
+        # Load the grid dataset
+        nc_file_path = "/mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc"
+        grid_ds = xr.open_dataset(nc_file_path)
+        
+        model = GraphCastTriangle(
+            grid_file_path=nc_file_path,
+            embed_dim=args.hidden_dim,
+            depth=args.layers, #num blocks
+            dropout=args.dropout, # used in the mlp
             mean2d=mean2d,
             var2d=var2d, 
             mean3d=mean3d, 
             var3d=var3d,
             device=device,
             is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)
         
-    elif model_name == 'afno_easyConcat':
-        from column_files.afno_column_concatEasy import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            cutoff_frequency=args.cutoff_frequency
-        ).to(device)
-        
-        
-                
-    elif model_name == 'afno_crossAttention_clean':
-        from column_files.afno_column_crossAttention_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean1':
-        from column_files.afno_column_crossAttention_clean1 import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_2dnorm':
-        from column_files.afno_column_crossAttention_clean_2dnorm import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_expand':
-        from column_files.afno_column_crossAttention_clean_expand import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
-    elif model_name == 'afno_crossAttention_clean_expandPos':
-        from column_files.afno_column_crossAttention_clean_expandPos import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-        
+        grid_ds.close()
 
-    elif model_name == 'afno_easyConcat_clean':
-        from column_files.afno_column_concatEasy_clean import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)        
-        
-        
-    
-    elif model_name == 'afno_column_concatEasy_clean_wO_LayerNorm':
-        from column_files.afno_column_concatEasy_clean_wO_LayerNorm import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)        
-            
-        
-    elif model_name == 'afno_column_concatEasy_clean_histo':
-        from column_files.afno_column_concatEasy_clean_histo import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
-            
-        ).to(device)    
-            
-    elif model_name == 'afno_easyConcat_clean_smooth':
-        from column_files.afno_column_concatEasy_clean_smoothing import AFNONet
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices  # Pass the parameter
-            
-        ).to(device)    
-        
-    elif model_name == 'ViT_heightDepSigmoid':
-        from flux_specific_sigmoid.vit_column_heightDep_sigmoid_diffNorm import ViT
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-        model = ViT(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            dim =args.vit_hidden_dim,
-            mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            heads=args.vit_heads,
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)    
-            
-        
-        
-    elif model_name == 'afno_clean_heightDepSigmoid':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_sigmoid import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  
-        height_end = 64    
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)    
-        
-        
-            
-
-
-         
-    elif model_name == 'afno_clean_heightDepSigmoid_normalized':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_sigmoid_normalized import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)    
-        
-        
-        
-    elif model_name == 'afno_clean_heightDepSigmoid_lwup':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_lwup import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)    
-        
-        
-    elif model_name == 'afno_clean_heightDepSigmoid_lwdown':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_lwdown import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)       
-
-
-    elif model_name == 'afno_clean_heightDepSigmoid_lwdown_concat':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_lwdown_concat import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)       
-        
-        
-    elif model_name == 'afno_clean_heightDepSigmoid_concat':
-        from flux_specific_sigmoid.afno_column_clean_heightDep_sigmoid_concat import AFNONet
-        
-        # Load Gaussian parameters
-        fitted_gaussians_file_LWDown = args.gaussian_params_file_LWDown  
-        fitted_gaussians_file_LWUp = args.gaussian_params_file_LWUp  
-        
-        fitted_gaussians_LWDown = load_gaussian_parameters(fitted_gaussians_file_LWDown)
-        fitted_gaussians_LWUp = load_gaussian_parameters(fitted_gaussians_file_LWUp)
-        gaussian_params_LWUp = fitted_gaussians_LWUp
-
-        # Construct the parameters by height
-        height_start = 70  # Adjust based on your data
-        height_end = 64    # Adjust based on your data
-        gaussian_params_LWDown = construct_gaussian_params_by_height(
-            fitted_gaussians_LWDown,
-            height_start=height_start,
-            height_end=height_end
-        )
-
-
-        model = AFNONet(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            embed_dim=args.vit_hidden_dim,
-            depth=args.vit_layers, #num blocks
-            dropout=args.vit_dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-            zero_freq_indices=args.zero_freq_indices,  # Pass the parameter
-            gaussian_params_file_LWDown= gaussian_params_LWDown,
-            gaussian_params_file_LWUp= gaussian_params_LWUp,
-        ).to(device)       
-        
     else:
         raise NotImplementedError('Model has not implemented yet!')
     return model
@@ -929,7 +407,7 @@ def test_model(model, test_set):
 
 def test_loading_time(train_files, iter=10):
     logger.info('Test Loading time started...')
-    dataset = get_data_with_disk_cache(train_files, shuffle=True)
+    dataset = get_triangle_data_with_disk_cache(train_files, shuffle=True)
         
     for it in range(iter):
         t1 = time.perf_counter(), time.process_time()
@@ -942,8 +420,13 @@ def test_loading_time(train_files, iter=10):
         gc.collect()
         
         
-def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
-    icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
+def get_triangle_data_with_disk_cache(filenames, triangle_id=0, shuffle=False, num_workers=0):
+    icon_data = IconTriangleIterableDataset(
+        filenames, 
+        triangle_id=triangle_id,
+        cache_dir='/tmp', 
+        shuffle=shuffle
+    )
 
     # Prepare arguments for DataLoader
     dataloader_args = {
@@ -1004,8 +487,8 @@ def main():
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
 
-        train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
-        val_loader = get_column_data_with_disk_cache(val_files, shuffle = False, subsample=1.0)
+        train_loader = get_triangle_data_with_disk_cache(train_files, shuffle=True)
+        val_loader = get_triangle_data_with_disk_cache(val_files, shuffle = False)
    
         train_model(model, train_loader, val_loader)
 
@@ -1013,7 +496,7 @@ def main():
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')
     
     if args.test:
-        test_loader = get_column_data_with_disk_cache(test_files, shuffle=False)
+        test_loader = get_triangle_data_with_disk_cache(test_files, shuffle=False)
         test_model(model, test_loader)
     
     logger.info('Code ended!')

@@ -1,0 +1,47 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+
+                
+        {
+            "name": "Python Debugger: train_triangle_gnn",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--model", "gnn_graphCast_triangle",
+                "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+                "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/triangle_testing",
+                "--percent", "0.1",
+                "--num-workers", "4",
+                "--prefetch-factor", "2",
+                "--wandb-mode", "disabled",
+                "--num-cells", "81920",
+                "--train",
+                "--test",
+                "--shuffle", 
+                "--batch-size", "4",
+                "--vbatch", "1",
+                "--optimizer", "adamw",
+                "--clip", "1.0",
+                "--num-epoch", "1",
+                "--learning-rate", "0.001",
+                "--hidden-dim", "8",
+                "--layers", "4",
+                "--dropout", "0.0",
+            ]
+        },  
+    ]
+}
