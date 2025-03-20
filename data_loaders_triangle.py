@@ -8,7 +8,7 @@ from os.path import join, basename, exists
 from torch.utils.data import IterableDataset, DataLoader
 
 
-def get_triangle_indices(triangle_id=0, total_cols=81920):
+def get_triangle_indices(triangle_id=1, total_cols=81920):
     """
     A naive approach: picks one block of columns for the 'large triangle.'
     For R2B05, each block is 4096 columns.
@@ -27,7 +27,7 @@ class IconTriangleIterableDataset(IterableDataset):
     def __init__(
         self,
         filenames,
-        triangle_id=0,
+        triangle_id=1,
         shuffle=False,
         dtype='float32',
         cache_dir=None,

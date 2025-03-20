@@ -191,44 +191,53 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
         ).to(device)        
         
     
-    # AFNO Implementation
-    elif model_name == 'afno':
-        from column_files.afno_column_clean import AFNONet
-        model = AFNONet(
+    elif model_name == 'gnn_graphCast_hirarchical_concat':
+        from column_files.gnn_graphCast_hirarchical_concat import AtmosphericColumnGNN
+        model = AtmosphericColumnGNN(
             num_cells=args.num_cells,
-            patch_size=args.patch_size,
             embed_dim=args.hidden_dim,
-            # mlp_dim=args.vit_hidden_dim,
             depth=args.layers, #num blocks
             dropout=args.dropout, # used in the mlp
+            max_skip=args.max_skip,
             mean2d=mean2d,
             var2d=var2d, 
             mean3d=mean3d, 
             var3d=var3d,
             device=device,
             is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
-    
-    elif model_name == 'afno_check':
-        from column_files.afno_column_clean_check import AFNONet
-        model = AFNONet(
+        ).to(device)     
+        
+    elif model_name == 'gnn_graphCast_hirarchical_concatBef':
+        from column_files.gnn_graphCast_hirarchical_concatBef import AtmosphericColumnGNN
+        model = AtmosphericColumnGNN(
             num_cells=args.num_cells,
-            patch_size=args.patch_size,
             embed_dim=args.hidden_dim,
-            # mlp_dim=args.vit_hidden_dim,
             depth=args.layers, #num blocks
             dropout=args.dropout, # used in the mlp
+            max_skip=args.max_skip,
             mean2d=mean2d,
             var2d=var2d, 
             mean3d=mean3d, 
             var3d=var3d,
             device=device,
             is_test=args.test,  
-            sparsity_threshold=args.afno_sparsity_threshold,  
-            hard_thresholding_fraction = args.hard_thresholding_fraction,
-        ).to(device)
+        ).to(device)       
+        
+    elif model_name == 'gnn_graphCast_hirarchical':
+        from column_files.gnn_graphCast_hirarchical import AtmosphericColumnGNN
+        model = AtmosphericColumnGNN(
+            num_cells=args.num_cells,
+            embed_dim=args.hidden_dim,
+            depth=args.layers, #num blocks
+            dropout=args.dropout, # used in the mlp
+            max_skip=args.max_skip,
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+        ).to(device)      
     
     
     

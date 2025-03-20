@@ -17,65 +17,59 @@ def create_atmospheric_graph_from_xarray(grid_data, triangle_indices, num_height
     """
     Creates a graph structure for the atmospheric data and returns edge_index directly.
     """
-    # graph = nx.Graph() # No longer using NetworkX graph directly
+    graph = nx.Graph()
     num_columns = len(triangle_indices)
-    # node_id_counter = 0 # Not needed with direct edge_index construction
-    node_ids = {}  # (local_col_idx, height_level) -> node_index (now just an index)
+    node_id_counter = 0
+    node_ids = {}  # (local_col_idx, height_level) -> node_id for each height and each column
 
-    # Initialize lists to build edge_index components
-    vertical_edges_list = []
-    horizontal_edges_list = []
-
-    # --- 1. Create ALL nodes (implicitly indexed) ---
+    # --- 1. Create ALL nodes first ---
     for local_col_idx in range(num_columns):
         for height_level in range(num_height_levels):
-            node_index = local_col_idx * num_height_levels + height_level # Unique index for each node
-            node_ids[(local_col_idx, height_level)] = node_index
-            # graph.add_node(node_id, features=[], id=node_id) # No NetworkX node addition
+            node_id = node_id_counter
+            node_ids[(local_col_idx, height_level)] = node_id
+            graph.add_node(node_id, features=[], id=node_id)
+            node_id_counter += 1
 
-    # --- 2. Add Vertical Edges (directly to edge_index) ---
+    # --- 2. Add Vertical Edges ---
     for local_col_idx in range(num_columns):
         for height_level in range(num_height_levels):
-            current_node_index = node_ids[(local_col_idx, height_level)]
-
+            current_node_id = node_ids[(local_col_idx, height_level)]
+            
             # adds vertical downward edges
             if height_level > 0:
-                lower_node_index = node_ids[(local_col_idx, height_level - 1)]
-                vertical_edges_list.append([current_node_index, lower_node_index]) # [source, target]
-                vertical_edges_list.append([lower_node_index, current_node_index]) # Bidirectional
+                graph.add_edge(current_node_id, node_ids[(local_col_idx, height_level - 1)])
+            # adds vertical upward edges
+            if height_level < num_height_levels - 1:
+                graph.add_edge(current_node_id, node_ids[(local_col_idx, height_level + 1)])
 
-            # adds vertical upward edges (already handled by bidirectional edges above)
-            # if height_level < num_height_levels - 1:
-            #     upper_node_index = node_ids[(local_col_idx, height_level + 1)]
-            #     vertical_edges_list.append([current_node_index, upper_node_index])
-
-
-    # --- 3. Add Horizontal Edges (with filtering, directly to edge_index) ---
+    # --- 3. Add Horizontal Edges (with filtering) ---
     neighbor_indices_global = grid_data['neighbor_cell_index'].values  # (3, 81920)
+    # get the neighbor indices of the current triangle, based on the grid_data information file
     triangle_neighbor_indices = neighbor_indices_global[:, triangle_indices.numpy()]  # (3, num_columns)
 
     for local_col_idx in range(num_columns):
         for height_level in range(num_height_levels):
-            current_node_index = node_ids[(local_col_idx, height_level)]
+            current_node_id = node_ids[(local_col_idx, height_level)]
             neighbors = triangle_neighbor_indices[:, local_col_idx]
 
-            for neighbor_global in neighbors:
-                local_neighbor_idx_array = np.where(triangle_indices.numpy() == neighbor_global)[0] # Returns array
+            # special edge case filtering for the edges that are not in the current triangle
+            for neighbor in neighbors:
+                
+                # check if the neighbor is in the current triangle
+                # Handles the edge case of 2 or 1 neighbors.
+                local_neighbor_idx = np.where(triangle_indices.numpy() == neighbor)[0]
+                
+                # if the neighbor is in the current triangle, add the neighbour edges. 
+                if len(local_neighbor_idx) > 0:
+                    local_neighbor_idx = local_neighbor_idx[0]
+                    neighbor_node_id = node_ids[(local_neighbor_idx, height_level)]
+                    graph.add_edge(current_node_id, neighbor_node_id)
+                
+                # could even add diagonal edges here.
 
-                if len(local_neighbor_idx_array) > 0:
-                    local_neighbor_idx = local_neighbor_idx_array[0] # Take the first element
-                    neighbor_node_index = node_ids[(local_neighbor_idx, height_level)]
-                    horizontal_edges_list.append([current_node_index, neighbor_node_index]) # [source, target]
-                    horizontal_edges_list.append([neighbor_node_index, current_node_index]) # Bidirectional
-
-
-    # 4. Combine edges and convert to PyTorch Tensor
-    edge_index_numpy = np.array(vertical_edges_list + horizontal_edges_list).T # Transpose to get shape (2, num_edges)
-    edge_index = torch.tensor(edge_index_numpy, dtype=torch.long, device=device)
-
-    # No NetworkX conversion needed anymore
-    # data = from_networkx(graph)
-    # edge_index = data.edge_index.to(device)
+    # Convert to PyG format and extract edge_index
+    data = from_networkx(graph)
+    edge_index = data.edge_index.to(device)
 
     return edge_index
 

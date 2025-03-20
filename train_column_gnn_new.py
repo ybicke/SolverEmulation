@@ -162,9 +162,9 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             hard_thresholding_fraction = args.hard_thresholding_fraction,
         ).to(device)
     
-    elif model_name == 'afno_check':
-        from column_files.afno_column_clean_check import AFNONet
-        model = AFNONet(
+    elif model_name == 'gnn_graphCast_hirarchical_concat':
+        from column_files.gnn_graphCast_hirarchical_concat import AtmosphericColumnGNN
+        model = AtmosphericColumnGNN(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
             embed_dim=args.hidden_dim,

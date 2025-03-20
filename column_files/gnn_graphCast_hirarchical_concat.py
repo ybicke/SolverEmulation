@@ -26,7 +26,7 @@ class AtmosphericColumnGNN(nn.Module):
                  dropout,
                  max_skip,
                  emb_dropout=0.0,
-                 channels_in=6,
+                 channels_in=12,
                  channels_out=4,
                  swflx_idx=[2, 3],
                  lwflx_idx=[0, 1],
@@ -55,6 +55,7 @@ class AtmosphericColumnGNN(nn.Module):
         self.processor = Processor(embed_dim, depth = depth, dropout = dropout)
         self.decoder = Decoder(embed_dim, channels_out)
         
+        self.learnable_level = nn.Parameter(torch.randn(1, 1, channels_out))
         self.sigmoid = nn.Sigmoid()
     
 
@@ -67,18 +68,25 @@ class AtmosphericColumnGNN(nn.Module):
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
 
+        # Expand x2d to have the same spatial dimensions as x3d
+        x2d_expanded = x2d.unsqueeze(1).expand(-1, L, -1)  # [B, L, channels_in_2d]
+
+        # Concatenate along the feature dimension
+        x = torch.cat([x2d_expanded, x3d], dim=-1)  # [B, L, channels_in_3d + channels_in_2d]
+
         # encode the height and surface data
-        x = torch.cat([x2d.unsqueeze(1),x3d], dim=1)
         x = self.encoder(x)
-        
+
         # create the edge indices for the 1D chain graph and process the data with the GNN layers
-        edge_index = create_edge_index_hirarchical(L+1, B, x.device, self.max_skip)
-        x = self.processor(x, edge_index)
-        
+        edge_index = create_edge_index_hirarchical(L, B, x.device, self.max_skip)
+        x = self.processor(x, edge_index)   
+
         # reshape the output to the original shape and decode the output variables
-        x = x.view(B, L+1, -1)
+        x = x.view(B, L, -1)  # Now using L, not L+1
         x = self.decoder(x)
-        
+
+        x = torch.cat([x, self.learnable_level.expand(B, -1, -1)], dim=1)  # [B, 71, channels_out]
+
         # scale the output variables to the original range
         x = self.sigmoid(x)
         x = self._scale_output(x, x2d_org)

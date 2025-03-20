@@ -26,7 +26,7 @@ class AtmosphericColumnGNN(nn.Module):
                  dropout,
                  max_skip,
                  emb_dropout=0.0,
-                 channels_in=6,
+                 channels_in=12,
                  channels_out=4,
                  swflx_idx=[2, 3],
                  lwflx_idx=[0, 1],
@@ -55,6 +55,7 @@ class AtmosphericColumnGNN(nn.Module):
         self.processor = Processor(embed_dim, depth = depth, dropout = dropout)
         self.decoder = Decoder(embed_dim, channels_out)
         
+        self.learnable_level = nn.Parameter(torch.randn(1, 1, 6))
         self.sigmoid = nn.Sigmoid()
     
 
@@ -67,18 +68,30 @@ class AtmosphericColumnGNN(nn.Module):
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
 
+        # Learnable 71st level, added BEFORE encoder
+        level_71 = self.learnable_level.repeat(B, 1, 1) # [B, 1, channels_out]
+
+        # Concatenate learnable 71st level to the *beginning* of x3d along height dimension (dim=1)
+        x3d_augmented = torch.cat([level_71, x3d], dim=1) # x3d_augmented now has L+1 height levels
+        L_augmented = L + 1 # Update L to L+1
+
+        # Expand x2d to have the same spatial dimensions as x3d_augmented
+        x2d_expanded = x2d.unsqueeze(1).expand(-1, L_augmented, -1)  # [B, L+1, channels_in_2d]
+
+        # Concatenate along the feature dimension
+        x = torch.cat([x2d_expanded, x3d_augmented], dim=-1)  # [B, L+1, channels_in_3d + channels_in_2d]
+
         # encode the height and surface data
-        x = torch.cat([x2d.unsqueeze(1),x3d], dim=1)
         x = self.encoder(x)
-        
+
         # create the edge indices for the 1D chain graph and process the data with the GNN layers
-        edge_index = create_edge_index_hirarchical(L+1, B, x.device, self.max_skip)
+        edge_index = create_edge_index_hirarchical(L_augmented, B, x.device, self.max_skip)
         x = self.processor(x, edge_index)
-        
+
         # reshape the output to the original shape and decode the output variables
-        x = x.view(B, L+1, -1)
+        x = x.view(B, L_augmented, -1)  # Now using L_augmented
         x = self.decoder(x)
-        
+
         # scale the output variables to the original range
         x = self.sigmoid(x)
         x = self._scale_output(x, x2d_org)

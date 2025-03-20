@@ -2,9 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import MessagePassing
-from triangle_files.triangle_graph import create_edge_index
-import time
-from torch_geometric.data import Data
+from triangle_files.triangle_graph import TriangleGraph
 
 class GraphCastTriangle(nn.Module):
     def __init__(self,
@@ -15,7 +13,8 @@ class GraphCastTriangle(nn.Module):
                  channels_in_3d=6,  # Number of 3D features
                  channels_in_2d=6,  # Number of 2D features
                  channels_out=4,
-                 input_height=70,
+                 input_height=70,   # Number of input height levels
+                 output_height=71,  # Number of output height levels
                  swflx_idx=[2, 3],
                  lwflx_idx=[0, 1],
                  cosmu0_idx=1,
@@ -29,7 +28,9 @@ class GraphCastTriangle(nn.Module):
                  **kwargs):
         super().__init__()
         
-
+        # Store dimensions
+        self.input_height = input_height
+        self.output_height = output_height
         
         # Store radiation-specific indices
         self.swflx_idx = swflx_idx
@@ -39,17 +40,12 @@ class GraphCastTriangle(nn.Module):
         
         self.channels_out = channels_out
         self.device = device
-        self.input_height = input_height
         
-        start_time = time.time()
-        # Create the base edge index directly using the function
-        self.base_edge_index = create_edge_index(
-            grid_file_path,
-            device=device,
-            num_height_levels=self.input_height # Use self.input_height here
-        )
-        end_time = time.time()
-        print(f"Graph creation time: {end_time - start_time:.4f} seconds")
+        # Create the base graph structure for a single triangle
+        self.triangle_graph = TriangleGraph(grid_file_path, device=device)
+        self.base_edge_index = self.triangle_graph.initialize()
+        self.triangle_graph.close()
+        
         # Store dimensions for later use
         self.num_nodes_per_triangle = self.base_edge_index.max() + 1
         
@@ -61,12 +57,7 @@ class GraphCastTriangle(nn.Module):
         total_channels = channels_in_3d + channels_in_2d
         self.encoder = TriangleEncoder(total_channels, embed_dim, dropout)
         self.processor = TriangleProcessor(embed_dim, depth=depth, dropout=dropout)
-        self.decoder = TriangleDecoder(embed_dim, channels_out, output_height=self.input_height)
-
-        # Learnable parameter for the 71st level, added AFTER decoder
-        self.level_71_param = nn.Parameter(torch.randn(1, 1, 1, channels_out)) # [1, 1, 1, channels_out]
-        
-        
+        self.decoder = TriangleDecoder(embed_dim, channels_out, output_height)
         
     def _create_batch_edge_index(self, batch_size):
         """
@@ -92,38 +83,30 @@ class GraphCastTriangle(nn.Module):
         
         batch_size = x3d.shape[0]
         num_columns = x3d.shape[1]
-        input_height = x3d.shape[2]
         
         # Normalize inputs
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
         
-        # Augment each height level with x2d features
-        x2d_expanded = x2d.unsqueeze(2).repeat(1, 1, input_height, 1) # Expand x2d to match x3d height
-        x_concat = torch.cat([x3d, x2d_expanded], dim=3) # Concatenate along feature dimension (dim=3)
+        # Reshape and combine features
+        x3d_flat = x3d.view(batch_size, num_columns * self.input_height, -1)
+        x2d_expanded = x2d.unsqueeze(2).expand(-1, -1, self.input_height, -1)
+        x2d_flat = x2d_expanded.reshape(batch_size, num_columns * self.input_height, -1)
+        
+        # Concatenate features
+        x = torch.cat([x3d_flat, x2d_flat], dim=-1)  # [B, N*H_in, F3d+F2d]
         
         # Create the batch edge index that keeps triangles separate
         batch_edge_index = self._create_batch_edge_index(batch_size)
         
-        # --- START Create PyG Data object ---
-        # Reshape feature tensors for node features 'x', x shape: [B*N*H, embed_dim] 
-        x_features = x_concat.reshape(batch_size * num_columns * self.input_height, -1) # Reshape concatenated features
-        graph_data = Data(x=x_features, edge_index=batch_edge_index)
+        # Process through GNN
+        x = self.encoder(x)
+        x = self.processor(x, batch_edge_index)
+        x = self.decoder(x)  # Now outputs [B*N*H_out, channels_out]
         
-        # Process through GNN - now pass graph_data
-        x = self.encoder(graph_data.x) # Access node features as graph_data.x
-        x = self.processor(x, graph_data.edge_index) # Access edge_index as graph_data.edge_index
-        x = self.decoder(x)  # Now outputs [B*N*70, channels_out]
-
-        # Reshape decoder output to [B, N, 70, channels_out]
-        x = x.view(batch_size, num_columns, 70, self.channels_out) 
-
-        # -------------- currently 71 level as learned parameter after decoder --------------
-        # Learnable 71st level, added AFTER decoder
-        level_71 = self.level_71_param.repeat(batch_size, num_columns, 1, 1) # Repeat to match batch and column dimensions
-        output = torch.cat([x, level_71], dim=2)  # [B, N, 71, channels_out]
-
-
+        # Reshape output to match target shape
+        output = x.view(batch_size, num_columns, self.output_height, self.channels_out)
+        
         # Apply radiation-specific scaling
         output = self._scale_output(output, x2d_original)
         
@@ -196,7 +179,10 @@ class TriangleEncoder(nn.Module):
         )
 
     def forward(self, x):
-        # x shape: [B*N*H, embed_dim] 
+        # x shape: [B, N*H, channels_in]
+        B, NH, C = x.shape
+        # Flatten for PyG message passing
+        x = x.reshape(B*NH, C)
         return self.mlp(x)
     
     
@@ -309,9 +295,21 @@ class TriangleDecoder(nn.Module):
         x = self.mlp(x)  # [B*N*H_in, channels_out]
         
         # Reshape to [B, N, 70, channels_out]
-        x = x.view(B, -1, self.output_height, self.channels_out) # Decoder now explicitly outputs 70 levels
+        x = x.view(B, -1, 70, self.channels_out)
         
-        return x # Now only outputs 70 levels
+        # Add an extra height level by interpolating between the last two levels
+        # This is more physically motivated than using a learnable parameter
+        last_level = x[..., -1, :]  # [B, N, channels_out]
+        second_last_level = x[..., -2, :]  # [B, N, channels_out]
+        interpolated_level = 0.5 * (last_level + second_last_level)  # Simple linear interpolation
+        
+        # Concatenate the interpolated level
+        x = torch.cat([x, interpolated_level.unsqueeze(2)], dim=2)  # [B, N, 71, channels_out]
+        
+        # Reshape back to expected format
+        x = x.reshape(-1, self.channels_out)  # [B*N*71, channels_out]
+        
+        return x
     
     
 
