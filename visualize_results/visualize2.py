@@ -64,6 +64,8 @@ models = [
     
     {'name': 'AFNO-Emb128-standard','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},   
     {'name': 'GNN-Hirarchical-Emb128-l4-h5','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256/test'},
+    {'name': 'GNN-Hirarchical-concat','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256_concat/test'},
+    {'name': 'GNN-Hirarchical-concatBef','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256_concatBef/test'},
 
 
     
@@ -142,4 +144,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/results-temp/comparing_graphCast_hirarchical_afno1.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/results-temp/comparing_graphCast_hirarchical_concat.png', bbox_inches='tight', dpi=300)

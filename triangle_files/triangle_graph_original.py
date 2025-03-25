@@ -28,14 +28,31 @@ def create_atmospheric_graph_from_xarray(grid_data, triangle_indices, num_height
     vertical_edges_list = []
     horizontal_edges_list = []
 
-    # --- 1. Create ALL nodes and Node IDs (implicitly indexed) ---
+    # --- 1. Create ALL nodes (implicitly indexed) ---
     for local_col_idx in range(num_columns):
         for height_level in range(num_height_levels):
             node_index = local_col_idx * num_height_levels + height_level # Unique index for each node
             node_ids[(local_col_idx, height_level)] = node_index
             # graph.add_node(node_id, features=[], id=node_id) # No NetworkX node addition
 
-    # --- 2. Add Horizontal Edges (within each height level) ---
+    # --- 2. Add Vertical Edges (directly to edge_index) ---
+    for local_col_idx in range(num_columns):
+        for height_level in range(num_height_levels):
+            current_node_index = node_ids[(local_col_idx, height_level)]
+
+            # adds vertical downward edges
+            if height_level > 0:
+                lower_node_index = node_ids[(local_col_idx, height_level - 1)]
+                vertical_edges_list.append([current_node_index, lower_node_index]) # [source, target]
+                vertical_edges_list.append([lower_node_index, current_node_index]) # Bidirectional
+
+            # adds vertical upward edges (already handled by bidirectional edges above)
+            # if height_level < num_height_levels - 1:
+            #     upper_node_index = node_ids[(local_col_idx, height_level + 1)]
+            #     vertical_edges_list.append([current_node_index, upper_node_index])
+
+
+    # --- 3. Add Horizontal Edges (with filtering, directly to edge_index) ---
     neighbor_indices_global = grid_data['neighbor_cell_index'].values  # (3, 81920)
     print(f"neighbor_indices_global.shape: {neighbor_indices_global.shape}")
     print(f"neighbor_indices_global: {neighbor_indices_global}")
@@ -55,7 +72,7 @@ def create_atmospheric_graph_from_xarray(grid_data, triangle_indices, num_height
 
             for neighbor_global in neighbors:
                 print(f"neighbor_global: {neighbor_global}")
-                local_neighbor_idx_array = np.where(triangle_indices.numpy() == neighbor_global - 1)[0] # Returns array
+                local_neighbor_idx_array = np.where(triangle_indices.numpy() == neighbor_global)[0] # Returns array
                 print(f"local_neighbor_idx_array: {local_neighbor_idx_array}")
 
                 if len(local_neighbor_idx_array) > 0:
@@ -66,14 +83,6 @@ def create_atmospheric_graph_from_xarray(grid_data, triangle_indices, num_height
                     horizontal_edges_list.append([current_node_index, neighbor_node_index]) # [source, target]
                     horizontal_edges_list.append([neighbor_node_index, current_node_index]) # Bidirectional
 
-    # --- 3. Add Vertical Edges (connecting nodes at the same horizontal location across height levels) ---
-    for local_col_idx in range(num_columns):
-        for height_level in range(num_height_levels):
-            current_node_index = node_ids[(local_col_idx, height_level)]
-            if height_level > 0:
-                lower_node_index = node_ids[(local_col_idx, height_level - 1)]
-                vertical_edges_list.append([current_node_index, lower_node_index]) # Vertical downward edge
-                vertical_edges_list.append([lower_node_index, current_node_index]) # Vertical upward edge (bidirectional)
 
     # 4. Combine edges and convert to PyTorch Tensor
     edge_index_numpy = np.array(vertical_edges_list + horizontal_edges_list).T # Transpose to get shape (2, num_edges)

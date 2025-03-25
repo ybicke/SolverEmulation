@@ -5,12 +5,15 @@ from torch_geometric.nn import MessagePassing
 from triangle_files.triangle_graph import create_edge_index
 import time
 from torch_geometric.data import Data
+import torch.autograd.profiler as profiler
 
 class GraphCastTriangle(nn.Module):
     def __init__(self,
                  grid_file_path,
                  embed_dim,
                  depth,
+                 
+                 triangle_id,
                  dropout=0.0,
                  channels_in_3d=6,  # Number of 3D features
                  channels_in_2d=6,  # Number of 2D features
@@ -41,10 +44,13 @@ class GraphCastTriangle(nn.Module):
         self.device = device
         self.input_height = input_height
         
+        self.triangle_id = triangle_id
+        
         start_time = time.time()
         # Create the base edge index directly using the function
         self.base_edge_index = create_edge_index(
             grid_file_path,
+            triangle_id=self.triangle_id,
             device=device,
             num_height_levels=self.input_height # Use self.input_height here
         )
@@ -111,10 +117,14 @@ class GraphCastTriangle(nn.Module):
         graph_data = Data(x=x_features, edge_index=batch_edge_index)
         
         # Process through GNN - now pass graph_data
+        
+        
+        # Create the base edge index directly using the function
         x = self.encoder(graph_data.x) # Access node features as graph_data.x
+        
         x = self.processor(x, graph_data.edge_index) # Access edge_index as graph_data.edge_index
+        
         x = self.decoder(x)  # Now outputs [B*N*70, channels_out]
-
         # Reshape decoder output to [B, N, 70, channels_out]
         x = x.view(batch_size, num_columns, 70, self.channels_out) 
 

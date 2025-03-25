@@ -1,6 +1,10 @@
+#!/usr/bin/env python
+import torch
+import sys
+import os
+
 import os
 import re
-import sys
 import time
 import glob
 import h5py
@@ -17,7 +21,6 @@ from concurrent.futures import ThreadPoolExecutor
 from os.path import join, dirname, basename, normpath, isfile, exists
 
 import wandb
-import torch
 # import lightning as L
 # import lightning as L
 import numpy as np
@@ -27,10 +30,13 @@ from torch.utils.data import Dataset, DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 from torchinfo import summary
 
-import torch.autograd.profiler as profiler
-
-
 from data_loaders_triangle import IconTriangleIterableDataset
+
+
+
+
+import torch
+
 
 
 
@@ -72,7 +78,6 @@ parser.add_argument('--train', action=argparse.BooleanOptionalAction, default=Tr
 parser.add_argument('--test', action=argparse.BooleanOptionalAction, default=True, help='Specify if test takes place')
 parser.add_argument('--shuffle', action=argparse.BooleanOptionalAction, default=True, help='Shuffling the train dataset')
 parser.add_argument('--batch-size', type=int, default=4, help='Batch size')
-parser.add_argument('--vbatch', type=int, default=1, help='Virtual batch: gradients will be applied after vbatch epoch')
 parser.add_argument('--optimizer', type=str, default='adamw', help='Optimizer')
 parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of epochs')
@@ -80,6 +85,8 @@ parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning
 parser.add_argument('--hidden-dim', type=int, default=256, help='hidden dimension')
 parser.add_argument('--layers', type=int, default=4, help='layers')
 parser.add_argument('--dropout', type=float, default=0.0, help='dropout')
+parser.add_argument('--vbatch', type=int, default=1, help='Virtual batch: gradients will be applied after vbatch epoch')
+parser.add_argument('--triangle-id', type=int, default=0, help='Triangle ID')
 args = parser.parse_args()
 
 
@@ -108,6 +115,7 @@ def count_parameters(model):
 
 
 
+
 def get_normalization_params(stats_file):
     with open(stats_file, 'rb') as f:
         stats = pickle.load(f)
@@ -131,6 +139,7 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             embed_dim=args.hidden_dim,
             depth=args.layers, #num blocks
             dropout=args.dropout, # used in the mlp
+            triangle_id=args.triangle_id,
             mean2d=mean2d,
             var2d=var2d, 
             mean3d=mean3d, 
@@ -214,6 +223,9 @@ def train_model(model, train_set, valid_set):
       
 
     # Training loop
+    
+
+    
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
@@ -223,28 +235,47 @@ def train_model(model, train_set, valid_set):
         for i, data in enumerate(train_set):
             
             t1_1 = time.perf_counter()
-            
+            #t_data_start = time.perf_counter()
             batch_x3, batch_x2, batch_y = data
             batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
+            #t_data_end = time.perf_counter()
+            #data_time = t_data_end - t_data_start
 
+            #t_forward_start = time.perf_counter()
             outputs = model(batch_x3, batch_x2)
+            #t_forward_end = time.perf_counter()
+            #forward_time = t_forward_end - t_forward_start
+
+            #t_loss_start = time.perf_counter()
             loss = train_loss(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
-            
+            #t_loss_end = time.perf_counter()
+            #loss_time = t_loss_end - t_loss_start
+
+
             if i > 0 and i % vbatch == 0:
                 optimizer.zero_grad()
+                #t_backward_start = time.perf_counter()
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
                 optimizer.step()
-                t2_1 = time.perf_counter()
-                
-                if i % 100 == 99 or vbatch > 1:
-                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
-                
+                #t_backward_end = time.perf_counter()
+                #backward_time = t_backward_end - t_backward_start
+            else:
+                #backward_time = 0 # or some default value
+                pass
+
+            t2_1 = time.perf_counter()
+            
+            if i % 10 == 9 or vbatch > 1:
+                #print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, data_time:{data_time:.3f}, forward_time:{forward_time:.3f}, loss_time:{loss_time:.3f}, backward_time:{backward_time:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+                print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
 
         # Validation step
         model.eval()
         
+
+            
         with torch.no_grad():
             for i, v_data in enumerate(valid_set):
                 
@@ -420,7 +451,7 @@ def test_loading_time(train_files, iter=10):
         gc.collect()
         
         
-def get_triangle_data_with_disk_cache(filenames, triangle_id=0, shuffle=False, num_workers=0):
+def get_triangle_data_with_disk_cache(filenames, triangle_id=args.triangle_id, shuffle=False, num_workers=0):
     icon_data = IconTriangleIterableDataset(
         filenames, 
         triangle_id=triangle_id,
@@ -485,12 +516,13 @@ def main():
     random.setstate(random_rng_state)
 
     if args.train:
-        tr1 = time.perf_counter(), time.process_time()                        
+        tr1 = time.perf_counter(), time.process_time()
 
         train_loader = get_triangle_data_with_disk_cache(train_files, shuffle=True)
         val_loader = get_triangle_data_with_disk_cache(val_files, shuffle = False)
-   
-        train_model(model, train_loader, val_loader)
+
+
+        train_model(model, train_loader, val_loader) # Profile training
 
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')

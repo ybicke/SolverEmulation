@@ -1,6 +1,21 @@
+#!/usr/bin/env python
+import torch
+import sys
+import os
+
+print(f"Python version (train_column_triangle.py): {sys.version}")
+print(f"PyTorch version (train_column_triangle.py): {torch.__version__}")
+
+print(f"Python executable path: {sys.executable}")
+
+conda_env_name = os.environ.get('CONDA_DEFAULT_ENV')
+if conda_env_name:
+    print(f"Conda environment name: {conda_env_name}")
+else:
+    print("Conda environment name: Not detected (may not be a conda environment)")
+
 import os
 import re
-import sys
 import time
 import glob
 import h5py
@@ -17,7 +32,6 @@ from concurrent.futures import ThreadPoolExecutor
 from os.path import join, dirname, basename, normpath, isfile, exists
 
 import wandb
-import torch
 # import lightning as L
 # import lightning as L
 import numpy as np
@@ -26,13 +40,14 @@ from torch import optim, nn
 from torch.utils.data import Dataset, DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 from torchinfo import summary
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-import torch.autograd.profiler as profiler
+from data_loaders_triangle import IconTriangleIterableDataset
 
 
-from data_loaders_new import IconColumnIterableDataset
-from flux_specific_sigmoid.FluxSpecificSigmoid_lwdown import load_gaussian_parameters, construct_gaussian_params_by_height
+
+
+import torch.profiler as profiler
+import torch
 
 
 
@@ -66,7 +81,6 @@ parser.add_argument('--model', type=str, default='vit', help='Name of the model 
 parser.add_argument('--dataset', type=str, required=True, help='Path to dataset')
 parser.add_argument('--save', type=str, required=True, help='Path to save the result')
 parser.add_argument('--percent', type=float, default=1.0, help='Percent of data to train on')
-parser.add_argument('--subsample', type=float, default=None, help='Subsampling rate')
 parser.add_argument('--num-workers', type=int, default=os.cpu_count(), help='Number of workers to load data')
 parser.add_argument('--prefetch-factor', type=int, default=2, help='Prefetch factor')
 parser.add_argument('--wandb-mode', type=str, default='disabled', choices={'online', 'offline', 'disabled'}, help='Operating mode for W&B')
@@ -79,15 +93,11 @@ parser.add_argument('--optimizer', type=str, default='adamw', help='Optimizer')
 parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of epochs')
 parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
-parser.add_argument('--patch-size', type=int, default=2, help='Patch size')
 parser.add_argument('--hidden-dim', type=int, default=256, help='hidden dimension')
-parser.add_argument('--dropout', type=float, default=0.0, help='dropout')
 parser.add_argument('--layers', type=int, default=4, help='layers')
-parser.add_argument('--heads', type=int, default=6, help='heads')
-parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
-parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
-parser.add_argument('--lr-schedule-type', type=str, default='none', choices=['none', 'plateau', 'graphcast'], help='LR schedule mode to use')
-parser.add_argument('--max-skip', type=int, default=3, help='max skip')
+parser.add_argument('--dropout', type=float, default=0.0, help='dropout')
+parser.add_argument('--vbatch', type=int, default=1, help='Virtual batch: gradients will be applied after vbatch epoch')
+parser.add_argument('--triangle-id', type=int, default=0, help='Triangle ID')
 args = parser.parse_args()
 
 
@@ -116,6 +126,7 @@ def count_parameters(model):
 
 
 
+
 def get_normalization_params(stats_file):
     with open(stats_file, 'rb') as f:
         stats = pickle.load(f)
@@ -124,16 +135,22 @@ def get_normalization_params(stats_file):
                 torch.tensor(stats['mean3d']).to(device), \
                     torch.tensor(stats['var3d']).to(device)
     
-    
 def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
     logger.info('Preparing the model...')
-    if model_name == 'gnn_graphCast_new_residual':
-        from column_files.gnn_graphCast_new_residual import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
+    
+    if model_name == 'gnn_graphCast_triangle':
+        from triangle_files.graphCast_triangle import GraphCastTriangle
+        
+        # Load the grid dataset
+        nc_file_path = "/mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc"
+        grid_ds = xr.open_dataset(nc_file_path)
+        
+        model = GraphCastTriangle(
+            grid_file_path=nc_file_path,
             embed_dim=args.hidden_dim,
             depth=args.layers, #num blocks
             dropout=args.dropout, # used in the mlp
+            triangle_id=args.triangle_id,
             mean2d=mean2d,
             var2d=var2d, 
             mean3d=mean3d, 
@@ -141,109 +158,9 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             device=device,
             is_test=args.test,  
         ).to(device)
+        
+        grid_ds.close()
 
-
-    elif model_name == 'gnn_graphCast_new':
-        from column_files.gnn_graphCast_new import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)        
-        
-    elif model_name == 'gnn_graphCast_hirarchical':
-        from column_files.gnn_graphCast_hirarchical import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)        
-        
-    elif model_name == 'gnn_graphCast_hirarchical2':
-        from column_files.gnn_graphCast_hirarchical2 import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)        
-        
-    
-    elif model_name == 'gnn_graphCast_hirarchical_concat':
-        from column_files.gnn_graphCast_hirarchical_concat import AtmosphericColumnGNN
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)     
-        
-    elif model_name == 'gnn_graphCast_hirarchical_concatBef':
-        from column_files.gnn_graphCast_hirarchical_concatBef import AtmosphericColumnGNN
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)       
-        
-    elif model_name == 'gnn_graphCast_hirarchical':
-        from column_files.gnn_graphCast_hirarchical import AtmosphericColumnGNN
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)      
-    
-
-        
-    
-    
-    
     else:
         raise NotImplementedError('Model has not implemented yet!')
     return model
@@ -276,47 +193,19 @@ def train_model(model, train_set, valid_set):
     )
     wandb.watch(model, log_freq=100)
 
-
-
-    optimizer = optim.AdamW(
-        model.parameters(),
-        lr=args.learning_rate,
-        eps=1e-8,
-        weight_decay=0.01,
-        betas=(0.9, 0.95)  # Use GraphCast betas
-    )
-    
-    scheduler_mode = args.lr_schedule_type  # e.g. 'none', 'plateau', or 'graphcast'
-    scheduler = None
-
-    if scheduler_mode == 'plateau':
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer,
-            mode='min',
-            factor=0.2,
-            patience=3,
-            verbose=True,
-            min_lr=1e-7,
-            threshold=1e-3,
+    # Set up the optimizer based on the specified type
+    if args.optimizer == 'adam':
+        optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
+    elif args.optimizer == 'adamw':
+        optimizer = optim.AdamW(
+            model.parameters(), 
+            lr=args.learning_rate,
+            eps=1e-8,
+            weight_decay=0.01  # basically applying ridge regression L2
         )
-        logger.info('Using ReduceLROnPlateau scheduler.')
-
-        
-    # TODO: Implement GraphCast two-phase (warmup + half-cosine) scheduling.
-    elif scheduler_mode == 'graphcast':
-        # We will manually implement warmup + half-cosine in the loop below
-        logger.info('Using GraphCast two-phase (warmup + half-cosine) scheduling.')
     else:
-        logger.info('No scheduler. Using constant LR = args.learning_rate')
+        raise NameError('optimizer not supported.')
     
-    
-    # He initialization (recommended)
-    for name, param in model.named_parameters():
-        if param.dim() > 1:
-            nn.init.kaiming_uniform_(param)
-            
-            
-
     # Initialize loss and metric trackers
     train_loss = MeanSquaredError().to(device)
     valid_loss = MeanSquaredError().to(device)
@@ -333,122 +222,122 @@ def train_model(model, train_set, valid_set):
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         init_epoch = cp_id
+        # vbatch = min(args.vbatch + (init_epoch/2), 20)
         logger.info(f'Training will continue from epoch: {init_epoch}/{args.num_epoch}')
     else:
         init_epoch = 0
+        # vbatch = args.vbatch
 
+    vbatch = args.vbatch
     epoch_number = init_epoch
     best_loss = 1e9999999 
       
 
     # Training loop
-    for epoch in range(init_epoch, args.num_epoch):
-        t1 = time.perf_counter()
-        epoch_number += 1
+    
+    with profiler.profile(activities=[ 
+        profiler.ProfilerActivity.CPU, profiler.ProfilerActivity.CUDA],
+                        record_shapes=True, profile_memory=True) as prof:
         
-        # Training step
-        model.train(True)        
-        for i, data in enumerate(train_set):
-            
-            t1_1 = time.perf_counter()
-            
-            batch_x3, batch_x2, batch_y = data
-            batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
-
-            optimizer.zero_grad()
-
-            outputs = model(batch_x3, batch_x2)
-            loss = train_loss(outputs, batch_y)
-            batch_mae = train_mae(outputs, batch_y)
-            
-            loss.backward()
-            
-            torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
-            
-            optimizer.step()
-            t2_1 = time.perf_counter()
-            
-            if i % 100 == 99:
-                curr_lr = optimizer.param_groups[0]['lr']
-                print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, lr: {curr_lr:.6f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
-            
-
-        # Validation step
-        model.eval()
         
-        with torch.no_grad():
-            for i, v_data in enumerate(valid_set):
+        for epoch in range(init_epoch, args.num_epoch):
+            t1 = time.perf_counter()
+            epoch_number += 1
+            
+            # Training step
+            model.train(True)        
+            for i, data in enumerate(train_set):
                 
-                vx3d, vx2d, v_labels = v_data
-                vx3d, vx2d, v_labels = vx3d.to(device), vx2d.to(device), v_labels.to(device)
-                v_outputs = model(vx3d, vx2d)        
+                t1_1 = time.perf_counter()
                 
-                # two different losses         
-                valid_loss.update(v_outputs, v_labels)
-                valid_mae.update(v_outputs, v_labels)                
+                batch_x3, batch_x2, batch_y = data
+                batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
 
-        # Compute total losses and metrics
-        total_train_loss = train_loss.compute()
-        total_valid_loss = valid_loss.compute()
-        total_train_mae = train_mae.compute()
-        total_valid_mae = valid_mae.compute()
 
-        t2 = time.perf_counter()
-        
-        # Step the standard scheduler if using 'plateau' 
-        if scheduler_mode == 'plateau':
-            scheduler.step(total_valid_loss)
-            curr_lr = optimizer.param_groups[0]['lr']
-            wandb.log({'learning_rate': curr_lr})
+                with profiler.record_function("model_forward"): # <---- Profile forward pass
+                    outputs = model(batch_x3, batch_x2)
+                with profiler.record_function("loss_calculation"): # <---- Profile loss calculation
+                    loss = train_loss(outputs, batch_y)
+                    batch_mae = train_mae(outputs, batch_y)
 
-        # Otherwise, if using 'graphcast', we've already updated per batch,
-        # so we just log the last lr from the final param_group
-        elif scheduler_mode == 'graphcast':
-            curr_lr = optimizer.param_groups[0]['lr']
-        else:
-            curr_lr = optimizer.param_groups[0]['lr']  # constant LR
+                if i > 0 and i % vbatch == 0:
+                    optimizer.zero_grad()
+                    with profiler.record_function("model_backward"): # <---- Profile backward pass
+                        loss.backward()
+                    with profiler.record_function("optimizer_step"): # <---- Profile optimizer step
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
+                        optimizer.step()
+                
+                t2_1 = time.perf_counter()
+                
+                if i % 10 == 9 or vbatch > 1:
+                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+                    # prof.key_averages().table(sort_by="cpu_time_total", row_limit=10)
+                    # prof.export_chrome_trace(join(checkpoint_path, f"trace_batch_{i}_" + PROFILE_NAME + ".json"))
+                    
 
-        # Log metrics to W&B
-        wandb.log({
-            'epoch': epoch_number, 
-            'loss': total_train_loss,
-            'val_loss': total_valid_loss,
-            'mean_absolute_error': total_train_mae,
-            'val_mean_absolute_error': total_valid_mae,
-            'learning_rate': curr_lr
-            })
-
-        # Print epoch summary
-        print(f'{epoch_number:03}/{args.num_epoch}: ',
-              f'time: {t2-t1:.3f}', 
-              f'lr: {curr_lr:.6f}',
-              f'loss: {total_train_loss:.4f} ',
-              f'mean_absolute_error: {total_train_mae:.4f}, ',
-              f'val_loss: {total_valid_loss:.4f}, ',
-              f'val_mean_absolute_error: {total_valid_mae:.4f}')
-        
-        # Save checkpoints
-        checkpoint = {
-            'epoch': epoch + 1,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': valid_loss,
-        }
-        torch.save(
-            checkpoint, 
-            join(checkpoint_path, f'checkpoint_epoch_{epoch_number}.pth')
-        )
-        if total_valid_loss < best_loss:
-            torch.save(checkpoint, join(checkpoint_path, 'best_model.pth'))
-            best_loss = total_valid_loss
+            # Validation step
+            model.eval()
             
-        # Reset metrics for the next epoch
-        train_mae.reset()
-        valid_mae.reset()
-        train_loss.reset()
-        valid_loss.reset()
-    return model
+            with torch.no_grad():
+                for i, v_data in enumerate(valid_set):
+                    
+                    vx3d, vx2d, v_labels = v_data
+                    vx3d, vx2d, v_labels = vx3d.to(device), vx2d.to(device), v_labels.to(device)
+                    v_outputs = model(vx3d, vx2d)        
+                    
+                    # two different losses         
+                    valid_loss.update(v_outputs, v_labels)
+                    valid_mae.update(v_outputs, v_labels)                
 
+            # Compute total losses and metrics
+            total_train_loss = train_loss.compute()
+            total_valid_loss = valid_loss.compute()
+            total_train_mae = train_mae.compute()
+            total_valid_mae = valid_mae.compute()
+
+            t2 = time.perf_counter()
+
+            # Log metrics to W&B
+            wandb.log({
+                'epoch': epoch_number, 
+                'loss': total_train_loss,
+                'val_loss': total_valid_loss,
+                'mean_absolute_error': total_train_mae,
+                'val_mean_absolute_error': total_valid_mae
+                })
+
+            # Print epoch summary
+            print(f'{epoch_number:03}/{args.num_epoch}: ',
+                  f'time: {t2-t1:.3f}', 
+                  f'loss: {total_train_loss:.4f} ',
+                  f'mean_absolute_error: {total_train_mae:.4f}, ',
+                  f'val_loss: {total_valid_loss:.4f}, ',
+                  f'val_mean_absolute_error: {total_valid_mae:.4f}')
+            
+            # Save checkpoints
+            checkpoint = {
+                'epoch': epoch + 1,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': valid_loss,
+            }
+            torch.save(
+                checkpoint, 
+                join(checkpoint_path, f'checkpoint_epoch_{epoch_number}.pth')
+            )
+            if total_valid_loss < best_loss:
+                torch.save(checkpoint, join(checkpoint_path, 'best_model.pth'))
+                best_loss = total_valid_loss
+            
+            # Reset metrics for the next epoch
+            train_mae.reset()
+            valid_mae.reset()
+            train_loss.reset()
+            valid_loss.reset()
+    print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))
+    prof.export_chrome_trace(join(checkpoint_path, "trace_" + PROFILE_NAME + ".json"))
+            
 
 def calculate_heating_rates(y, x3d, x2d): 
     # assumed output order is: [lw_up, lw_dn, sw_up, sw_dn]
@@ -553,7 +442,7 @@ def test_model(model, test_set):
 
 def test_loading_time(train_files, iter=10):
     logger.info('Test Loading time started...')
-    dataset = get_data_with_disk_cache(train_files, shuffle=True)
+    dataset = get_triangle_data_with_disk_cache(train_files, shuffle=True)
         
     for it in range(iter):
         t1 = time.perf_counter(), time.process_time()
@@ -566,8 +455,13 @@ def test_loading_time(train_files, iter=10):
         gc.collect()
         
         
-def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
-    icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
+def get_triangle_data_with_disk_cache(filenames, triangle_id=args.triangle_id, shuffle=False, num_workers=0):
+    icon_data = IconTriangleIterableDataset(
+        filenames, 
+        triangle_id=triangle_id,
+        cache_dir='/tmp', 
+        shuffle=shuffle
+    )
 
     # Prepare arguments for DataLoader
     dataloader_args = {
@@ -626,18 +520,28 @@ def main():
     random.setstate(random_rng_state)
 
     if args.train:
-        tr1 = time.perf_counter(), time.process_time()                        
+        tr1 = time.perf_counter(), time.process_time()
 
-        train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
-        val_loader = get_column_data_with_disk_cache(val_files, shuffle = False, subsample=1.0)
-   
-        train_model(model, train_loader, val_loader)
+        train_loader = get_triangle_data_with_disk_cache(train_files, shuffle=True)
+        val_loader = get_triangle_data_with_disk_cache(val_files, shuffle = False)
+        
+        
+        
+        print(torch.__version__)
+        with profiler.profile(activities=[
+                profiler.ProfilerActivity.CPU, profiler.ProfilerActivity.CUDA],
+                                record_shapes=True) as prof: # Start profiler context for training
+            train_model(model, train_loader, val_loader) # Profile training
+
+        print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20)) # Print profiler output table
+        prof.export_chrome_trace(join(checkpoint_path, "trace_" + PROFILE_NAME + ".json")) # Export Chrome trace file
+
 
         tr2 = time.perf_counter(), time.process_time()
         print(f'Training time: Real time: {tr2[0] - tr1[0]:.2f}, CPU time: {tr2[1]-tr1[1]}')
     
     if args.test:
-        test_loader = get_column_data_with_disk_cache(test_files, shuffle=False)
+        test_loader = get_triangle_data_with_disk_cache(test_files, shuffle=False)
         test_model(model, test_loader)
     
     logger.info('Code ended!')
