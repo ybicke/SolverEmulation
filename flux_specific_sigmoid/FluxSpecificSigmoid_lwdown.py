@@ -28,6 +28,7 @@ def load_gaussian_parameters(file_path):
 
 
 # TODO: Could be integrated in the fitted gaussian process or put into the utils file
+# TODO:Check if the height layer ordering is crrect!!
 def construct_gaussian_params_by_height(fitted_gaussians, height_start=70, height_end=64):
     """
     Constructs a dictionary mapping height levels to their corresponding Gaussian parameters.

@@ -145,11 +145,11 @@ for model in models:
 
 
     # Select a specific sample index
-    sample_index = 0  # Change this to the desired sample index
-    y_true = y_true[sample_index]
-    y_pred = y_pred[sample_index]
-    h_true = h_true[sample_index]
-    h_pred = h_pred[sample_index]
+    #sample_index = (0,5)  # Change this to the desired sample index
+    #y_true = y_true[sample_index]
+    #y_pred = y_pred[sample_index]
+    #h_true = h_true[sample_index]
+    #h_pred = h_pred[sample_index]
 
     print('calculating errors...')
     # y_mae_g = torch.mean(torch.abs(y_true - y_pred), dim=0)
@@ -160,6 +160,10 @@ for model in models:
 
     # y_mae_gs.append(torch.flip(y_mae_g, [1]))
     # h_mae_gs.append(torch.flip(h_mae_g, [1]))
+    
+    y_mae_hs.append(torch.flip(y_mae_h, [0]))
+    h_mae_hs.append(torch.flip(h_mae_h, [0]))
+    
     y_mae_hs.append(torch.flip(y_mae_h, [0]))
     h_mae_hs.append(torch.flip(h_mae_h, [0]))
 
@@ -205,4 +209,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/results-temp/comparing_graphCast_hirarchical_afno.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/test_orderWoFlip.png', bbox_inches='tight', dpi=300)
