@@ -145,9 +145,9 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             device=device
         ).to(device)
         
-    elif model_name == 'vit_column4':
-        from vit_column import ViT4
-        model = ViT4(
+    elif model_name == 'vit_column':
+        from column_files.vit_column import ViT
+        model = ViT(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
             dim=args.vit_hidden_dim,
@@ -162,6 +162,24 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             device=device
         ).to(device)
         
+    elif model_name == 'vit_concat':
+        from column_files.vit_column_concat import ViT
+        model = ViT(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            dim=args.vit_hidden_dim,
+            mlp_dim=args.vit_hidden_dim,
+            depth=args.vit_layers,
+            heads=args.vit_heads,
+            dropout=args.vit_dropout,
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device
+        ).to(device)
+        
+    
     
     # AFNO Implementation
     elif model_name == 'afno':

@@ -202,7 +202,7 @@ class AFNONet(nn.Module):
         
         self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
         
-        self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
+        self.pos_embed = nn.Parameter(torch.randn(1, self.num_patches, embed_dim))
         self.pos_drop = nn.Dropout(p=dropout)
         self.norm = nn.LayerNorm(embed_dim)              
         
@@ -304,7 +304,7 @@ class AFNONet(nn.Module):
         concat_with_x2d = torch.cat((dummy_vector_repeated, x2d.unsqueeze(1)), dim=-1)
         
         # Concatenate the resulting tensor as an additional height level
-        x_concat = torch.cat((x_concat, concat_with_x2d), dim=1)
+        x_concat = torch.cat((concat_with_x2d, x_concat), dim=1)
         x = self.to_patch_embedding(x_concat)
 
         x = x + self.pos_embed

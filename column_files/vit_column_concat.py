@@ -40,11 +40,9 @@ class Attention(nn.Module):
     def __init__(self, dim, heads=8, dim_head=64, dropout=0.):
         super().__init__()
         
-        # Calculate the inner dimension of the attention mechanism
         inner_dim = dim_head *  heads
         project_out = not (heads == 1 and dim_head == dim)
 
-        # Nr of heads and scaling factor for the dot product attention
         self.heads = heads
         self.scale = dim_head ** -0.5
 
@@ -65,7 +63,6 @@ class Attention(nn.Module):
 
         x = self.norm(x)
 
-        # Create qkv matrix and introduce the head dimension (batch_size, heads, sequence_length, dim_head)
         qkv = self.to_qkv(x).chunk(3, dim=-1)
         q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h=self.heads), qkv)
 
@@ -98,7 +95,8 @@ class Transformer(nn.Module):
             x = attn(x) + x
             x = ff(x) + x
 
-        return self.norm(x) # This norm after blocks doesn't seem to be standard in vanilla ViT
+        return self.norm(x) 
+        # Norm after blocks not standard in vanilla ViT
 
 class ViT(nn.Module):
         
@@ -110,7 +108,7 @@ class ViT(nn.Module):
              mlp_dim=256, 
              depth=4,
              heads=6,
-             channels_in=6,
+             channels_in=12,
              channels_out=4,
              height=71,
              dim_head=64,
@@ -146,7 +144,7 @@ class ViT(nn.Module):
         patch_dim = channels_in  * patch_size
 
         
-        self.to_patch_embedding_3D = nn.Sequential(
+        self.to_patch_embedding = nn.Sequential(
             Rearrange('b (h p) f -> b h p f', p=patch_size),
             nn.Flatten(-2, -1),
             nn.LayerNorm(patch_dim),
@@ -154,10 +152,7 @@ class ViT(nn.Module):
             nn.LayerNorm(dim),
         )
         
-        self.to_patch_embedding_2D = nn.Sequential(
-            nn.Linear(channels_in, dim),
-            nn.LayerNorm(dim)
-        )
+        self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
 
         self.pos_embedding = nn.Parameter(torch.randn(1, self.num_patches + 1, dim, device=device))
         self.dropout = nn.Dropout(emb_dropout)
@@ -224,11 +219,17 @@ class ViT(nn.Module):
         x2d_org = x2d.clone()
         x2d = self.normalizer2d(x2d)
 
-        x3d = self.to_patch_embedding_3D(x3d)
-        x2d = self.to_patch_embedding_2D(x2d)
-
-        x = torch.cat((x2d[:,None,:], x3d), axis=-2)
-
+        # Broadcast each 2d feature along the height column
+        x2d_repeated = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
+        x_concat = torch.cat((x3d, x2d_repeated), dim=-1)
+        
+        dummy_vector_repeated = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
+        concat_with_x2d = torch.cat((dummy_vector_repeated, x2d.unsqueeze(1)), dim=-1)
+        
+        x_concat = torch.cat((concat_with_x2d, x_concat), dim=1)
+        x = self.to_patch_embedding(x_concat)
+        
+        
         x += self.pos_embedding[:, :self.num_patches]
         x = self.dropout(x)
         

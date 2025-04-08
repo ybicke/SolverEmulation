@@ -4,14 +4,14 @@
 set -e
 
 # Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
-source /mydata/deepcloud/yves/online-datasets/workspace/scripts/setup.sh
+source /mydata/deepcloud/yves/SolverEmulation/bash_scripts/setup.sh
 
 # Check if GPU available
 #nvidia-smi
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation
+myfolder=/mydata/deepcloud/yves/SolverEmulation/
 
 
 # run script
@@ -25,9 +25,9 @@ echo training$line_number started!
 
 # Run the training script with specified parameters
 python train_column.py \
-    --model afno_easyConcat_clean \
+    --model vit_column \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_clean_checkPosemb \
+    --save /mydata/deepcloud/yves/results_git/vit_column \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -45,7 +45,7 @@ python train_column.py \
     --patch-size 1 \
     --vit-hidden-dim 128 \
     --vit-layers 4 \
-    --vit-heads 8        \
-    --vit-dropout 0.0 \
-    --afno-sparsity-threshold 0.01 \
+    --vit-heads 6 \
+    --vit-dropout 0.0\
     --wandb-mode online \
+

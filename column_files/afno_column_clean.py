@@ -144,9 +144,8 @@ class AFNONet(nn.Module):
     def __init__(self, 
                  patch_size,
                  num_cells,
-                 embed_dim, # (mlp_dim)
-                 depth, # actually num of blocks, what about the layers?
-                 # heads, not used in afno
+                 embed_dim, 
+                 depth, 
                  dropout,
                  emb_dropout=0.,
                  channels_in=6,
@@ -181,14 +180,13 @@ class AFNONet(nn.Module):
         self.cosmu0_idx = cosmu0_idx
         self.tsfctrad_idx = tsfctrad_idx
         
-        # Initialize normalizers for 2D and 3D inputs
         self.normalizer2d = Normalization(std=torch.sqrt(var2d), mean=mean2d)
         self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
 
         patch_dim = channels_in  * patch_size
 
         # same patch embedding as in ViT code
-        self.to_patch_embedding = nn.Sequential(
+        self.to_patch_embedding_3D = nn.Sequential(
             Rearrange('b (h p) f -> b h p f', p=patch_size),
             nn.Flatten(-2, -1),
             nn.LayerNorm(patch_dim),
@@ -201,28 +199,20 @@ class AFNONet(nn.Module):
             nn.LayerNorm(embed_dim)
         )
         
-        self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
+        self.pos_embed = nn.Parameter(torch.randn(1, self.num_patches, embed_dim))
         self.pos_drop = nn.Dropout(p=dropout)
         self.norm = nn.LayerNorm(embed_dim)              
         
-        # Define the MLP head for final output 
         self.mlp_head = nn.Linear(embed_dim, patch_size*channels_out)
         self.sigmoid = nn.Sigmoid()
 
-      
-        # With uniform fals and drop_path_rate to 0 not really used. Responsible for calculating the drop path rates for each 
-        # "transformer" block based on the uniform_drop flag and the drop_path_rate value. If uniform_drop is True, the same 
-        # drop_path_rate is used for all blocks. Otherwise, a linearly increasing drop path rate is used, starting from 0 and 
-        # reaching drop_path_rate at the last block.
 
         if uniform_drop:
             print('using uniform droppath with expect rate', drop_path_rate)
             dpr = [drop_path_rate for _ in range(depth)]  # stochastic depth decay rule
         else:
             print('using linear droppath with expect rate', drop_path_rate * 0.5)
-            dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
-        # dpr = [drop_path_rate for _ in range(depth)]  # stochastic depth decay rule
-        
+            dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]         
           
         h=height // patch_size
         w=1
@@ -240,8 +230,7 @@ class AFNONet(nn.Module):
                 sparsity_threshold=sparsity_threshold,
                 hard_thresholding_fraction = hard_thresholding_fraction
                 )
-                for i in range(depth)
-                
+                for i in range(depth)          
         ])
         
 
@@ -288,14 +277,13 @@ class AFNONet(nn.Module):
         return y_pred
         
             
-
             
     def forward_features(self, x3d, x2d):
 
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
          
-        x3d = self.to_patch_embedding(x3d)
+        x3d = self.to_patch_embedding_3D(x3d)
         x2d = self.to_patch_embedding_2D(x2d)
 
         x = torch.cat((x3d, x2d[:, None, :]), axis=-2)
@@ -310,7 +298,6 @@ class AFNONet(nn.Module):
         return x
 
 
-    # when we use the forward feature like this, we do use the original x2d shape and not the embedded one!!!
     def forward(self, x3d, x2d):
         x = self.forward_features(x3d, x2d)
         
