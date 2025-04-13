@@ -60,7 +60,7 @@ class AtmosphericColumnGNN(nn.Module):
 
         self.encoder = Encoder(channels_in, edge_channels_in, embed_dim, emb_dropout)
         self.processor = Processor(embed_dim, depth = depth, dropout = dropout)
-        self.decoder = Decoder(embed_dim, channels_out)
+        self.decoder = Decoder(embed_dim, channels_out) 
         
         self.sigmoid = nn.Sigmoid()
     
