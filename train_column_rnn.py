@@ -11,7 +11,7 @@ import shutil
 import logging
 import tempfile
 import random
-import xarray as xr
+
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from os.path import join, dirname, basename, normpath, isfile, exists
@@ -26,13 +26,12 @@ from torch import optim, nn
 from torch.utils.data import Dataset, DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 from torchinfo import summary
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 import torch.autograd.profiler as profiler
 
 
 from data_loaders_new import IconColumnIterableDataset
-from flux_specific_sigmoid.FluxSpecificSigmoid_lwdown import load_gaussian_parameters, construct_gaussian_params_by_height
+
 
 
 
@@ -75,20 +74,29 @@ parser.add_argument('--train', action=argparse.BooleanOptionalAction, default=Tr
 parser.add_argument('--test', action=argparse.BooleanOptionalAction, default=True, help='Specify if test takes place')
 parser.add_argument('--shuffle', action=argparse.BooleanOptionalAction, default=True, help='Shuffling the train dataset')
 parser.add_argument('--batch-size', type=int, default=4, help='Batch size')
+parser.add_argument('--vbatch', type=int, default=1, help='Virtual batch: gradients will be applied after vbatch epoch')
 parser.add_argument('--optimizer', type=str, default='adamw', help='Optimizer')
 parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of epochs')
 parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
 parser.add_argument('--patch-size', type=int, default=2, help='Patch size')
-parser.add_argument('--hidden-dim', type=int, default=256, help='hidden dimension')
-parser.add_argument('--dropout', type=float, default=0.0, help='dropout')
-parser.add_argument('--layers', type=int, default=4, help='layers')
-parser.add_argument('--heads', type=int, default=6, help='heads')
-parser.add_argument('--lr-schedule-type', type=str, default='none', choices=['none', 'plateau', 'graphcast'], help='LR schedule mode to use')
-parser.add_argument('--max-skip', type=int, default=3, help='max skip')
-parser.add_argument('--edge-channels-in', type=int, default=0, help='edge channels in')
-parser.add_argument('--fully-connected', action=argparse.BooleanOptionalAction, default=False, help='fully connected')
-parser.add_argument('--heights-file', type=str, default=None, help='Path to NetCDF file containing height data (z_ifc)')
+parser.add_argument('--vit-hidden-dim', type=int, default=256, help='Vit hidden dimension')
+parser.add_argument('--vit-layers', type=int, default=4, help='Vit layers')
+parser.add_argument('--vit-heads', type=int, default=6, help='Vit heads')
+parser.add_argument('--vit-dropout', type=float, default=0.0, help='Vit dropout')
+parser.add_argument('--lstm-units', nargs='+', type=int, default=[256, 512], help='LSTM units for RNN model')
+parser.add_argument('--mlp-units', nargs='+', type=int, default=[256, 256], help='MLP units for RNN model')
+parser.add_argument('--lstm-droprate', type=float, default=0.0, help='Dropout rate for LSTM layers')
+parser.add_argument('--height-in', type=int, default=70, help='Number of height levels')
+parser.add_argument('--channel-out', type=int, default=4, help='Output channels')
+parser.add_argument('--channel-3d', type=int, default=6, help='3D input channels')
+parser.add_argument('--channel-2d', type=int, default=6, help='2D input channels')
+parser.add_argument('--scale-output', action=argparse.BooleanOptionalAction, default=True)
+parser.add_argument('--smoothing-kernel', type=int, default=None, help='Smoothing kernel size')
+parser.add_argument('--beta', type=float, default=None, help='Beta for exponential decay')
+parser.add_argument('--beta-height', type=float, default=None, help='Beta height')
+parser.add_argument('--beta-height-sw', type=float, default=None, help='Beta height SW')
+parser.add_argument('--beta-height-lw', type=float, default=None, help='Beta height LW')
 args = parser.parse_args()
 
 
@@ -125,153 +133,60 @@ def get_normalization_params(stats_file):
                 torch.tensor(stats['mean3d']).to(device), \
                     torch.tensor(stats['var3d']).to(device)
     
-    
 def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
     logger.info('Preparing the model...')
-    if model_name == 'gnn_graphCast_new_residual':
-        from column_files.gnn_graphCast_new_residual import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
+    
+    if model_name == 'rnn':
+        from models.rnn import RnnIg
+        model = RnnIg(
+            x3d_mean=mean3d,
+            x3d_std=torch.sqrt(var3d),
+            x2d_mean=mean2d,
+            x2d_std=torch.sqrt(var2d),
+            args=args
         ).to(device)
-
-
-    elif model_name == 'gnn_graphCast_new':
-        from column_files.gnn_graphCast_new import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)        
         
-    elif model_name == 'gnn_graphCast_hirarchical':
-        from column_files.gnn_graphCast_hirarchical import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)        
+    elif model_name == 'FastRnnIg':
+        from models.rnn import FastRnnIg
+        model = FastRnnIg(
+            x3d_mean=mean3d,
+            x3d_var=var3d,
+            x2d_mean=mean2d,
+            x2d_var=var2d,
+            args=args
+        ).to(device)
         
-    elif model_name == 'gnn_graphCast_hirarchical2':
-        from column_files.gnn_graphCast_hirarchical2 import AtmosphericColumnGNN    
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)        
+    elif model_name == 'NewRnnIg':
+        from models.rnn import NewRnnIg
+        model = NewRnnIg(
+            x3d_mean=mean3d,
+            x3d_var=var3d,
+            x2d_mean=mean2d,
+            x2d_var=var2d,
+            args=args
+        ).to(device)
         
-    elif model_name == 'gnn_graphCast_multiMesh':
-        from column_files.gnn_graphCast_multiMesh import AtmosphericColumnGNN    
+    elif model_name == 'NewRnnIgSharedWeights':
+        from models.rnn import NewRnnIgSharedWeights
+        model = NewRnnIgSharedWeights(
+            x3d_mean=mean3d,
+            x3d_var=var3d,
+            x2d_mean=mean2d,
+            x2d_var=var2d,
+            args=args
+        ).to(device)
         
-        # Load heights from NetCDF file if specified
-        #if args.heights_file:
-        #    logger.info(f'Loading heights from {args.heights_file}')
-        #    from column_files.gnn_graphCast_multiMesh import load_vertical_heights
-        #    heights = load_vertical_heights(args.heights_file)
+    elif model_name == 'ClippedNewRnnIg':
+        from models.rnn import ClippedNewRnnIg
+        model = ClippedNewRnnIg(
+            x3d_mean=mean3d,
+            x3d_var=var3d,
+            x2d_mean=mean2d,
+            x2d_var=var2d,
+            args=args
+        ).to(device)
         
         
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-            edge_channels_in=args.edge_channels_in,
-            fully_connected=args.fully_connected,
-            #heights=heights,
-        ).to(device)    
-        
-    
-    elif model_name == 'gnn_graphCast_hirarchical_concat':
-        from column_files.gnn_graphCast_hirarchical_concat import AtmosphericColumnGNN
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)     
-        
-    elif model_name == 'gnn_graphCast_hirarchical_concatBef':
-        from column_files.gnn_graphCast_hirarchical_concatBef import AtmosphericColumnGNN
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)       
-        
-    elif model_name == 'gnn_graphCast_hirarchical':
-        from column_files.gnn_graphCast_hirarchical import AtmosphericColumnGNN
-        model = AtmosphericColumnGNN(
-            num_cells=args.num_cells,
-            embed_dim=args.hidden_dim,
-            depth=args.layers, #num blocks
-            dropout=args.dropout, # used in the mlp
-            max_skip=args.max_skip,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device,
-            is_test=args.test,  
-        ).to(device)      
-    
-
-        
-    
-    
-    
     else:
         raise NotImplementedError('Model has not implemented yet!')
     return model
@@ -304,47 +219,19 @@ def train_model(model, train_set, valid_set):
     )
     wandb.watch(model, log_freq=100)
 
-
-
-    optimizer = optim.AdamW(
-        model.parameters(),
-        lr=args.learning_rate,
-        eps=1e-8,
-        weight_decay=0.01,
-        betas=(0.9, 0.95)  # Use GraphCast betas
-    )
-    
-    scheduler_mode = args.lr_schedule_type  # e.g. 'none', 'plateau', or 'graphcast'
-    scheduler = None
-
-    if scheduler_mode == 'plateau':
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer,
-            mode='min',
-            factor=0.2,
-            patience=3,
-            verbose=True,
-            min_lr=1e-7,
-            threshold=1e-3,
+    # Set up the optimizer based on the specified type
+    if args.optimizer == 'adam':
+        optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
+    elif args.optimizer == 'adamw':
+        optimizer = optim.AdamW(
+            model.parameters(), 
+            lr=args.learning_rate,
+            eps=1e-8,
+            weight_decay=0.01  # basically applying ridge regression L2
         )
-        logger.info('Using ReduceLROnPlateau scheduler.')
-
-        
-    # TODO: Implement GraphCast two-phase (warmup + half-cosine) scheduling.
-    elif scheduler_mode == 'graphcast':
-        # We will manually implement warmup + half-cosine in the loop below
-        logger.info('Using GraphCast two-phase (warmup + half-cosine) scheduling.')
     else:
-        logger.info('No scheduler. Using constant LR = args.learning_rate')
+        raise NameError('optimizer not supported.')
     
-    
-    # He initialization (recommended)
-    for name, param in model.named_parameters():
-        if param.dim() > 1:
-            nn.init.kaiming_uniform_(param)
-            
-            
-
     # Initialize loss and metric trackers
     train_loss = MeanSquaredError().to(device)
     valid_loss = MeanSquaredError().to(device)
@@ -361,10 +248,13 @@ def train_model(model, train_set, valid_set):
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         init_epoch = cp_id
+        # vbatch = min(args.vbatch + (init_epoch/2), 20)
         logger.info(f'Training will continue from epoch: {init_epoch}/{args.num_epoch}')
     else:
         init_epoch = 0
+        # vbatch = args.vbatch
 
+    vbatch = args.vbatch
     epoch_number = init_epoch
     best_loss = 1e9999999 
       
@@ -383,23 +273,20 @@ def train_model(model, train_set, valid_set):
             batch_x3, batch_x2, batch_y = data
             batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
 
-            optimizer.zero_grad()
-
-            outputs = model(batch_x3, batch_x2, edge_attr=None)
+            outputs = model(batch_x3, batch_x2)
             loss = train_loss(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
             
-            loss.backward()
-            
-            torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
-            
-            optimizer.step()
-            t2_1 = time.perf_counter()
-            
-            if i % 100 == 99:
-                curr_lr = optimizer.param_groups[0]['lr']
-                print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, lr: {curr_lr:.6f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
-            
+            if i > 0 and i % vbatch == 0:
+                optimizer.zero_grad()
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
+                optimizer.step()
+                t2_1 = time.perf_counter()
+                
+                if i % 100 == 99 or vbatch > 1:
+                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+                
 
         # Validation step
         model.eval()
@@ -422,19 +309,6 @@ def train_model(model, train_set, valid_set):
         total_valid_mae = valid_mae.compute()
 
         t2 = time.perf_counter()
-        
-        # Step the standard scheduler if using 'plateau' 
-        if scheduler_mode == 'plateau':
-            scheduler.step(total_valid_loss)
-            curr_lr = optimizer.param_groups[0]['lr']
-            wandb.log({'learning_rate': curr_lr})
-
-        # Otherwise, if using 'graphcast', we've already updated per batch,
-        # so we just log the last lr from the final param_group
-        elif scheduler_mode == 'graphcast':
-            curr_lr = optimizer.param_groups[0]['lr']
-        else:
-            curr_lr = optimizer.param_groups[0]['lr']  # constant LR
 
         # Log metrics to W&B
         wandb.log({
@@ -442,14 +316,12 @@ def train_model(model, train_set, valid_set):
             'loss': total_train_loss,
             'val_loss': total_valid_loss,
             'mean_absolute_error': total_train_mae,
-            'val_mean_absolute_error': total_valid_mae,
-            'learning_rate': curr_lr
+            'val_mean_absolute_error': total_valid_mae
             })
 
         # Print epoch summary
         print(f'{epoch_number:03}/{args.num_epoch}: ',
               f'time: {t2-t1:.3f}', 
-              f'lr: {curr_lr:.6f}',
               f'loss: {total_train_loss:.4f} ',
               f'mean_absolute_error: {total_train_mae:.4f}, ',
               f'val_loss: {total_valid_loss:.4f}, ',
@@ -643,8 +515,6 @@ def main():
         test_files = prng.choice(test_files, max(1, int(args.percent*len(test_files))))
 
     stats_file = join(args.dataset, 'normalizer_stats_per_feat.pickle')
-    
-
     mean2d, var2d, mean3d, var3d = get_normalization_params(stats_file)
     model = get_model(args.model, mean2d, var2d, mean3d, var3d, args.test)
     num_params = count_parameters(model)
@@ -660,8 +530,7 @@ def main():
 
         train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
         val_loader = get_column_data_with_disk_cache(val_files, shuffle = False, subsample=1.0)
-        
-        # Train the model (heights are already incorporated via the model initialization)
+   
         train_model(model, train_loader, val_loader)
 
         tr2 = time.perf_counter(), time.process_time()

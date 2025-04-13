@@ -119,7 +119,9 @@ models = [
     # {'name': 'AFNO-Emb128-concat_w0_layerNorm','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_concatEasy_clean_wO_LayerNorm/test'},
     # {'name': 'GNN-Hirarchical-Emb128-l4-h5','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256/test'},
 
-
+    {'name': 'GNN-gt70-Emb128-l2','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L2_H70_Emb128_new/test'},
+    {'name': 'GNN-gt70-Emb128-l3','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L3_H70_Emb128_new/test'},
+    {'name': 'GNN-gt70-Emb128-l4','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L4_H70_Emb256_new/test'},
 
 
 ]
@@ -160,9 +162,6 @@ for model in models:
 
     # y_mae_gs.append(torch.flip(y_mae_g, [1]))
     # h_mae_gs.append(torch.flip(h_mae_g, [1]))
-    
-    y_mae_hs.append(torch.flip(y_mae_h, [0]))
-    h_mae_hs.append(torch.flip(h_mae_h, [0]))
     
     y_mae_hs.append(torch.flip(y_mae_h, [0]))
     h_mae_hs.append(torch.flip(h_mae_h, [0]))
@@ -209,4 +208,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/test_orderWoFlip.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/AFNO_vs_GNN.png', bbox_inches='tight', dpi=300)

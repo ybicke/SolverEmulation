@@ -69,7 +69,7 @@ class AtmosphericColumnGNN(nn.Module):
 
     def create_edge_index(self, num_nodes, batch_size, device):
         """
-        Creates edge indices for a batch of 1D chain graphs.
+    Creates edge indices for a batch of 1D chain graphs.
         Each graph represents a linear chain where nodes are sequentially connected.
         Ensures unique node indices across graphs in the batch.
 

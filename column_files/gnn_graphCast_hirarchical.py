@@ -68,7 +68,7 @@ class AtmosphericColumnGNN(nn.Module):
         x2d = self.normalizer2d(x2d)
 
         # encode the height and surface data
-        x = torch.cat([x2d.unsqueeze(1),x3d], dim=1)
+        x = torch.cat([x2d.unsqueeze(1), x3d], dim=1)
         x = self.encoder(x)
         
         # create the edge indices for the 1D chain graph and process the data with the GNN layers

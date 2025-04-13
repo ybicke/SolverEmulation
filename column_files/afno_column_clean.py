@@ -129,17 +129,7 @@ class Block(nn.Module):
     
     
 class AFNONet(nn.Module):
-    """
-    Args:
-        patch_size (int, tuple): patch size
-        in_chans (int): number of input channels
-        embed_dim (int): embedding dimension
-        depth (int): depth of transformer layers, here blocks
-        mlp_ratio (int): ratio of mlp hidden dim to embedding dim
-        drop_rate (float): dropout rate
-        drop_path_rate (float): stochastic depth rate
-        norm_layer: (nn.Module): normalization layer
-    """
+
         
     def __init__(self, 
                  patch_size,

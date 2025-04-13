@@ -45,11 +45,15 @@ def print_netcdf_info(file_path):
             for attr_name, attr_value in ds[var].attrs.items():
                 print(f"  {attr_name:15}: {attr_value}")
     
-    # Print coordinates for a single point
+    return ds
+
+def analyze_heights(file_path):
+    """Analyze height data in the NetCDF file, focusing on z_ifc variable"""
+    ds = print_netcdf_info(file_path)
+    
     print('\n' + '='*50)
-    print('SAMPLE POINT COORDINATES (first point)')
+    print('HEIGHT ANALYSIS (z_ifc)')
     print('='*50)
-    single_point = ds.isel(time=0, height=0, ncells=0)
     
     for coord_name in single_point.coords:
         coord_data = single_point[coord_name]
@@ -68,4 +72,5 @@ file_tendencies = '../../../../../mydata/deepcloud/salman/dataset/tmp/ml_ecrad_a
 
 file_tendencies = '../../../../../s3/deepcloud/deepcloud/icon_tendencies/year1/ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_DOM01_ml_0001_lonlat.nc'
 file_inputs = '../../../../../s3/deepcloud/deepcloud/icon_tendencies/year1/ml_ecrad_ape_R2B05_myrunscript_1year_183min_tendencies_inputs_DOM01_ml_0001_lonlat.nc'
+/mydata/deepcloud/yves/SolverEmulation/data_exploration/ml_ecrad_ape_R2B05_myrunscript_ecRad5d_infero5d_70lev_atm_3d_ICONGRID_DOM01_ml_lonlat (1).nc
 print_netcdf_info(file_inputs)

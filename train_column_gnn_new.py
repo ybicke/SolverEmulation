@@ -197,6 +197,23 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             is_test=args.test,  
         ).to(device)
     
+    elif model_name == 'gnn_graphCast_multiMesh':
+        from column_files.gnn_graphCast_multiMesh import AtmosphericColumnGNN    
+        model = AtmosphericColumnGNN(
+            num_cells=args.num_cells,
+            embed_dim=args.hidden_dim,
+            depth=args.layers, #num blocks
+            dropout=args.dropout, # used in the mlp
+            max_skip=args.max_skip,
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device,
+            is_test=args.test,  
+        ).to(device)    
+    
+    
     
     
     else:
