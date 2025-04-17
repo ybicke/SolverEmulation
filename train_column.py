@@ -181,6 +181,7 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
         
     
     
+    
     # AFNO Implementation
     elif model_name == 'afno':
         from column_files.afno_column_clean import AFNONet

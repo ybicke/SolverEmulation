@@ -95,7 +95,7 @@ class FastRnnIg(RnnIg):
     lstm_units = args.lstm_units
     self.scale_output = args.scale_output
     activation = 'sigmoid' if args.scale_output else 'relu'
-   
+    
     self.p_layer1 = FastParallelLayers(
       input_size=channel_3d+channel_2d, 
       num_players=height_in+1, 
@@ -105,6 +105,7 @@ class FastRnnIg(RnnIg):
 
     lstm_input_sizes = mlp_units[-1:] + [2*e for e in lstm_units]
     
+
     self.p_layer2 = FastParallelLayers(
       input_size=lstm_input_sizes[-1],
       num_players=height_in+1,

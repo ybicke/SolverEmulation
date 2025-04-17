@@ -1,0 +1,155 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+    
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "python": "/myhome/mambaforge/envs/deepFlux/bin/python",
+            "env": {
+                "PYTHONPATH": "/mydata/deepcloud/yves/SolverEmulation"
+            }
+        }, 
+            
+    {
+        "name": "Python Debugger: train_vit",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py",
+        "console": "integratedTerminal",
+        "python": "/myhome/mambaforge/envs/deepFlux/bin/python",
+        "env": {
+            "PYTHONPATH": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux"
+        },
+        "args": [
+            "--model", "vit",
+            "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+            "--save", "/mydata/deepcloud/yves/results_git/vit_test",
+            "--percent", "0.1",
+            "--subsample", "0.1",
+            "--num-workers", "4",
+            "--prefetch-factor", "2",
+            "--wandb-mode", "disabled",
+            "--num-cells", "81920",
+            "--channel-3d", "6",
+            "--channel-2d", "6",
+            "--channel-out", "4",
+            "--height-in", "71",
+            "--train",
+            "--test",
+            "--shuffle", 
+            "--batch-size", "4",
+            "--optimizer", "adamw",
+            "--clip", "1",
+            "--num-epoch", "5",
+            "--learning-rate", "0.001",
+            "--hidden-dim", "128",
+            "--layers", "4",
+            "--heads", "6",
+            "--dim-head", "64",
+            "--dropout", "0.0",
+            "--emb-dropout", "0.0",
+            "--patch-size", "1",
+            "--scale-output"
+        ]
+    },
+
+
+    {
+        "name": "Python Debugger: train_afno",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py",
+        "console": "integratedTerminal",
+        "python": "/myhome/mambaforge/envs/deepFlux/bin/python",
+        "env": {
+            "PYTHONPATH": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux"
+        },
+        "args": [
+            "--model", "afno",
+            "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+            "--save", "/mydata/deepcloud/yves/results_git/afno_test",
+            "--percent", "0.1",
+            "--subsample", "0.1",
+            "--num-workers", "4",
+            "--prefetch-factor", "2",
+            "--wandb-mode", "disabled",
+            "--num-cells", "81920",
+            "--channel-3d", "6",
+            "--channel-2d", "6",
+            "--channel-out", "4",
+            "--height-in", "71",
+            "--train",
+            "--test",
+            "--shuffle", 
+            "--batch-size", "4",
+            "--optimizer", "adamw",
+            "--clip", "1",
+            "--num-epoch", "5",
+            "--learning-rate", "0.001",
+            "--hidden-dim", "128",
+            "--layers", "4",
+            "--dropout", "0.0",
+            "--patch-size", "1",
+            "--scale-output",
+            "--afno-sparsity-threshold", "0.01",        
+            "--hard-thresholding-fraction", "1",
+            "--fno-blocks", "8",
+            "--hidden-size-factor", "1",
+            "--double-skip",
+            "--mlp-ratio", "4.0"
+        ]
+    },
+
+    {
+        "name": "Python Debugger: train_gnn",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py",
+        "console": "integratedTerminal",
+        "python": "/myhome/mambaforge/envs/deepFlux/bin/python",
+        "env": {
+            "PYTHONPATH": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux"
+        },
+        "args": [
+            "--model", "gnn",
+            "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+            "--save", "/mydata/deepcloud/yves/results_git/gnn_test",
+            "--percent", "0.1",
+            "--subsample", "0.1",
+            "--num-workers", "4",
+            "--prefetch-factor", "2",
+            "--wandb-mode", "disabled",
+            "--num-cells", "81920",
+            "--channel-3d", "6",
+            "--channel-2d", "6",
+            "--channel-out", "4",
+            "--height-in", "71",
+            "--train",
+            "--test",
+            "--shuffle", 
+            "--batch-size", "4",
+            "--optimizer", "adamw",
+            "--clip", "1",
+            "--num-epoch", "5",
+            "--learning-rate", "0.001",
+            "--hidden-dim", "128",
+            "--layers", "4",
+            "--dropout", "0.0",
+            "--scale-output",
+            "--max-skip", "3",
+            "--edge-channels-in", "1",
+            "--fully-connected",
+            "--heights-file", "/mydata/deepcloud/yves/SolverEmulation/data_exploration/ml_ecrad_ape_R2B05_myrunscript_ecRad5d_infero5d_70lev_atm_3d_ICONGRID_DOM01_ml_lonlat.nc"
+        ]
+    }
+
+    ]
+}
