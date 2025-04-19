@@ -78,9 +78,10 @@ parser.add_argument('--dropout', type=float, default=0.0, help='Dropout rate for
 parser.add_argument('--channel-out', type=int, default=4, help='Output channels for all models')
 parser.add_argument('--channel-3d', type=int, default=6, help='3D input channels')
 parser.add_argument('--channel-2d', type=int, default=6, help='2D input channels')
-parser.add_argument('--height-in', type=int, default=70, help='Number of height levels')
 parser.add_argument('--patch-size', type=int, default=2, help='Patch size for transformer models')
 parser.add_argument('--scale-output', action=argparse.BooleanOptionalAction, default=True, help='Whether to scale output')
+parser.add_argument('--height-in', type=int, default=70, help='Number of height levels')
+
 
 # To create argument groups, just call the method on the parser
 # These groups are for better help text organization, but all arguments are still part of the main namespace
@@ -114,11 +115,7 @@ rnn_group = parser.add_argument_group('RNN model arguments')
 rnn_group.add_argument('--lstm-units', nargs='+', type=int, default=[256, 512], help='LSTM units for RNN model')
 rnn_group.add_argument('--mlp-units', nargs='+', type=int, default=[256, 256], help='MLP units for RNN model')
 rnn_group.add_argument('--lstm-droprate', type=float, default=0.0, help='Dropout rate for LSTM layers')
-rnn_group.add_argument('--smoothing-kernel', type=int, default=None, help='Smoothing kernel size')
-rnn_group.add_argument('--beta', type=float, default=None, help='Beta for exponential decay')
-rnn_group.add_argument('--beta-height', type=float, default=None, help='Beta height')
-rnn_group.add_argument('--beta-height-sw', type=float, default=None, help='Beta height SW')
-rnn_group.add_argument('--beta-height-lw', type=float, default=None, help='Beta height LW')
+
 
 args = parser.parse_args()
 
@@ -198,12 +195,8 @@ def get_model(model_name):
         
     
     elif model_name == 'gnn':
-        from models.gnn import AtmosphericColumnGNN, load_vertical_heights
+        from models.gnn import AtmosphericColumnGNN
         
-        # Load heights from file if provided
-        heights = None
-        if args.heights_file is not None:
-            heights = load_vertical_heights(args.heights_file)
                 
         model = AtmosphericColumnGNN(
             embed_dim=args.hidden_dim,
@@ -216,20 +209,107 @@ def get_model(model_name):
             channels_out=args.channel_out,
             edge_channels_in=args.edge_channels_in,
             fully_connected=args.fully_connected,
-            heights=heights,
+            device=device
+        ).to(device)    
+       
+    elif model_name == 'gnn_broadcast':
+        from models.gnn_broadcast import AtmosphericColumnGNN  
+                
+        model = AtmosphericColumnGNN(
+            embed_dim=args.hidden_dim,
+            depth=args.layers, 
+            dropout=args.dropout,
+            max_skip=args.max_skip,
+            emb_dropout=args.dropout,  # Using main dropout for embedding
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            edge_channels_in=args.edge_channels_in,
+            fully_connected=args.fully_connected,
+            device=device
+        ).to(device)      
+        
+    elif model_name == 'gnn_broadcast_1':
+        from models.gnn_broadcast_1 import AtmosphericColumnGNN  
+                
+        model = AtmosphericColumnGNN(
+            embed_dim=args.hidden_dim,
+            depth=args.layers, 
+            dropout=args.dropout,
+            max_skip=args.max_skip,
+            emb_dropout=args.dropout,  # Using main dropout for embedding
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            edge_channels_in=args.edge_channels_in,
+            fully_connected=args.fully_connected,
+            device=device
+        ).to(device)    
+        
+    elif model_name == 'gnn_broadcast_skip':
+        from models.gnn_broadcast_skip import AtmosphericColumnGNN  
+                
+        model = AtmosphericColumnGNN(
+            embed_dim=args.hidden_dim,
+            depth=args.layers, 
+            dropout=args.dropout,
+            max_skip=args.max_skip,
+            emb_dropout=args.dropout,  # Using main dropout for embedding
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            edge_channels_in=args.edge_channels_in,
+            fully_connected=args.fully_connected,
             device=device
         ).to(device)    
         
         
-    elif model_name == 'fast_rnn':
-        from models.rnn_new import FastRnnIg
+    elif model_name == 'gnn_edgeFeat':
+        from models.gnn_edgeFeat import AtmosphericColumnGNN
+        
+        model = AtmosphericColumnGNN(
+            embed_dim=args.hidden_dim,
+            depth=args.layers, 
+            dropout=args.dropout,
+            max_skip=args.max_skip,
+            emb_dropout=args.dropout,  # Using main dropout for embedding
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            edge_channels_in=args.edge_channels_in,
+            fully_connected=args.fully_connected,
+            device=device
+        ).to(device)    
+        
+    elif model_name == 'gnn_zeroEdge_encoding':
+        from models.gnn_zeroEdge_encoding import AtmosphericColumnGNN
+        
+        model = AtmosphericColumnGNN(
+            embed_dim=args.hidden_dim,
+            depth=args.layers, 
+            dropout=args.dropout,
+            max_skip=args.max_skip,
+            emb_dropout=args.dropout,  # Using main dropout for embedding
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            edge_channels_in=args.edge_channels_in,
+            fully_connected=args.fully_connected,
+            device=device
+        ).to(device)    
+        
+        
+        
+        
+    elif model_name == 'rnn':
+        from models.rnn import FastRnnIg
         model = FastRnnIg(
-            dropout=args.dropout, 
             height_in=args.height_in,
             channel_out=args.channel_out,
             channel_3d=args.channel_3d,
             channel_2d=args.channel_2d,
             lstm_units=args.lstm_units,
+            lstm_droprate=args.lstm_droprate,
             mlp_units=args.mlp_units,
             device=device
         ).to(device)

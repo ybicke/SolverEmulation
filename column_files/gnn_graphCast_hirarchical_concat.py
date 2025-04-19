@@ -69,7 +69,6 @@ class AtmosphericColumnGNN(nn.Module):
         x2d = self.normalizer2d(x2d)
 
         x2d_expanded = x2d.unsqueeze(1).expand(-1, L, -1)  # [B, L, channels_in_2d]
-
         x = torch.cat([x2d_expanded, x3d], dim=-1)  # [B, L, channels_in_3d + channels_in_2d]
 
         x = self.encoder(x)

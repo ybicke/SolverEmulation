@@ -4,35 +4,38 @@
 set -e
 
 # Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
-source /mydata/deepcloud/yves/SolverEmulation/bash_scripts/setup.sh
+source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.sh
 
 # Check if GPU available
 #nvidia-smi
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation
+myfolder=/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/
 
 
 # run script
 
 cd $myfolder
-echo training$line_number started!
+echo "GNN training started!"
 
 
 # bash <(sed -n "${line_number}p" run_all_models.sh)
 
 
-# Run the training script with specified parameters
-python train_column_rnn.py \
-    --model FastRnnIg \
+# Run the training script with all required parameters
+python train_models.py \
+    --model gnn_broadcast_skip \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/results_git/rnn_BiLSTM_fast_small \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_256_h5_l4_broadcast_skip \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
+    --channel-3d 6 \
+    --channel-2d 6 \
+    --channel-out 4 \
     --train \
     --test \
     --shuffle \
@@ -41,11 +44,11 @@ python train_column_rnn.py \
     --clip 1 \
     --num-epoch 30 \
     --learning-rate 0.0005 \
-    --wandb-mode online \
-    --channel-out 4 \
-    --channel-3d 6 \
-    --channel-2d 6 \
-    --lstm-units 64 128 256 \
-    --mlp-units 64 128\
-    --lstm-droprate 0.0 \
-    --scale-output
+    --hidden-dim 256 \
+    --layers 4 \
+    --dropout 0.0 \
+    --edge-channels-in 1 \
+    --no-fully-connected \
+    --max-skip 5 \
+    --wandb-mode online
+

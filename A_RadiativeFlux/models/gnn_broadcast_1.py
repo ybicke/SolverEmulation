@@ -29,7 +29,7 @@ class AtmosphericColumnGNN(BaseRadiationModel):
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
-
+        
         self.channels_out = channels_out
         
         self.max_skip = max_skip
@@ -37,7 +37,7 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         self.fully_connected = fully_connected
         self.edge_channels_in = edge_channels_in
                 
-        channels_in = channel_3d # + channel_2d
+        channels_in = channel_3d + channel_2d
 
         self.encoder = Encoder(channels_in, edge_channels_in, embed_dim, emb_dropout)
         self.processor = Processor(embed_dim, depth=depth, dropout=dropout)
@@ -50,8 +50,17 @@ class AtmosphericColumnGNN(BaseRadiationModel):
     def forward(self, x3d_norm, x2d_norm, x2d_orig):
         B, L, _ = x3d_norm.shape
 
-        # encode the height and surface data
-        x = torch.cat([x2d_norm.unsqueeze(1), x3d_norm], dim=1)
+        # Append surface features to each atmospheric level
+        surface_features = x2d_norm.unsqueeze(1)
+        repeat_surface_at_all_levels = surface_features.repeat(1, L, 1)
+        augmented_atmospheric_column = torch.cat([x3d_norm, repeat_surface_at_all_levels], dim=-1)
+        
+        # Create extra surface nodes with zeros and match the batch dimension
+        one_surface_tensor = torch.ones(B, 1, x2d_norm.shape[1], device=x3d_norm.device)
+        append_one_surface_tensor = torch.cat([one_surface_tensor, surface_features], dim=-1)
+        
+        # Combine extra zero surface nodes with atmospheric columns
+        x = torch.cat([augmented_atmospheric_column, append_one_surface_tensor], dim=1)
         
         # create the edge indices based on chosen connectivity pattern
         if self.fully_connected:
@@ -175,11 +184,6 @@ class Processor(nn.Module):
         ])
         
     def forward(self, x, edge_index, edge_attr):
-        # Initialize edge attributes if None
-        if edge_attr is None:
-            num_edges = edge_index.size(1)
-            # Initialize with zeros matching the node embedding dimension
-            edge_attr = torch.zeros(num_edges, x.size(1), device=x.device)
             
         for layer in self.layers:
             # Compute node and edge updates

@@ -51,7 +51,7 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         B, L, _ = x3d_norm.shape
 
         # encode the height and surface data
-        x = torch.cat([x2d_norm.unsqueeze(1), x3d_norm], dim=1)
+        x = torch.cat([x3d_norm, x2d_norm.unsqueeze(1)], dim=1)
         
         # create the edge indices based on chosen connectivity pattern
         if self.fully_connected:
@@ -64,11 +64,14 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         B, N, E = x.shape
         x = x.view(B*N, E)
         
-        # Now create edge features with the SAME dimension as node features
+        # Create initial edge features as zeros with shape [num_edges, edge_channels_in]
         num_edges = edge_index.size(1)
-        edge_attr_encoded = torch.zeros(num_edges, self.embed_dim, device=x.device)
-        
-        # Pass directly to processor, skipping edge encoding
+        edge_attr = torch.zeros(num_edges, self.edge_channels_in, device=x.device)
+
+        # Pass through encoder's edge_mlp to transform to embed_dim
+        edge_attr_encoded = self.encoder.edge_mlp(edge_attr)
+
+        # Then process
         x = self.processor(x, edge_index, edge_attr_encoded)
 
         # reshape the output to the original shape and decode the output variables
@@ -175,11 +178,7 @@ class Processor(nn.Module):
         ])
         
     def forward(self, x, edge_index, edge_attr):
-        # Initialize edge attributes if None
-        if edge_attr is None:
-            num_edges = edge_index.size(1)
-            # Initialize with zeros matching the node embedding dimension
-            edge_attr = torch.zeros(num_edges, x.size(1), device=x.device)
+
             
         for layer in self.layers:
             # Compute node and edge updates
