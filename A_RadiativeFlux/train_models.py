@@ -197,7 +197,6 @@ def get_model(model_name):
     elif model_name == 'gnn':
         from models.gnn import AtmosphericColumnGNN
         
-                
         model = AtmosphericColumnGNN(
             embed_dim=args.hidden_dim,
             depth=args.layers, 
@@ -212,39 +211,6 @@ def get_model(model_name):
             device=device
         ).to(device)    
        
-    elif model_name == 'gnn_broadcast':
-        from models.gnn_broadcast import AtmosphericColumnGNN  
-                
-        model = AtmosphericColumnGNN(
-            embed_dim=args.hidden_dim,
-            depth=args.layers, 
-            dropout=args.dropout,
-            max_skip=args.max_skip,
-            emb_dropout=args.dropout,  # Using main dropout for embedding
-            channel_3d=args.channel_3d,
-            channel_2d=args.channel_2d,
-            channels_out=args.channel_out,
-            edge_channels_in=args.edge_channels_in,
-            fully_connected=args.fully_connected,
-            device=device
-        ).to(device)      
-        
-    elif model_name == 'gnn_broadcast_1':
-        from models.gnn_broadcast_1 import AtmosphericColumnGNN  
-                
-        model = AtmosphericColumnGNN(
-            embed_dim=args.hidden_dim,
-            depth=args.layers, 
-            dropout=args.dropout,
-            max_skip=args.max_skip,
-            emb_dropout=args.dropout,  # Using main dropout for embedding
-            channel_3d=args.channel_3d,
-            channel_2d=args.channel_2d,
-            channels_out=args.channel_out,
-            edge_channels_in=args.edge_channels_in,
-            fully_connected=args.fully_connected,
-            device=device
-        ).to(device)    
         
     elif model_name == 'gnn_broadcast_skip':
         from models.gnn_broadcast_skip import AtmosphericColumnGNN  

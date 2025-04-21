@@ -25,9 +25,9 @@ echo "GNN training started!"
 
 # Run the training script with all required parameters
 python train_models.py \
-    --model gnn_broadcast \
+    --model gnn_broadcast_1 \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small_broadcast \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small_broadcast_1 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \

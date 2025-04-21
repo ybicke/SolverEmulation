@@ -25,9 +25,9 @@ echo "GNN training started!"
 
 # Run the training script with all required parameters
 python train_models.py \
-    --model gnn_zeroEdge_encoding \
+    --model gnn \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small_zeroEdge_encoding \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l3 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -44,7 +44,7 @@ python train_models.py \
     --clip 1 \
     --num-epoch 30 \
     --learning-rate 0.0005 \
-    --hidden-dim 32 \
+    --hidden-dim 64 \
     --layers 3 \
     --dropout 0.0 \
     --edge-channels-in 1 \

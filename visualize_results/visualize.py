@@ -130,11 +130,13 @@ models = [
     # {'name': 'GNN-Hirarchical-Emb256-l4-h5','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256_concat/test'},
     #{'name': 'GNN-edgeFeatures-Emb256-l4-h5','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L3_H70_Emb128_edgeFeatures/test'},
     
-    {'name': 'GNN-256-h5-l4-broadcast-skip','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_256_h5_l4_broadcast_skip/test'},
+    #{'name': 'GNN-256-h5-l4-broadcast-skip','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_256_h5_l4_broadcast_skip/test'},
 
-    {'name': 'GNN-small','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small/test'},
-    {'name': 'GNN-small-zeroEdge-encoding','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small_zeroEdge_encoding/test'},
-
+    {'name': 'GNN-32-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small_broadcast/test'},
+    #{'name': 'GNN-64-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l3/test'},
+    #{'name': 'GNN-64-l2','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l2/test'},
+    {'name': 'GNN-32-l6','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l6/test'},
+    {'name': 'GNN-32-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3/test'},
 
 
 ]
@@ -221,4 +223,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/GNN_small_vs_small_zeroEdge_encoding.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/GNN_32_l3_vs_l6.png', bbox_inches='tight', dpi=300)
