@@ -144,23 +144,6 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             device=device
         ).to(device)
         
-    elif model_name == 'vit_column4':
-        from vit_column import ViT4
-        model = ViT4(
-            num_cells=args.num_cells,
-            patch_size=args.patch_size,
-            dim=args.vit_hidden_dim,
-            mlp_dim=args.vit_hidden_dim,
-            depth=args.vit_layers,
-            heads=args.vit_heads,
-            dropout=args.vit_dropout,
-            mean2d=mean2d,
-            var2d=var2d, 
-            mean3d=mean3d, 
-            var3d=var3d,
-            device=device
-        ).to(device)
-        
     
     # AFNO Implementation
     elif model_name == 'afno':
@@ -378,14 +361,35 @@ def train_model(model, train_set, valid_set, target_means, target_vars):
 
         t2 = time.perf_counter()
 
-        # Log metrics to W&B
+        # ----------------------------------------------------------
+        # Additional scale‑aware metrics per epoch (scalar aggregate)
+        # ----------------------------------------------------------
+        #   NRMSE  =  RMSE / σ_y ,     R² = 1 – MSE / Var(y)
+        # Use mean variance across outputs as scalar σ² ; target_vars is vector
+        mean_var_targets = torch.mean(target_vars)
+        std_targets = torch.sqrt(mean_var_targets)
+
+        train_rmse = torch.sqrt(total_train_loss)
+        valid_rmse = torch.sqrt(total_valid_loss)
+        train_nrmse = train_rmse / std_targets
+        valid_nrmse = valid_rmse / std_targets
+
+        train_r2 = 1 - total_train_loss / mean_var_targets
+        valid_r2 = 1 - total_valid_loss / mean_var_targets
+        # ----------------------------------------------------------
+
+        # Log metrics to W&B (single call per epoch)
         wandb.log({
-            'epoch': epoch_number, 
+            'epoch': epoch_number,
             'loss': total_train_loss,
             'val_loss': total_valid_loss,
             'mean_absolute_error': total_train_mae,
-            'val_mean_absolute_error': total_valid_mae
-            })
+            'val_mean_absolute_error': total_valid_mae,
+            'nrmse': train_nrmse,
+            'val_nrmse': valid_nrmse,
+            'r2': train_r2,
+            'val_r2': valid_r2
+        })
 
         # Print epoch summary
         print(f'{epoch_number:03}/{args.num_epoch}: ',
@@ -394,7 +398,8 @@ def train_model(model, train_set, valid_set, target_means, target_vars):
               f'mean_absolute_error: {total_train_mae:.4f}, ',
               f'val_loss: {total_valid_loss:.4f}, ',
               f'val_mean_absolute_error: {total_valid_mae:.4f}')
-        
+        print(f'          nrmse: {train_nrmse:.4f}, val_nrmse: {valid_nrmse:.4f}, r2: {train_r2:.4f}, val_r2: {valid_r2:.4f}')
+
         # Save checkpoints
         checkpoint = {
             'epoch': epoch + 1,
@@ -415,30 +420,8 @@ def train_model(model, train_set, valid_set, target_means, target_vars):
         valid_mae.reset()
         train_loss.reset()
         valid_loss.reset()
+
     return model
-
-
-def calculate_heating_rates(y, x3d, x2d): 
-    # assumed output order is: [lw_up, lw_dn, sw_up, sw_dn]
-    g = 9.80665
-    cd = 1005
-    cv = 1855
-    
-    # Indices need to be checked for the new data structureq
-    qv_ecrad_in_idx = 7
-    pres_ecrad_in_idx = 3
-
-    qv = x3d[..., qv_ecrad_in_idx]
-    pres = x3d[..., pres_ecrad_in_idx]
-    
-    pres = torch.unsqueeze(pres, dim=-1)
-    qv = torch.unsqueeze(qv, dim=-1)
-    
-    heating_rate = ((-g / (cd * (1-qv) + cv * qv)) / \
-    (pres[..., :-1, :] - pres[...,1:,:])) * \
-    ((y[..., :-1, [0, 2]] - y[..., :-1, [1, 3]]) - \
-    (y[..., 1:, [0, 2]] - y[..., 1:, [1, 3]])) * 24*60*60
-    return heating_rate
 
 
 
@@ -495,11 +478,12 @@ def test_model(model, test_set, target_means, target_vars, train_target_mean):
         # Inverse transform targets
         outputs_original = inverse_transform_targets(outputs, target_means, target_vars)
         
+        
         # Collect true and predicted values for further analysis
         y_true.append(batch_y.detach().cpu())
         y_pred.append(outputs_original.detach().cpu())
-        #h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
-        #h_pred.append(calculate_heating_rates(outputs, batch_x3, batch_x2).detach().cpu())
+
+
 
         # Calculate and log loss and mean absolute error
         loss = test_loss(outputs, batch_y_transformed)
@@ -514,8 +498,7 @@ def test_model(model, test_set, target_means, target_vars, train_target_mean):
     # Concatenate all collected true and predicted values
     y_true = torch.cat(y_true, 0)
     y_pred = torch.cat(y_pred, 0)
-    #h_true = torch.cat(h_true, 0)
-    #h_pred = torch.cat(h_pred, 0)
+
 
     # Compute total test loss and mean absolute error
     total_test_loss = test_loss.compute()
@@ -532,8 +515,7 @@ def test_model(model, test_set, target_means, target_vars, train_target_mean):
     print(f'Model MSE: {model_mse:.4f}')
     print(f'MSE Ratio (Model / Baseline): {model_mse / baseline_mse:.4f}')
     
-    # mean_err = torch.mean(torch.abs(y_true - y_pred), dim=0)
-    # heat_err = torch.mean(torch.abs(h_true - h_pred), dim=0)
+
     
     if args.test_single_time_2d is not None:
         with open(join(test_path, 'y_true_2d.pickle'), 'wb') as handle:
@@ -550,12 +532,49 @@ def test_model(model, test_set, target_means, target_vars, train_target_mean):
         with open(join(test_path, 'y_pred.pickle'), 'wb') as handle:
             pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        #with open(join(test_path, 'h_true.pickle'), 'wb') as handle:
-        #    pickle.dump(h_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        
-        #with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
-        #    pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        
+
+    # --------------------------------------------------------------
+    # Additional, scale‑aware verification metrics
+    # --------------------------------------------------------------
+    def _flatten(t):
+        """Flatten all but the last dimension so metrics treat every level equally."""
+        return t.view(-1)
+    
+    # Flatten arrays for aggregate statistics
+    y_true_flat = _flatten(y_true)
+    y_pred_flat = _flatten(y_pred)
+
+    # Variance (population) of the true tendencies
+    var_true = torch.var(y_true_flat, unbiased=False)
+    std_true = torch.sqrt(var_true)
+
+    # Model RMSE / NRMSE
+    rmse_model = torch.sqrt(model_mse)
+    nrmse      = rmse_model / std_true
+
+    # R² (explained variance)
+    r2 = 1 - model_mse / var_true
+
+    # Anomaly Correlation Coefficient (ACC)
+    y_true_anom = y_true_flat - torch.mean(y_true_flat)
+    y_pred_anom = y_pred_flat - torch.mean(y_pred_flat)
+    acc_num = torch.sum(y_true_anom * y_pred_anom)
+    acc_den = torch.sqrt(torch.sum(y_true_anom ** 2) * torch.sum(y_pred_anom ** 2))
+    acc = acc_num / acc_den
+
+    # Skill score relative to baseline (climatology)
+    rmse_baseline = torch.sqrt(baseline_mse)
+    skill_score = 1 - rmse_model / rmse_baseline
+
+    print("\nScale‑aware metrics (aggregated over all outputs):")
+    print(f"  NRMSE                : {nrmse:.4f}")
+    print(f"  R² (explained var.)  : {r2:.4f}")
+    print(f"  ACC                  : {acc:.4f}")
+    print(f"  Skill vs. baseline   : {skill_score:.4f}\n")
+    
+    # --------------------------------------------------------------
+    # End of additional metrics
+    # --------------------------------------------------------------
 
 def test_loading_time(input_filenames, output_filenames, iter=10):
     logger.info('Test Loading time started...')
@@ -591,95 +610,99 @@ def get_column_data_with_disk_cache(input_filenames, output_filenames, subsample
 
 
 def transform_targets(batch_y, means, variances, k=4, min_scale=1e-6):
-    # batch_y: Tensor of shape (batch_size, num_levels, num_features)
-    # means: Tensor of shape (num_features,)
-    # variances: Tensor of shape (num_features,)
+    """Standardize targets to zero-mean, unit-variance representation.
     
-    # Compute standard deviations
-    std_devs = torch.sqrt(variances)
-    
-    # Compute scaling factors
-    scale_factors = k * std_devs
-    # scale_factors = torch.clamp(scale_factors, min=min_scale)
-    
-    # Reshape means and scales to match batch_y dimensions
+    Args:
+        batch_y: Raw targets (B,L,C) in physical units
+        means, variances: Per-channel statistics (C,)
+        k: Scale factor for normalizing to approx. [-1,1] range
+        min_scale: Lower bound for scaling to avoid div-by-zero
+    """
+    scale = torch.clamp(k * torch.sqrt(variances), min=min_scale)
     means = means.view(1, 1, -1).expand_as(batch_y)
-    scales = scale_factors.view(1, 1, -1).expand_as(batch_y)
+    scale = scale.view(1, 1, -1).expand_as(batch_y)
     
-    # Transform targets
-    batch_y_transformed = (batch_y - means) / scales
-    
-    return batch_y_transformed
+    return (batch_y - means) / scale
 
-def inverse_transform_targets(batch_y_transformed, means, variances, k=4, min_scale=1e-6):
-    # batch_y_transformed: Tensor of shape (batch_size, num_levels, num_features)
-    # means: Tensor of shape (num_features,)
-    # variances: Tensor of shape (num_features,)
+
+def inverse_transform_targets(y_norm, means, variances, k=4, min_scale=1e-6):
+    """Convert normalized values back to physical units."""
+    scale = torch.clamp(k * torch.sqrt(variances), min=min_scale)
+    means = means.view(1, 1, -1).expand_as(y_norm)
+    scale = scale.view(1, 1, -1).expand_as(y_norm)
     
-    # Compute standard deviations
-    std_devs = torch.sqrt(variances)
-    
-    # Compute scaling factors
-    scale_factors = k * std_devs
-    # scale_factors = torch.clamp(scale_factors, min=min_scale)
-    
-    # Reshape means and scales to match batch_y_transformed dimensions
-    means = means.view(1, 1, -1).expand_as(batch_y_transformed)
-    scales = scale_factors.view(1, 1, -1).expand_as(batch_y_transformed)
-    
-    # Inverse transform targets
-    batch_y_original = batch_y_transformed * scales + means
-    
-    return batch_y_original
+    return y_norm * scale + means
 
 
 
-def test_model_single_time_2d(model, test_loader, target_means, target_vars, save_path, time_chosen):
-    model.eval()
-    device = next(model.parameters()).device
+# def test_model_single_time_2d(model, test_loader, target_means, target_vars, save_path, time_chosen):
+#     """Run inference for **one** forecast time and store column‑wise diagnostics.
 
-    all_mae_values = []
-    all_y_true = []
-    all_y_pred = []
+#     The function converts predictions back to physical units, computes a
+#     mean‑absolute‑error aggregated over vertical levels for each column
+#     (resulting in a 2‑D field), and writes both the errors and the full
+#     y_true / y_pred tensors to ``save_path``.  The pickle filenames are
+#     suffixed with ``time_<time_chosen>`` so that multiple calls do not clash.
 
-    with torch.no_grad():
+#     Parameters
+#     ----------
+#     model : torch.nn.Module
+#         Trained emulator in *eval* mode.
+#     test_loader : DataLoader
+#         Must yield batches from the **single** time slice we want to analyse.
+#     target_means, target_vars : tensors
+#         Statistics needed for inverse transform.
+#     save_path : str
+#         Directory where pickles are saved.
+#     time_chosen : float
+#         The forecast time (hours since start, etc.) for filename tagging.
+#     """
+
+#     model.eval()
+#     device = next(model.parameters()).device
+
+#     all_mae_values = []
+#     all_y_true = []
+#     all_y_pred = []
+
+#     with torch.no_grad():
         
-        for batch in test_loader:
-            batch_x = batch[0].to(device)
-            batch_y = batch[2].to(device)
+#         for batch in test_loader:
+#             batch_x = batch[0].to(device)
+#             batch_y = batch[2].to(device)
 
-            # Transform targets using mean and variance
-            batch_y_transformed = transform_targets(batch_y, target_means, target_vars)
+#             # Transform targets using mean and variance
+#             batch_y_transformed = transform_targets(batch_y, target_means, target_vars)
 
-            # Forward pass
-            pred = model(batch_x)
+#             # Forward pass
+#             pred = model(batch_x)
 
-            # Inverse transform predictions
-            pred_original = inverse_transform_targets(pred, target_means, target_vars)
+#             # Inverse transform predictions
+#             pred_original = inverse_transform_targets(pred, target_means, target_vars)
 
-            # Compute MAE
-            mae = torch.abs(pred_original - batch_y).mean(dim=1)  # Compute MAE over height dimension
-            all_mae_values.append(mae.cpu().numpy())
+#             # Compute MAE
+#             mae = torch.abs(pred_original - batch_y).mean(dim=1)  # Compute MAE over height dimension
+#             all_mae_values.append(mae.cpu().numpy())
 
-            # Collect true and predicted values
-            all_y_true.append(batch_y.cpu().numpy())
-            all_y_pred.append(pred_original.cpu().numpy())
+#             # Collect true and predicted values
+#             all_y_true.append(batch_y.cpu().numpy())
+#             all_y_pred.append(pred_original.cpu().numpy())
 
-    # Concatenate MAE, true, and predicted values from all batches
-    mae_2d = np.concatenate(all_mae_values, axis=0)
-    y_true = np.concatenate(all_y_true, axis=0)
-    y_pred = np.concatenate(all_y_pred, axis=0)
+#     # Concatenate MAE, true, and predicted values from all batches
+#     mae_2d = np.concatenate(all_mae_values, axis=0)
+#     y_true = np.concatenate(all_y_true, axis=0)
+#     y_pred = np.concatenate(all_y_pred, axis=0)
 
-    # Save MAE, true, and predicted values to files with specific naming
-    os.makedirs(save_path, exist_ok=True)
-    with open(os.path.join(save_path, f"test_mae_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
-        pickle.dump(mae_2d, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open(os.path.join(save_path, f"y_true_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
-        pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open(os.path.join(save_path, f"y_pred_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
-        pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     # Save MAE, true, and predicted values to files with specific naming
+#     os.makedirs(save_path, exist_ok=True)
+#     with open(os.path.join(save_path, f"test_mae_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
+#         pickle.dump(mae_2d, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     with open(os.path.join(save_path, f"y_true_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
+#         pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     with open(os.path.join(save_path, f"y_pred_2d_time_{time_chosen:.1f}.pickle"), "wb") as handle:
+#         pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    return mae_2d, y_true, y_pred
+#     return mae_2d, y_true, y_pred
 
 
 

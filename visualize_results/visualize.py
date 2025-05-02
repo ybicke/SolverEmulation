@@ -123,7 +123,7 @@ models = [
 
     #{'name': 'GNN-gt70-Emb128-l2','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L2_H70_Emb128_new/test'},
     #{'name': 'GNN-gt70-Emb128-l3','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L3_H70_Emb128_new/test'},
-    {'name': 'GNN-gt70-Emb256-l4','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L4_H70_Emb256_new/test'},
+    # {'name': 'GNN-gt70-Emb256-l4','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L4_H70_Emb256_new/test'},
     # {'name': 'Bi-LSTM-Emb128','path': '/mydata/deepcloud/yves/results_git/rnn_BiLSTM_128_128/test'},
     #{'name': 'Bi-LSTM-Emb256','path': '/mydata/deepcloud/yves/results_git/rnn_BiLSTM_256_256/test'},
     
@@ -132,11 +132,16 @@ models = [
     
     #{'name': 'GNN-256-h5-l4-broadcast-skip','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_256_h5_l4_broadcast_skip/test'},
 
-    {'name': 'GNN-32-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small_broadcast/test'},
+    #{'name': 'GNN-32-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small_broadcast/test'},
     #{'name': 'GNN-64-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l3/test'},
     #{'name': 'GNN-64-l2','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l2/test'},
-    {'name': 'GNN-32-l6','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l6/test'},
+    #{'name': 'GNN-64-l4','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l4/test'},
+
+    #{'name': 'GNN-32-l6','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l6/test'},
     {'name': 'GNN-32-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3/test'},
+    
+    {'name': 'GNN-512-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_medium/test'},
+    {'name': 'BiLSTM-128-265','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/rnn_medium/test'},
 
 
 ]
@@ -223,4 +228,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/GNN_32_l3_vs_l6.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/GNN_medium_vs_BiLSTM_medium.png', bbox_inches='tight', dpi=300)

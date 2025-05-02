@@ -31,9 +31,18 @@ for model in models:
         y_pred = pickle.load(handle)
     print(f'y_pred shape: {y_pred.shape}')
 
+    # >>> choose which test‑set indices you want to look at <<<
+    #    – a single sample,    e.g. [17]
+    #    – a few samples,      e.g. [3, 8, 12]
+    #    – or the first k,     e.g. range(5)
+    sample_idx = [134]                 # change this line to taste
+    # ---------------------------------------------------------------
 
-    
-    
+    # keep only the requested samples
+    y_true = y_true[sample_idx]
+    y_pred = y_pred[sample_idx]
+    # ---------------------------------------------------------------
+
     # Convert y_true and y_pred to PyTorch tensors if they are numpy arrays
     if isinstance(y_true, np.ndarray):
         y_true = torch.tensor(y_true)
@@ -136,6 +145,6 @@ for i, (label, units) in enumerate(target_units.items()):
 ax_list[0].legend(fontsize=12, loc='best')
 
 plt.tight_layout()
-plt.savefig('/mydata/deepcloud/yves/results-temp/tendency-norm-targetMean-mae-afno-new.png',
+plt.savefig('/mydata/deepcloud/yves/Tendency-normTarget-mae-afno-singleSample.png',
             bbox_inches='tight', dpi=300)   
 plt.show()

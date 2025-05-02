@@ -36,7 +36,7 @@ python train_models.py \
     --channel-3d 6 \
     --channel-2d 6 \
     --channel-out 4 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 512 \
@@ -49,5 +49,4 @@ python train_models.py \
     --dropout 0.0 \
     --edge-channels-in 1 \
     --fully-connected \
-    --wandb-mode online
-
+    --wandb-mode offline

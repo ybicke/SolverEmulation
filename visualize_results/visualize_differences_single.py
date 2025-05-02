@@ -7,19 +7,19 @@ from itertools import cycle
 
 # Define the model names and paths
 model_names = [
-    'graphCast_multiMesh_00001_L4_H70_Emb256_new',
-    'rnn_BiLSTM_128_128',
+    'gnn_medium',
+    'rnn_medium',
 ]
 
 model_paths = [
-    f'/mydata/deepcloud/yves/results_git/{model_names[0]}/test',
-    f'/mydata/deepcloud/yves/results_git/{model_names[1]}/test',
+    f'/mydata/deepcloud/yves/A_RadiativeFlux/results/{model_names[0]}/test',
+    f'/mydata/deepcloud/yves/A_RadiativeFlux/results/{model_names[1]}/test',
 ]
 
 models = [{'name': name, 'path': path} for name, path in zip(model_names, model_paths)]
 
 # Select a single sample
-sample_index = 60  # Change this to select a different sample
+sample_index = 91  # Change this to select a different sample
 
 # Define vertical level range to visualize
 min_level = 35  # Minimum vertical level (inclusive)
@@ -133,5 +133,5 @@ plt.tight_layout(rect=[0, 0.05, 1, 0.95])
 plt.suptitle(f"Sample {sample_index}: Vertical Differences Comparison (Levels {min_level}-{max_level-1})", fontsize=16)
 
 # Save the figure
-plt.savefig(f'/mydata/deepcloud/yves/results_git/vertical_differences_GNN_vs_BiLSTM_sample_{sample_index}_levels_{min_level}-{max_level-1}.png', bbox_inches='tight', dpi=300)
-print(f"Figure saved as vertical_differences_GNN_vs_BiLSTM_sample_{sample_index}_levels_{min_level}-{max_level-1}.png")
+plt.savefig(f'/mydata/deepcloud/yves/Vertical_differences_GNN_medium_vs_BiLSTM_medium_sample_{sample_index}_levels_{min_level}-{max_level-1}.png', bbox_inches='tight', dpi=300)
+print(f"Figure saved as Vertical_differences_GNN_medium_vs_BiLSTM_medium_sample_{sample_index}_levels_{min_level}-{max_level-1}.png")

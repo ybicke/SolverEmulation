@@ -36,7 +36,7 @@ python train_models.py \
     --channel-3d 6 \
     --channel-2d 6 \
     --channel-out 4 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 512 \

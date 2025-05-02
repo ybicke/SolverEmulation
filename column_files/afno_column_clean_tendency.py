@@ -246,50 +246,6 @@ class AFNONet(nn.Module):
         ])
         
 
-    # Radiation task specifics:
-    def _unscale_swflx(self, swflx, cosmu0):
-        return torch.where(
-            cosmu0 >= torch.tensor(1e-4, dtype=torch.float32),
-            swflx * (cosmu0 * 1400),
-            0
-        )
-
-    def _unscale_lwflx(self, lwflx, tsfctrad):
-        stefan_boltzmann_const = torch.tensor(5.670374419e-08, dtype=torch.float32)
-        return torch.where(
-            tsfctrad >= torch.tensor(1e-4, dtype=torch.float32),
-            lwflx * torch.pow(tsfctrad, 4) * stefan_boltzmann_const,
-            lwflx
-        )
-
-    def _scale_output(self, y_pred, x2d):
-        y_pred_scaled = []
-
-        for i in range(y_pred.shape[-1]):
-            f_pred = y_pred[..., i:i+1]
-
-            if i in self.swflx_idx:
-                cosmu0 = x2d[..., self.cosmu0_idx]
-                cosmu0 = torch.tile(
-                    cosmu0[..., None, None], 
-                    (1, 1, f_pred.shape[-2], 1)
-                )
-                y_pred_scaled.append(self._unscale_swflx(f_pred, cosmu0))
-            elif i in self.lwflx_idx:
-                tsfctrad = x2d[..., self.tsfctrad_idx]
-                tsfctrad = torch.tile(
-                    tsfctrad[..., None, None], 
-                    (1, 1, f_pred.shape[-2], 1)
-                )
-                y_pred_scaled.append(self._unscale_lwflx(f_pred, tsfctrad))
-            else:
-                y_pred_scaled.append(f_pred)
-
-        y_pred = torch.cat(y_pred_scaled, dim=-1)
-        return y_pred
-        
-            
-
             
     def forward_features(self, x3d, x2d):
 
