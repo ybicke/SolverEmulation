@@ -3,26 +3,29 @@ import pickle
 import numpy as np
 from os.path import join
 from matplotlib import pyplot as plt
+from matplotlib.ticker import FuncFormatter
 from itertools import cycle
 
 # Define the model names and paths
 model_names = [
-    'gnn_medium',
-    'rnn_medium',
+    'gnn_32_l3_optimized',
+    'gnn_32_l3_hrl_05',
+    'gnn_32_l3_hrl_02',
 ]
 
 model_paths = [
     f'/mydata/deepcloud/yves/A_RadiativeFlux/results/{model_names[0]}/test',
     f'/mydata/deepcloud/yves/A_RadiativeFlux/results/{model_names[1]}/test',
+    f'/mydata/deepcloud/yves/A_RadiativeFlux/results/{model_names[2]}/test',
 ]
 
 models = [{'name': name, 'path': path} for name, path in zip(model_names, model_paths)]
 
 # Select a single sample
-sample_index = 91  # Change this to select a different sample
+sample_index = 90  # Change this to select a different sample
 
 # Define vertical level range to visualize
-min_level = 35  # Minimum vertical level (inclusive)
+min_level = 0  # Minimum vertical level (inclusive)
 max_level = 71  # Maximum vertical level (exclusive)
 vertical_levels = range(min_level, max_level)
 print(f"Visualizing vertical levels from {min_level} to {max_level-1}")
@@ -84,7 +87,16 @@ def plot_differences(fig, subplot_idx, x_values, y_true, y_preds, models, title,
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    # ax.legend(loc='best')
+    
+    # Simple function to invert the y label
+    def invert_y_label(y, pos):
+        # Convert the position to an integer level
+        level = int(round(y))
+        # Invert the level number and shift to start at 1 and end at 71
+        return str(max_level - 1 - level)
+    
+    # Apply the formatter to the y-axis
+    ax.yaxis.set_major_formatter(FuncFormatter(invert_y_label))
     
     # Create a single legend for the entire figure
     handles, labels = ax.get_legend_handles_labels()
@@ -133,5 +145,5 @@ plt.tight_layout(rect=[0, 0.05, 1, 0.95])
 plt.suptitle(f"Sample {sample_index}: Vertical Differences Comparison (Levels {min_level}-{max_level-1})", fontsize=16)
 
 # Save the figure
-plt.savefig(f'/mydata/deepcloud/yves/Vertical_differences_GNN_medium_vs_BiLSTM_medium_sample_{sample_index}_levels_{min_level}-{max_level-1}.png', bbox_inches='tight', dpi=300)
-print(f"Figure saved as Vertical_differences_GNN_medium_vs_BiLSTM_medium_sample_{sample_index}_levels_{min_level}-{max_level-1}.png")
+plt.savefig(f'/mydata/deepcloud/yves/Vertical_differences_GNN_HRL_Models_sample_{sample_index}_levels_{min_level}-{max_level-1}.png', bbox_inches='tight', dpi=300)
+print(f"Figure saved as Vertical_differences_GNN_HRL_Models_sample_{sample_index}_levels_{min_level}-{max_level-1}.png")

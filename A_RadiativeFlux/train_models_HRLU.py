@@ -88,6 +88,8 @@ parser.add_argument('--height-in', type=int, default=70, help='Number of height 
 # Add this argument to your parser arguments section
 parser.add_argument('--hr-smoothness-weight', type=float, default=0.0, 
                    help='Weight for heating rate smoothness loss (0.0 to disable, higher values create smoother profiles)')
+parser.add_argument('--hr-smoothness-top-levels', type=int, default=None,
+                   help='If set, apply heating rate smoothness only to the N uppermost vertical levels')
 
 # To create argument groups, just call the method on the parser
 # These groups are for better help text organization, but all arguments are still part of the main namespace
@@ -320,15 +322,36 @@ def find_latest_checkpoint(directory):
 
 
 class HeatingRateSmoothnessLoss(torch.nn.Module):
-    def __init__(self, weight=0.1):
-
+    def __init__(self, weight=0.1, top_levels=None):
+        """
+        Initialize the heating rate smoothness loss.
+        
+        Args:
+            weight (float): Weight factor for the smoothness loss
+            top_levels (int, optional): If provided, only apply smoothness loss to the top N levels.
+                                      If None, apply to all levels.
+        """
         super(HeatingRateSmoothnessLoss, self).__init__()
         self.weight = weight
+        self.top_levels = top_levels
         
     def forward(self, outputs, x3d, x2d):
-
+        # Calculate heating rates for all levels
         hr_pred = calculate_heating_rates(outputs, x3d, x2d)
+        
+        # Get the differences between adjacent levels
         hr_diff_pred = hr_pred[:, 1:, :] - hr_pred[:, :-1, :]
+        
+        # If top_levels is set, only use the top N levels
+        if self.top_levels is not None:
+            # Ensure we're not asking for more levels than available
+            n_levels = min(self.top_levels, hr_diff_pred.shape[1])
+            
+            # Get the top N levels - in the atmospheric context, lower indices typically 
+            # represent higher altitudes (top of atmosphere)
+            hr_diff_pred = hr_diff_pred[:, -n_levels:, :]
+            
+        # Calculate mean squared differences for smoothness
         smoothness_loss = torch.mean(hr_diff_pred**2)
         
         return self.weight * smoothness_loss
@@ -359,9 +382,13 @@ def train_model(model, train_set, valid_set, normalizer):
     # Initialize smoothness loss function if enabled
     use_hr_smoothness = args.hr_smoothness_weight > 0
     if use_hr_smoothness:
-        logger.info(f"Using heating rate smoothness loss with weight={args.hr_smoothness_weight}")
-        hr_smoothness = HeatingRateSmoothnessLoss(weight=args.hr_smoothness_weight).to(device)
-        
+        top_levels_str = f", applied to top {args.hr_smoothness_top_levels} levels" if args.hr_smoothness_top_levels else ", applied to all levels"
+        logger.info(f"Using heating rate smoothness loss with weight={args.hr_smoothness_weight}{top_levels_str}")
+        hr_smoothness = HeatingRateSmoothnessLoss(
+            weight=args.hr_smoothness_weight,
+            top_levels=args.hr_smoothness_top_levels
+        ).to(device)
+    
     
     cp_path = None
     p_path, cp_id = find_latest_checkpoint(checkpoint_path)
@@ -647,7 +674,10 @@ def test_model(model, test_set, normalizer):
     # Initialize HR smoothness loss if enabled
     use_hr_smoothness = args.hr_smoothness_weight > 0
     if use_hr_smoothness:
-        hr_smoothness = HeatingRateSmoothnessLoss(weight=1.0).to(device)  
+        hr_smoothness = HeatingRateSmoothnessLoss(
+            weight=1.0,
+            top_levels=args.hr_smoothness_top_levels
+        ).to(device)  
         smoothness_losses = []
 
     y_true, y_pred = list(), list()

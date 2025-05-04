@@ -24,10 +24,10 @@ echo "GNN training started!"
 
 
 # Run the training script with all required parameters
-python train_models.py \
+python train_models_HRLU.py \
     --model gnn_optimized1 \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l3_optimized_hr_smoothness \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrlu_005\
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -44,11 +44,11 @@ python train_models.py \
     --clip 1 \
     --num-epoch 60 \
     --learning-rate 0.0005 \
-    --hidden-dim 64 \
+    --hidden-dim 32 \
     --layers 3 \
     --dropout 0.0 \
     --edge-channels-in 1 \
     --fully-connected \
-    --hr-smoothness-weight 1.0 \
+    --hr-smoothness-weight 0.05 \
+    --hr-smoothness-top-levels 30 \
     --wandb-mode online
-

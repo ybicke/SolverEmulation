@@ -21,7 +21,10 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
-
+# Import matplotlib for visualizations
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from io import BytesIO
 
 from data_loader import IconColumnIterableDataset
 from data_utils import DataNormalizer
@@ -85,12 +88,14 @@ parser.add_argument('--patch-size', type=int, default=2, help='Patch size for tr
 parser.add_argument('--scale-output', action=argparse.BooleanOptionalAction, default=True, help='Whether to scale output')
 parser.add_argument('--height-in', type=int, default=70, help='Number of height levels')
 
-# Add this argument to your parser arguments section
-parser.add_argument('--hr-smoothness-weight', type=float, default=0.0, 
-                   help='Weight for heating rate smoothness loss (0.0 to disable, higher values create smoother profiles)')
-
-# To create argument groups, just call the method on the parser
-# These groups are for better help text organization, but all arguments are still part of the main namespace
+# Add to the parser arguments section
+parser.add_argument('--smoothness-weight', type=float, default=0.1, help='Weight for the heating rate smoothness loss')
+parser.add_argument('--smoothness-mode', type=str, default='diff', choices=['diff', 'abs', 'squared'], 
+                    help='Mode for smoothness penalty (diff: compare to ground truth gradients, abs: absolute gradients, squared: squared gradients)')
+parser.add_argument('--higher-level-weight', action=argparse.BooleanOptionalAction, default=False, 
+                    help='Whether to apply additional weight to higher level transitions')
+parser.add_argument('--higher-level-scale', type=float, default=2.0, 
+                    help='Scaling factor for higher levels when higher-level-weight is enabled')
 
 # ViT specific parameters
 vit_group = parser.add_argument_group('ViT model arguments')
@@ -318,23 +323,6 @@ def find_latest_checkpoint(directory):
     return join(directory, f'checkpoint_epoch_{max(idx)}.pth'), max(idx)
 
 
-
-class HeatingRateSmoothnessLoss(torch.nn.Module):
-    def __init__(self, weight=0.1):
-
-        super(HeatingRateSmoothnessLoss, self).__init__()
-        self.weight = weight
-        
-    def forward(self, outputs, x3d, x2d):
-
-        hr_pred = calculate_heating_rates(outputs, x3d, x2d)
-        hr_diff_pred = hr_pred[:, 1:, :] - hr_pred[:, :-1, :]
-        smoothness_loss = torch.mean(hr_diff_pred**2)
-        
-        return self.weight * smoothness_loss
-
-
-
 def train_model(model, train_set, valid_set, normalizer):
     
     logger.info('Train started...')
@@ -351,17 +339,29 @@ def train_model(model, train_set, valid_set, normalizer):
     else:
         raise NameError('optimizer not supported.')
     
+    # Create level weights if higher level weighting is enabled
+    higher_level_weight = None
+    if args.higher_level_weight:
+        # Create weights that increase with height level
+        # This gives stronger penalties for non-smoothness at higher levels
+        num_levels = args.height_in - 1  # Number of transitions between levels
+        # Exponential increasing weights from 1.0 to scale factor
+        higher_level_weight = torch.exp(torch.linspace(0, math.log(args.higher_level_scale), num_levels))
+        logger.info(f"Using higher level weighting with scale factor {args.higher_level_scale}")
+    
+    # Create our custom loss function
+    custom_loss = HeatingRateSmoothLoss(
+        smoothness_weight=args.smoothness_weight,
+        smoothness_mode=args.smoothness_mode,
+        higher_level_weight=higher_level_weight,
+        device=device
+    )
+    
+    # We still keep the metrics for tracking
     train_loss = MeanSquaredError().to(device)
     valid_loss = MeanSquaredError().to(device)
     train_mae = MeanAbsoluteError().to(device)
     valid_mae = MeanAbsoluteError().to(device)
-    
-    # Initialize smoothness loss function if enabled
-    use_hr_smoothness = args.hr_smoothness_weight > 0
-    if use_hr_smoothness:
-        logger.info(f"Using heating rate smoothness loss with weight={args.hr_smoothness_weight}")
-        hr_smoothness = HeatingRateSmoothnessLoss(weight=args.hr_smoothness_weight).to(device)
-        
     
     cp_path = None
     p_path, cp_id = find_latest_checkpoint(checkpoint_path)
@@ -379,17 +379,19 @@ def train_model(model, train_set, valid_set, normalizer):
     epoch_number = init_epoch
     best_loss = 1e9999999 
       
+    # For tracking smoothness loss
+    smoothness_loss_epoch = 0.0
+    batch_count = 0
 
     # Training loop
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
         
-        # Track smoothness losses for epochs
-        smoothness_losses_train = []
-        smoothness_losses_valid = []
+        model.train(True)
+        smoothness_loss_epoch = 0.0
+        batch_count = 0
         
-        model.train(True)        
         for i, data in enumerate(train_set):
             
             t1_1 = time.perf_counter()
@@ -397,48 +399,39 @@ def train_model(model, train_set, valid_set, normalizer):
             batch_x3, batch_x2, batch_y = data
             batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
             
+            # Normalize data using the normalizer
             batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
 
+            # Forward pass with normalized data
             outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
             
-            mse_loss = train_loss(outputs, batch_y)
+            # Use our custom loss function
+            total_loss, mse_loss, smoothness_loss = custom_loss(outputs, batch_y, batch_x3, batch_x2)
             
-            
-            # Calculate heating rate smoothness penalty if enabled
-            if use_hr_smoothness:
-                smoothness_loss = hr_smoothness(outputs, batch_x3, batch_x2)
-                loss = mse_loss + smoothness_loss
-                
-                # Track for logging
-                smoothness_losses_train.append(smoothness_loss.item())
-            else:
-                loss = mse_loss
-                smoothness_loss = 0.0
-            
-            
-            # The MAE is a metric of prediction accuracy - it measures the average absolute difference between the predicted and true values. Its purpose is to give a clear, interpretable measure of how much the predictions deviate from the ground truth on average.
-            # The smoothness loss, on the other hand, is a regularization term designed to penalize large differences between adjacent height levels in the predicted heating rates. Its goal is to encourage smoother predictions, but not necessarily more accurate ones.
+            # Update metrics for logging
+            train_loss.update(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
+            
+            # Track smoothness loss
+            smoothness_loss_epoch += smoothness_loss.item()
+            batch_count += 1
             
             if i > 0:
                 optimizer.zero_grad()
-                loss.backward()
+                total_loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
                 optimizer.step()
                 t2_1 = time.perf_counter()
                 
                 if i % 100 == 99:
-                    if use_hr_smoothness:
-                        print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, '
-                              f'mse: {mse_loss:.4f}, smoothness: {smoothness_loss:.4f}, '
-                              f'mean_absolute_error: {batch_mae:.4f}')
-                    else:
-                        print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, '
-                              f'mean_absolute_error: {batch_mae:.4f}')
+                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, total_loss: {total_loss:.4f}, mse_loss: {mse_loss:.4f}, '
+                          f'smoothness_loss: {smoothness_loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
                 
 
         # Validation step
         model.eval()
+        val_smoothness_loss = 0.0
+        val_batch_count = 0
         with torch.no_grad():
             for i, v_data in enumerate(valid_set):
                 
@@ -451,62 +444,47 @@ def train_model(model, train_set, valid_set, normalizer):
                 # Forward pass with normalized data
                 v_outputs = model(vx3d_norm, vx2d_norm, vx2d_orig)
                 
-                # Calculate validation smoothness if enabled
-                if use_hr_smoothness:
-                    v_smoothness_loss = hr_smoothness(v_outputs, vx3d, vx2d).item()
-                    smoothness_losses_valid.append(v_smoothness_loss)
+                # Calculate validation losses
+                _, _, v_smoothness_loss = custom_loss(v_outputs, v_labels, vx3d, vx2d)
                 
                 valid_loss.update(v_outputs, v_labels)
-                valid_mae.update(v_outputs, v_labels)                
+                valid_mae.update(v_outputs, v_labels)
+                
+                # Track validation smoothness loss
+                val_smoothness_loss += v_smoothness_loss.item()
+                val_batch_count += 1
 
         total_train_loss = train_loss.compute()
         total_valid_loss = valid_loss.compute()
         total_train_mae = train_mae.compute()
         total_valid_mae = valid_mae.compute()
+        
+        # Calculate average smoothness loss
+        avg_smoothness_loss = smoothness_loss_epoch / max(1, batch_count)
+        avg_val_smoothness_loss = val_smoothness_loss / max(1, val_batch_count)
 
         t2 = time.perf_counter()
 
-        # Prepare log dictionary
-        log_dict = {
+        # Keep logging metrics continuously
+        wandb.log({
             'epoch': epoch_number, 
             'loss': total_train_loss,
             'val_loss': total_valid_loss,
             'mean_absolute_error': total_train_mae,
-            'val_mean_absolute_error': total_valid_mae
-        }
-        
-        # Add smoothness metrics if enabled
-        if use_hr_smoothness:
-            if smoothness_losses_train:
-                avg_smoothness_train = sum(smoothness_losses_train) / len(smoothness_losses_train)
-                log_dict['hr_smoothness'] = avg_smoothness_train
+            'val_mean_absolute_error': total_valid_mae,
+            'smoothness_loss': avg_smoothness_loss,
+            'val_smoothness_loss': avg_val_smoothness_loss
+            })
 
-            if smoothness_losses_valid:
-                avg_smoothness_valid = sum(smoothness_losses_valid) / len(smoothness_losses_valid)
-                log_dict['val_hr_smoothness'] = avg_smoothness_valid
-        
-        # Log to wandb
-        wandb.log(log_dict)
-
-        # Print epoch summary - simplify this part
-        summary = (f'{epoch_number:03}/{args.num_epoch}: '
-                  f'time: {t2-t1:.3f}, '
-                  f'loss: {total_train_loss:.4f}, '
-                  f'mean_absolute_error: {total_train_mae:.4f}, '
-                  f'val_loss: {total_valid_loss:.4f}, '
-                  f'val_mean_absolute_error: {total_valid_mae:.4f}')
-                  
-        # Add smoothness metrics to summary if they exist
-        if use_hr_smoothness and smoothness_losses_train:
-            avg_smoothness_train = sum(smoothness_losses_train) / len(smoothness_losses_train)
-            summary += f', hr_smoothness: {avg_smoothness_train:.4f}'
-            
-        if use_hr_smoothness and smoothness_losses_valid:
-            avg_smoothness_valid = sum(smoothness_losses_valid) / len(smoothness_losses_valid)
-            summary += f', val_hr_smoothness: {avg_smoothness_valid:.4f}'
-                
-                
-        print(summary)
+        # Print epoch summary
+        print(f'{epoch_number:03}/{args.num_epoch}: ',
+              f'time: {t2-t1:.3f}', 
+              f'loss: {total_train_loss:.4f} ',
+              f'smoothness_loss: {avg_smoothness_loss:.4f}, ',
+              f'mean_absolute_error: {total_train_mae:.4f}, ',
+              f'val_loss: {total_valid_loss:.4f}, ',
+              f'val_smoothness_loss: {avg_val_smoothness_loss:.4f}, ',
+              f'val_mean_absolute_error: {total_valid_mae:.4f}')
         
         # Save checkpoints
         checkpoint = {
@@ -631,6 +609,100 @@ def process_timing_statistics(timing_data, model, test_path):
     return samples_per_second, per_sample_time, earth_time, earth_batch_time
 
 
+def visualize_heating_rates(model, test_loader, normalizer, num_samples=4):
+    """
+    Visualize the heating rates and their gradients for a few test samples.
+    
+    This helps verify that the smoothness loss is having the intended effect.
+    
+    Args:
+        model: Trained model
+        test_loader: DataLoader for test data
+        normalizer: Data normalizer
+        num_samples: Number of samples to visualize
+    """
+    logger.info(f"Visualizing heating rates for {num_samples} samples...")
+    
+    # Load best model
+    best_chkpt = join(checkpoint_path, 'best_model.pth')
+    assert isfile(best_chkpt), 'Checkpoint not found, visualization failed!'
+    checkpoint = torch.load(best_chkpt, map_location=torch.device(device))
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.eval()
+    
+    # Get sample data
+    sample_data = []
+    with torch.no_grad():
+        for batch in test_loader:
+            batch_x3, batch_x2, batch_y = batch
+            batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
+            
+            # Normalize test data
+            batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
+            
+            # Forward pass with normalized data
+            outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+            
+            # Calculate heating rates
+            hr_true = calculate_heating_rates(batch_y, batch_x3, batch_x2)
+            hr_pred = calculate_heating_rates(outputs, batch_x3, batch_x2)
+            
+            # Calculate gradients
+            hr_diff_true = hr_true[:, 1:, :] - hr_true[:, :-1, :]
+            hr_diff_pred = hr_pred[:, 1:, :] - hr_pred[:, :-1, :]
+            
+            # Store data for each sample in batch
+            for i in range(min(batch_x3.shape[0], num_samples - len(sample_data))):
+                sample_data.append({
+                    'hr_true': hr_true[i].detach().cpu().numpy(),
+                    'hr_pred': hr_pred[i].detach().cpu().numpy(),
+                    'hr_diff_true': hr_diff_true[i].detach().cpu().numpy(),
+                    'hr_diff_pred': hr_diff_pred[i].detach().cpu().numpy()
+                })
+                
+            if len(sample_data) >= num_samples:
+                break
+    
+    # Create a figure for each sample
+    for i, data in enumerate(sample_data):
+        fig, axs = plt.subplots(2, 2, figsize=(12, 10), constrained_layout=True)
+        fig.suptitle(f'Sample {i+1} - Heating Rates and Gradients', fontsize=16)
+        
+        hr_types = ['Longwave', 'Shortwave']
+        
+        # Plot heating rates
+        for j, hr_type in enumerate(hr_types):
+            ax = axs[0, j]
+            ax.plot(data['hr_true'][:, j], range(data['hr_true'].shape[0]), 'b-', label='True')
+            ax.plot(data['hr_pred'][:, j], range(data['hr_pred'].shape[0]), 'r-', label='Predicted')
+            ax.set_title(f'{hr_type} Heating Rate')
+            ax.set_xlabel('Heating Rate (K/day)')
+            ax.set_ylabel('Height Level')
+            ax.legend()
+            ax.grid(True)
+            
+        # Plot heating rate gradients
+        for j, hr_type in enumerate(hr_types):
+            ax = axs[1, j]
+            ax.plot(data['hr_diff_true'][:, j], range(data['hr_diff_true'].shape[0]), 'b-', label='True')
+            ax.plot(data['hr_diff_pred'][:, j], range(data['hr_diff_pred'].shape[0]), 'r-', label='Predicted')
+            ax.set_title(f'{hr_type} Heating Rate Gradient')
+            ax.set_xlabel('Gradient (K/day/level)')
+            ax.set_ylabel('Height Level')
+            ax.legend()
+            ax.grid(True)
+        
+        # Save the figure
+        plt.savefig(join(test_path, f'heating_rate_sample_{i+1}.png'), dpi=150)
+        plt.close(fig)
+        
+        # Log to wandb
+        if args.wandb_mode != 'disabled':
+            wandb.log({f"heating_rate_sample_{i+1}": wandb.Image(join(test_path, f'heating_rate_sample_{i+1}.png'))})
+    
+    logger.info(f"Heating rate visualizations saved to {test_path}")
+
+
 def test_model(model, test_set, normalizer):
     logger.info('Test started...')    
  
@@ -643,12 +715,6 @@ def test_model(model, test_set, normalizer):
     
     test_loss = MeanSquaredError().to(device)
     test_mae = MeanAbsoluteError().to(device)
-    
-    # Initialize HR smoothness loss if enabled
-    use_hr_smoothness = args.hr_smoothness_weight > 0
-    if use_hr_smoothness:
-        hr_smoothness = HeatingRateSmoothnessLoss(weight=1.0).to(device)  
-        smoothness_losses = []
 
     y_true, y_pred = list(), list()
     h_true, h_pred = list(), list()
@@ -714,11 +780,6 @@ def test_model(model, test_set, normalizer):
             else:
                 outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
             
-            # Track HR smoothness loss if enabled
-            if use_hr_smoothness:
-                smoothness_loss = hr_smoothness(outputs, batch_x3, batch_x2).item()
-                smoothness_losses.append(smoothness_loss)
-            
         y_true.append(batch_y.detach().cpu())
         y_pred.append(outputs.detach().cpu())
         h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
@@ -749,19 +810,8 @@ def test_model(model, test_set, normalizer):
     total_test_loss = test_loss.compute()
     total_test_mae = test_mae.compute()
 
-    # Report HR smoothness loss if calculated
-    if use_hr_smoothness and smoothness_losses:
-        avg_smoothness = sum(smoothness_losses) / len(smoothness_losses)
-        print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} '
-              f'mean_absolute_error: {total_test_mae:.4f} '
-              f'hr_smoothness: {avg_smoothness:.4f}')
-        
-        # Log to wandb
-        wandb.log({"test_hr_smoothness": avg_smoothness})
-    else:
-        print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} '
-              f'mean_absolute_error: {total_test_mae:.4f}')
-        
+    print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} ',
+            f'mean_absolute_error: {total_test_mae:.4f}')
 
 
     with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
@@ -775,6 +825,9 @@ def test_model(model, test_set, normalizer):
     
     with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
         pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    # After saving test predictions, visualize heating rates
+    visualize_heating_rates(model, test_set, normalizer)
         
     # Return timing metrics for logging in wandb
     return samples_per_second, per_sample_time, earth_time, earth_batch_time
@@ -797,9 +850,82 @@ def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle
     return DataLoader(**dataloader_args)
 
 
+# Custom loss function for smooth heating rates
+class HeatingRateSmoothLoss(torch.nn.Module):
+    def __init__(self, smoothness_weight=0.1, smoothness_mode='diff', higher_level_weight=None, device='cpu'):
+        """
+        Custom loss function that adds a penalty for non-smooth heating rate profiles.
+        
+        Args:
+            smoothness_weight (float): Weight for the smoothness term
+            smoothness_mode (str): Mode for calculating smoothness penalty:
+                - 'diff': Penalizes the model for having different gradients than ground truth
+                - 'abs': Directly penalizes large absolute gradients (regardless of ground truth)
+                - 'squared': Penalizes squared gradients (stronger penalty for large jumps)
+            higher_level_weight (list, optional): Additional weights for specific height regions.
+                If provided, should be a tensor of shape [height-1] for weighting each level transition.
+                This allows more penalty on transitions at higher levels where jumps can be problematic.
+            device (str): Device to use
+        """
+        super(HeatingRateSmoothLoss, self).__init__()
+        self.mse = torch.nn.MSELoss()
+        self.smoothness_weight = smoothness_weight
+        self.smoothness_mode = smoothness_mode
+        self.device = device
+        
+        # Initialize level weighting if provided
+        self.higher_level_weight = higher_level_weight
+        
+    def forward(self, outputs, targets, x3d, x2d):
+        # Standard MSE loss on the outputs
+        mse_loss = self.mse(outputs, targets)
+        
+        # Calculate heating rates for prediction and target
+        hr_pred = calculate_heating_rates(outputs, x3d, x2d)
+        hr_true = calculate_heating_rates(targets, x3d, x2d)
+        
+        # Calculate differences between adjacent height levels
+        hr_diff_pred = hr_pred[:, 1:, :] - hr_pred[:, :-1, :]
+        
+        # Apply different smoothness penalties based on mode
+        if self.smoothness_mode == 'diff':
+            # Penalize the model for having different gradients than ground truth
+            hr_diff_true = hr_true[:, 1:, :] - hr_true[:, :-1, :]
+            
+            # Apply additional weighting by height level if provided
+            if self.higher_level_weight is not None:
+                # Reshape for broadcasting
+                weights = self.higher_level_weight.view(1, -1, 1).to(self.device)
+                smoothness_loss = self.mse(hr_diff_pred * weights, hr_diff_true * weights)
+            else:
+                smoothness_loss = self.mse(hr_diff_pred, hr_diff_true)
+                
+        elif self.smoothness_mode == 'abs':
+            # Directly penalize large absolute gradients
+            smoothness_loss = torch.mean(torch.abs(hr_diff_pred))
+            
+        elif self.smoothness_mode == 'squared':
+            # Penalize squared gradients (stronger penalty for large jumps)
+            smoothness_loss = torch.mean(hr_diff_pred**2)
+            
+        else:
+            raise ValueError(f"Unknown smoothness mode: {self.smoothness_mode}")
+        
+        # Combined loss with weighting factor
+        total_loss = mse_loss + self.smoothness_weight * smoothness_loss
+        
+        return total_loss, mse_loss, smoothness_loss
+
 
 def main():
     logger.info('Code started...')
+    
+    # Log information about smoothness loss if it's being used
+    if args.smoothness_weight > 0:
+        logger.info(f"Using heating rate smoothness loss with weight={args.smoothness_weight}, "
+                   f"mode={args.smoothness_mode}")
+        if args.higher_level_weight:
+            logger.info(f"Applying higher-level weighting with scale factor={args.higher_level_scale}")
     
     FILENAMES = glob.glob(join(args.dataset, '*.h5'))
     time_indices = [float(re.search( r'\_time_(.*?)\.h5', f).group(1)) for f in FILENAMES]
@@ -834,6 +960,14 @@ def main():
     # First create the model before initializing wandb
     model = get_model(args.model)
     num_params = count_parameters(model)
+    
+    # Update wandb_config with smoothness parameters
+    wandb_config.update({
+        'smoothness_weight': args.smoothness_weight,
+        'smoothness_mode': args.smoothness_mode,
+        'higher_level_weight': args.higher_level_weight,
+        'higher_level_scale': args.higher_level_scale if args.higher_level_weight else None
+    })
     
     # Initialize W&B here before anything else
     wandb.init(
@@ -873,7 +1007,9 @@ def main():
         train_cpu_time = tr2[1] - tr1[1]
         print(f'Training time: Real time: {train_real_time:.2f}, CPU time: {train_cpu_time:.2f}')
         
-
+        # Store training times for end summary in wandb
+        #summary_metrics["train_real_time"] = train_real_time
+        #summary_metrics["train_cpu_time"] = train_cpu_time
     
     if args.test:
         #test1 = time.perf_counter(), time.process_time()
@@ -884,6 +1020,20 @@ def main():
         logger.info('Step 1: Measuring inference time...')
         samples_per_second, per_sample_time, earth_time, earth_batch_time = test_model(model, test_loader, normalizer)
         
+        #test2 = time.perf_counter(), time.process_time()
+        
+        #test_real_time = test2[0] - test1[0]
+        #test_cpu_time = test2[1] - test1[1]
+        #print(f'Total test time: Real time: {test_real_time:.2f}, CPU time: {test_cpu_time:.2f}')
+        
+        #summary_metrics["test_real_time"] = test_real_time
+        #summary_metrics["test_cpu_time"] = test_cpu_time
+        
+        # Log timing metrics in wandb
+        # if samples_per_second is not None and per_sample_time is not None:
+        #     summary_metrics["samples_per_second"] = samples_per_second
+        #     summary_metrics["per_sample_time"] = per_sample_time
+        #     print(f'Samples per second: {samples_per_second:.2f}, Per sample time: {per_sample_time:.2f}')
             
     # Log all summary metrics at the end
     wandb.log(summary_metrics, commit=True)
