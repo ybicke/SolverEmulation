@@ -142,9 +142,13 @@ models = [
     #{'name': 'GNN-8-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_8_l3_optimized1/test'},
     #{'name': 'GNN-16-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_16_l3_optimized1/test'},
     {'name': 'GNN-32-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_optimized/test'},
-    {'name': 'GNN-32-l3-hrl-02','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_02/test'},
-    {'name': 'GNN-32-l3-hrl-05','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_05/test'},
+    #{'name': 'GNN-32-l3-hrl-02','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_02/test'},
+    #{'name': 'GNN-32-l3-hrl-05','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_05/test'},
     # {'name': 'GNN-32-l3-hrl-1','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_1/test'},
+
+    {'name': 'GNN-32-l3-hrl-005','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_005/test'},
+    {'name': 'GNN-32-l3-hrlu-005','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrlu_005/test'},
+
 
     #{'name': 'GNN-64-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l3_optimized/test'},
     #{'name': 'GNN-128-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_128_l3_optimized/test'},
@@ -242,4 +246,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/GNN_Comparing_HRL_Models.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/GNN_Comparing_HRLU_Models.png', bbox_inches='tight', dpi=300)

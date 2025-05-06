@@ -9,8 +9,8 @@ from itertools import cycle
 # Define the model names and paths
 model_names = [
     'gnn_32_l3_optimized',
-    'gnn_32_l3_hrl_05',
-    'gnn_32_l3_hrl_02',
+    'gnn_32_l3_hrl_005',
+    'gnn_32_l3_hrlu_005',
 ]
 
 model_paths = [
@@ -22,7 +22,7 @@ model_paths = [
 models = [{'name': name, 'path': path} for name, path in zip(model_names, model_paths)]
 
 # Select a single sample
-sample_index = 90  # Change this to select a different sample
+sample_index = 93  # Change this to select a different sample
 
 # Define vertical level range to visualize
 min_level = 0  # Minimum vertical level (inclusive)
@@ -145,5 +145,5 @@ plt.tight_layout(rect=[0, 0.05, 1, 0.95])
 plt.suptitle(f"Sample {sample_index}: Vertical Differences Comparison (Levels {min_level}-{max_level-1})", fontsize=16)
 
 # Save the figure
-plt.savefig(f'/mydata/deepcloud/yves/Vertical_differences_GNN_HRL_Models_sample_{sample_index}_levels_{min_level}-{max_level-1}.png', bbox_inches='tight', dpi=300)
-print(f"Figure saved as Vertical_differences_GNN_HRL_Models_sample_{sample_index}_levels_{min_level}-{max_level-1}.png")
+plt.savefig(f'/mydata/deepcloud/yves/Vertical_differences_GNN_HRLU_Models_sample_{sample_index}_levels_{min_level}-{max_level-1}.png', bbox_inches='tight', dpi=300)
+print(f"Figure saved as Vertical_differences_GNN_HRLU_Models_sample_{sample_index}_levels_{min_level}-{max_level-1}.png")

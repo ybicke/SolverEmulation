@@ -2,41 +2,26 @@
 import torch
 import sys
 import os
-
-import os
 import re
 import time
 import glob
-import h5py
 import yaml
-import fsspec
 import pickle
-import shutil
 import logging
-import tempfile
 import random
 import xarray as xr
 import argparse
-from concurrent.futures import ThreadPoolExecutor
-from os.path import join, dirname, basename, normpath, isfile, exists
+from os.path import join, dirname, basename, normpath, isfile
+from torch import optim
 
 import wandb
 # import lightning as L
 # import lightning as L
 import numpy as np
-import matplotlib.pyplot as plt
-from torch import optim, nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import  DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
-from torchinfo import summary
 
 from data_loaders_triangle import IconTriangleIterableDataset
-
-
-
-
-import torch
-
 
 
 
@@ -62,8 +47,6 @@ torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-import argparse
-import os
 
 parser = argparse.ArgumentParser(description='Train Transformer models.')
 parser.add_argument('--model', type=str, default='vit', help='Name of the model to be trained')

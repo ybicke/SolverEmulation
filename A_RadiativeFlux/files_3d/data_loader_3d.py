@@ -3,22 +3,13 @@ import shutil
 import random
 import torch
 import h5py
+import numpy as np
 from os.path import join, basename, exists
 from torch.utils.data import IterableDataset
+from ..data_utils import get_triangle_indices
 
 
-def get_triangle_indices(triangle_id=1, total_cols=81920):
-    """
-    A naive approach: picks one block of columns for the 'large triangle.'
-    For R2B05, each block is 4096 columns.
-    """
-    block_size = total_cols // 20
-    start_idx = triangle_id * block_size
-    end_idx   = min(start_idx + block_size, total_cols)
-    return torch.arange(start_idx, end_idx, dtype=torch.long)
-
-
-class IconTriangleIterableDataset(IterableDataset):
+class IconIterableDataset_3D(IterableDataset):
     """
     Loads the entire large triangle (no subsampling) from each H5 "time chunk."
     Each iteration yields one sample: (x3d, x2d, y) for the entire triangle at that time.
@@ -30,14 +21,19 @@ class IconTriangleIterableDataset(IterableDataset):
         shuffle=False,
         dtype='float32',
         cache_dir=None,
-        total_cols=81920
+        total_cols=81920,
+        division_factor=1
     ):
         super().__init__()
         self.filenames = filenames
         self.cache_dir = cache_dir
         self.shuffle = shuffle
         self.triangle_id = triangle_id
-        self.triangle_indices = get_triangle_indices(triangle_id, total_cols=total_cols)
+        self.triangle_indices = get_triangle_indices(
+            triangle_id, 
+            total_cols=total_cols,
+            division_factor=division_factor
+        )
         
         # Convert dtype string to torch dtype
         self.dtype = getattr(torch, dtype)

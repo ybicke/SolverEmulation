@@ -1,11 +1,9 @@
-import networkx as nx
 import numpy as np
 import xarray as xr
 import torch
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
-from torch_geometric.data import Data
-from torch_geometric.utils.convert import from_networkx
+
 
 # --- 1. Function to get triangle indices (Original - Correct for your goal) ---
 def get_triangle_indices(triangle_id=1, total_cols=81920):

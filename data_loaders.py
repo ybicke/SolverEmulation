@@ -4,7 +4,7 @@ from os.path import join, basename, exists
 
 import h5py
 import torch
-from torch.utils.data import IterableDataset, DataLoader
+from torch.utils.data import IterableDataset
 
 
 class IconColumnIterableDataset(IterableDataset):

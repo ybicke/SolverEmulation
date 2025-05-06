@@ -7,12 +7,9 @@ import yaml
 import pickle
 import logging
 import random
-import math
-import warnings
-
 
 import argparse
-from os.path import join, dirname, basename, normpath, isfile, exists
+from os.path import join, dirname, basename, normpath, isfile
 
 import wandb
 import torch
@@ -23,7 +20,7 @@ from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
 
 
-from data_loader import IconColumnIterableDataset
+from files_3d.data_loader_3d import IconIterableDataset_3D
 from data_utils import DataNormalizer
 
 
@@ -50,8 +47,7 @@ torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-import argparse
-import os
+
 
 parser = argparse.ArgumentParser(description='Train Transformer models.')
 
@@ -64,7 +60,7 @@ parser.add_argument('--subsample', type=float, default=None, help='Subsampling r
 parser.add_argument('--num-workers', type=int, default=os.cpu_count(), help='Number of workers to load data')
 parser.add_argument('--prefetch-factor', type=int, default=2, help='Prefetch factor')
 parser.add_argument('--wandb-mode', type=str, default='disabled', choices={'online', 'offline', 'disabled'}, help='Operating mode for W&B')
-parser.add_argument('--num-cells', type=int, default=81921, help='Number of ICON cells in a complete Earth model')
+parser.add_argument('--num-cells', type=int, default=81920, help='Number of ICON cells')
 parser.add_argument('--train', action=argparse.BooleanOptionalAction, default=True, help='Specify if training takes place')
 parser.add_argument('--test', action=argparse.BooleanOptionalAction, default=True, help='Specify if test takes place')
 parser.add_argument('--shuffle', action=argparse.BooleanOptionalAction, default=True, help='Shuffling the train dataset')
@@ -84,13 +80,6 @@ parser.add_argument('--channel-2d', type=int, default=6, help='2D input channels
 parser.add_argument('--patch-size', type=int, default=2, help='Patch size for transformer models')
 parser.add_argument('--scale-output', action=argparse.BooleanOptionalAction, default=True, help='Whether to scale output')
 parser.add_argument('--height-in', type=int, default=70, help='Number of height levels')
-
-# Add this argument to your parser arguments section
-parser.add_argument('--hr-smoothness-weight', type=float, default=0.0, 
-                   help='Weight for heating rate smoothness loss (0.0 to disable, higher values create smoother profiles)')
-parser.add_argument('--hr-smoothness-top-levels', type=int, default=None,
-                   help='If set, apply heating rate smoothness only to the N uppermost vertical levels')
-parser.add_argument('--l1-loss', action=argparse.BooleanOptionalAction, default=False, help='Use L1 loss for smoothness')
 
 
 # To create argument groups, just call the method on the parser
@@ -119,6 +108,14 @@ gnn_group.add_argument('--max-skip', type=int, default=3, help='Maximum skip dis
 gnn_group.add_argument('--fully-connected', action=argparse.BooleanOptionalAction, default=False, help='Use fully connected graph')
 gnn_group.add_argument('--edge-channels-in', type=int, default=1, help='Number of edge feature channels')
 gnn_group.add_argument('--heights-file', type=str, default=None, help='Path to file containing height data')
+
+# GNN 3d specific parameters
+gnn_3d_group = parser.add_argument_group('GNN 3d model arguments')
+gnn_3d_group.add_argument('--grid-file-path', type=str, default=None, help='Path to the ICON grid file')
+gnn_3d_group.add_argument('--triangle-id', type=int, default=1, help='ID of the triangle to use')
+gnn_3d_group.add_argument('--embed-dim', type=int, default=256, help='Embedding dimension for GNN 3d')
+gnn_3d_group.add_argument('--triangle-division-factor', type=int, default=4, 
+                           help='Factor by which to divide the triangle (1 for full 4096 columns, 4 for 1024 columns, 16 for 256 columns)')
 
 # RNN specific parameters
 rnn_group = parser.add_argument_group('RNN model arguments')
@@ -222,24 +219,6 @@ def get_model(model_name):
         ).to(device)    
         
         
-    elif model_name == 'gnn_optimized1':
-        from models.gnn_optimized1 import AtmosphericColumnGNN
-        
-        model = AtmosphericColumnGNN(
-            embed_dim=args.hidden_dim,
-            depth=args.layers, 
-            dropout=args.dropout,
-            max_skip=args.max_skip,
-            emb_dropout=args.dropout,  # Using main dropout for embedding
-            channel_3d=args.channel_3d,
-            channel_2d=args.channel_2d,
-            channels_out=args.channel_out,
-            edge_channels_in=args.edge_channels_in,
-            fully_connected=args.fully_connected,
-            device=device
-        ).to(device)    
-        
-        
     elif model_name == 'gnn_broadcast_skip':
         from models.gnn_broadcast_skip import AtmosphericColumnGNN  
                 
@@ -293,6 +272,23 @@ def get_model(model_name):
         ).to(device)    
         
         
+    elif model_name == 'gnn_3d':
+        from files_3d.gnn_3d import GNN3d   
+        
+        model = GNN3d(
+            grid_file_path=args.grid_file_path,
+            triangle_id=args.triangle_id,
+            embed_dim=args.embed_dim,
+            depth=args.layers,
+            dropout=args.dropout,
+            channels_in_3d=args.channel_3d,
+            channels_in_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            edge_channels_in=args.edge_channels_in,
+            num_height_levels=args.height_in,
+            device=device,
+            division_factor=args.triangle_division_factor
+        ).to(device)
         
         
     elif model_name == 'rnn':
@@ -322,46 +318,6 @@ def find_latest_checkpoint(directory):
     return join(directory, f'checkpoint_epoch_{max(idx)}.pth'), max(idx)
 
 
-
-class HeatingRateSmoothnessLoss(torch.nn.Module):
-    def __init__(self, weight=0.1, top_levels=None):
-        """
-        Initialize the heating rate smoothness loss.
-        
-        Args:
-            weight (float): Weight factor for the smoothness loss
-            top_levels (int, optional): If provided, only apply smoothness loss to the top N levels.
-                                      If None, apply to all levels.
-        """
-        super(HeatingRateSmoothnessLoss, self).__init__()
-        self.weight = weight
-        self.top_levels = top_levels
-        
-    def forward(self, outputs, x3d, x2d):
-        # Calculate heating rates for all levels
-        hr_pred = calculate_heating_rates(outputs, x3d, x2d)
-        
-        # Get the differences between adjacent levels
-        hr_diff_pred = hr_pred[:, 1:, :] - hr_pred[:, :-1, :]
-        
-        # If top_levels is set, only use the top N levels
-        if self.top_levels is not None:
-            # Ensure we're not asking for more levels than available
-            n_levels = min(self.top_levels, hr_diff_pred.shape[1])
-
-            hr_diff_pred = hr_diff_pred[:, -n_levels:, :]
-            
-        if args.l1_loss:
-            # Calculate mean absolute differences for smoothness
-            smoothness_loss = torch.mean(torch.abs(hr_diff_pred))
-        else:
-            # Calculate mean squared differences for smoothness
-            smoothness_loss = torch.mean(hr_diff_pred**2)
-        
-        return self.weight * smoothness_loss
-
-
-
 def train_model(model, train_set, valid_set, normalizer):
     
     logger.info('Train started...')
@@ -383,17 +339,6 @@ def train_model(model, train_set, valid_set, normalizer):
     train_mae = MeanAbsoluteError().to(device)
     valid_mae = MeanAbsoluteError().to(device)
     
-    # Initialize smoothness loss function if enabled
-    use_hr_smoothness = args.hr_smoothness_weight > 0
-    if use_hr_smoothness:
-        top_levels_str = f", applied to top {args.hr_smoothness_top_levels} levels" if args.hr_smoothness_top_levels else ", applied to all levels"
-        logger.info(f"Using heating rate smoothness loss with weight={args.hr_smoothness_weight}{top_levels_str}")
-        hr_smoothness = HeatingRateSmoothnessLoss(
-            weight=args.hr_smoothness_weight,
-            top_levels=args.hr_smoothness_top_levels
-        ).to(device)
-    
-    
     cp_path = None
     p_path, cp_id = find_latest_checkpoint(checkpoint_path)
     if p_path is not None:
@@ -409,16 +354,12 @@ def train_model(model, train_set, valid_set, normalizer):
 
     epoch_number = init_epoch
     best_loss = 1e9999999 
-      
+    
 
     # Training loop
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
-        
-        # Track smoothness losses for epochs
-        smoothness_losses_train = []
-        smoothness_losses_valid = []
         
         model.train(True)        
         for i, data in enumerate(train_set):
@@ -428,27 +369,13 @@ def train_model(model, train_set, valid_set, normalizer):
             batch_x3, batch_x2, batch_y = data
             batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
             
+            # Normalize data using the normalizer
             batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
 
+            # Forward pass with normalized data
             outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
             
-            mse_loss = train_loss(outputs, batch_y)
-            
-            
-            # Calculate heating rate smoothness penalty if enabled
-            if use_hr_smoothness:
-                smoothness_loss = hr_smoothness(outputs, batch_x3, batch_x2)
-                loss = mse_loss + smoothness_loss
-                
-                # Track for logging
-                smoothness_losses_train.append(smoothness_loss.item())
-            else:
-                loss = mse_loss
-                smoothness_loss = 0.0
-            
-            
-            # The MAE is a metric of prediction accuracy - it measures the average absolute difference between the predicted and true values. Its purpose is to give a clear, interpretable measure of how much the predictions deviate from the ground truth on average.
-            # The smoothness loss, on the other hand, is a regularization term designed to penalize large differences between adjacent height levels in the predicted heating rates. Its goal is to encourage smoother predictions, but not necessarily more accurate ones.
+            loss = train_loss(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
             
             if i > 0:
@@ -459,13 +386,7 @@ def train_model(model, train_set, valid_set, normalizer):
                 t2_1 = time.perf_counter()
                 
                 if i % 100 == 99:
-                    if use_hr_smoothness:
-                        print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, '
-                              f'mse: {mse_loss:.4f}, smoothness: {smoothness_loss:.4f}, '
-                              f'mean_absolute_error: {batch_mae:.4f}')
-                    else:
-                        print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, '
-                              f'mean_absolute_error: {batch_mae:.4f}')
+                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
                 
 
         # Validation step
@@ -482,11 +403,6 @@ def train_model(model, train_set, valid_set, normalizer):
                 # Forward pass with normalized data
                 v_outputs = model(vx3d_norm, vx2d_norm, vx2d_orig)
                 
-                # Calculate validation smoothness if enabled
-                if use_hr_smoothness:
-                    v_smoothness_loss = hr_smoothness(v_outputs, vx3d, vx2d).item()
-                    smoothness_losses_valid.append(v_smoothness_loss)
-                
                 valid_loss.update(v_outputs, v_labels)
                 valid_mae.update(v_outputs, v_labels)                
 
@@ -497,47 +413,22 @@ def train_model(model, train_set, valid_set, normalizer):
 
         t2 = time.perf_counter()
 
-        # Prepare log dictionary
-        log_dict = {
+        # Keep logging metrics continuously
+        wandb.log({
             'epoch': epoch_number, 
             'loss': total_train_loss,
             'val_loss': total_valid_loss,
             'mean_absolute_error': total_train_mae,
             'val_mean_absolute_error': total_valid_mae
-        }
-        
-        # Add smoothness metrics if enabled
-        if use_hr_smoothness:
-            if smoothness_losses_train:
-                avg_smoothness_train = sum(smoothness_losses_train) / len(smoothness_losses_train)
-                log_dict['hr_smoothness'] = avg_smoothness_train
+            })
 
-            if smoothness_losses_valid:
-                avg_smoothness_valid = sum(smoothness_losses_valid) / len(smoothness_losses_valid)
-                log_dict['val_hr_smoothness'] = avg_smoothness_valid
-        
-        # Log to wandb
-        wandb.log(log_dict)
-
-        # Print epoch summary - simplify this part
-        summary = (f'{epoch_number:03}/{args.num_epoch}: '
-                  f'time: {t2-t1:.3f}, '
-                  f'loss: {total_train_loss:.4f}, '
-                  f'mean_absolute_error: {total_train_mae:.4f}, '
-                  f'val_loss: {total_valid_loss:.4f}, '
-                  f'val_mean_absolute_error: {total_valid_mae:.4f}')
-                  
-        # Add smoothness metrics to summary if they exist
-        if use_hr_smoothness and smoothness_losses_train:
-            avg_smoothness_train = sum(smoothness_losses_train) / len(smoothness_losses_train)
-            summary += f', hr_smoothness: {avg_smoothness_train:.4f}'
-            
-        if use_hr_smoothness and smoothness_losses_valid:
-            avg_smoothness_valid = sum(smoothness_losses_valid) / len(smoothness_losses_valid)
-            summary += f', val_hr_smoothness: {avg_smoothness_valid:.4f}'
-                
-                
-        print(summary)
+        # Print epoch summary
+        print(f'{epoch_number:03}/{args.num_epoch}: ',
+            f'time: {t2-t1:.3f}', 
+            f'loss: {total_train_loss:.4f} ',
+            f'mean_absolute_error: {total_train_mae:.4f}, ',
+            f'val_loss: {total_valid_loss:.4f}, ',
+            f'val_mean_absolute_error: {total_valid_mae:.4f}')
         
         # Save checkpoints
         checkpoint = {
@@ -591,128 +482,20 @@ def calculate_heating_rates(y, x3d, x2d):
     return heating_rate
 
 
-def process_timing_statistics(timing_data, model, test_path):
-    """
-    Process and report timing statistics from collected data.
-    """
-    batch_size = args.batch_size
-    
-    # Calculate basic statistics
-    mean_time = sum(timing_data) / len(timing_data)
-    std_time = (sum((t - mean_time) ** 2 for t in timing_data) / len(timing_data)) ** 0.5
-    min_time = min(timing_data)
-    max_time = max(timing_data)
-    
-    # Calculate per-sample metrics
-    per_sample_time = mean_time / batch_size
-    samples_per_second = batch_size / mean_time
-    
-    # Calculate Earth-wide metrics
-    earth_cells = args.num_cells  # Number of columns in the entire Earth model
-    earth_time = earth_cells * per_sample_time  # Time to process entire Earth
-    earth_batches = math.ceil(earth_cells / batch_size)  # Number of batches needed
-    earth_batch_time = earth_batches * mean_time  # Time to process Earth in batches
-    
-    gpu_info = torch.cuda.get_device_name(0)
-    
-    summary_text = f"""
-    ==================== INFERENCE TIMING SUMMARY ====================
-    Model: {args.model}
-    Hardware: {gpu_info}
-    Parameters: {count_parameters(model):,}
-
-    Configuration:
-    Hidden Dimension: {args.hidden_dim}
-    Layers: {args.layers}
-    Train Batch Size: {args.batch_size}
-    Test Batch Size: {batch_size}
-
-    Batch Performance:
-    Batches measured: {len(timing_data)}
-    Mean batch time: {mean_time*1000:.3f} ms/batch
-    Std deviation: {std_time*1000:.3f} ms/batch
-    Min/Max batch time: {min_time*1000:.3f}/{max_time*1000:.3f} ms/batch
-    
-    Sample Performance:
-    Per sample time: {per_sample_time*1000:.3f} ms/sample
-    Throughput: {samples_per_second:.1f} samples/second
-
-    Earth-wide Performance (for {earth_cells:,} columns):
-    Sequential processing time: {earth_time*1000:.2f} ms ({earth_time:.6f} sec)
-    Batched processing time: {earth_batch_time*1000:.2f} ms ({earth_batch_time:.6f} sec)
-    Required batches: {earth_batches}
-    """
-    
-    summary_text += "\nStatistical Distribution (percentiles):\n"
-    sorted_times = sorted(timing_data)
-    percentiles = [10, 25, 50, 75, 90, 95, 99]
-    for p in percentiles:
-        idx = int(len(sorted_times) * p / 100)
-        summary_text += f"  {p}th percentile: {sorted_times[idx]*1000:.3f} ms\n"
-        
-    summary_text += "================================================================\n"
-    
-    # Print to console
-    print(summary_text)
-    
-    # Save human-readable summary to text file
-    with open(join(test_path, 'inference_timing_summary.txt'), 'w') as f:
-        f.write(summary_text)
-        
-    return samples_per_second, per_sample_time, earth_time, earth_batch_time
-
 
 def test_model(model, test_set, normalizer):
     logger.info('Test started...')    
- 
+
     best_chkpt = join(checkpoint_path, 'best_model.pth')
     assert isfile(best_chkpt), 'Checkpoint not found, testing faild!'
     checkpoint = torch.load(best_chkpt, map_location=torch.device(device))
     model.load_state_dict(checkpoint['model_state_dict'])
-
-    
     
     test_loss = MeanSquaredError().to(device)
     test_mae = MeanAbsoluteError().to(device)
-    
-    # Initialize HR smoothness loss if enabled
-    use_hr_smoothness = args.hr_smoothness_weight > 0
-    if use_hr_smoothness:
-        hr_smoothness = HeatingRateSmoothnessLoss(
-            weight=1.0,
-            top_levels=args.hr_smoothness_top_levels
-        ).to(device)  
-        smoothness_losses = []
 
     y_true, y_pred = list(), list()
     h_true, h_pred = list(), list()
-    
-    # Timing configuration
-    # -------------------------------
-    num_timing_batches = 1000  
-    warmup_batches = 10       
-    timing_data = []
-    
-    # Perform warmup to stabilize GPU performance
-    logger.info(f'Performing {warmup_batches} warmup passes...')
-    warmup_iter = iter(test_set)
-    for _ in range(warmup_batches):
-        try:
-            data = next(warmup_iter)
-            batch_x3, batch_x2, _ = data
-            batch_x3, batch_x2 = batch_x3.to(device), batch_x2.to(device)
-            batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
-            with torch.no_grad():
-                _ = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
-        except StopIteration:
-            # If we run out of data, just break the loop
-            break
-    
-    # Synchronize GPU to ensure warmup is complete
-    # This makes sure all previous operations are finished before we start timing
-    torch.cuda.synchronize()
-    # -------------------------------   
-
     
     t1 = time.perf_counter(), time.process_time()
     
@@ -726,32 +509,7 @@ def test_model(model, test_set, normalizer):
         
         model.eval()
         with torch.no_grad():
-            # Time inference for a subset of batches
-            # -------------------------------   
-            if i < num_timing_batches:
-                # Ensure all previous GPU operations are complete
-                torch.cuda.synchronize()
-                
-                # Time forward pass
-                start = time.perf_counter()
-                # -------------------------------   
-                
-                outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
-                
-                # Ensure forward pass is complete before stopping timer
-                # -------------------------------   
-                torch.cuda.synchronize()
-                
-                end = time.perf_counter()
-                timing_data.append(end - start)
-                # -------------------------------   
-            else:
-                outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
-            
-            # Track HR smoothness loss if enabled
-            if use_hr_smoothness:
-                smoothness_loss = hr_smoothness(outputs, batch_x3, batch_x2).item()
-                smoothness_losses.append(smoothness_loss)
+            outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
             
         y_true.append(batch_y.detach().cpu())
         y_pred.append(outputs.detach().cpu())
@@ -766,15 +524,6 @@ def test_model(model, test_set, normalizer):
 
     t2 = time.perf_counter(), time.process_time()
     
-    # Process timing statistics using dedicated function
-    # -------------------------------   
-    samples_per_second, per_sample_time, earth_time, earth_batch_time = None, None, None, None
-    if timing_data:
-        samples_per_second, per_sample_time, earth_time, earth_batch_time = process_timing_statistics(
-            timing_data, model, test_path)
-        
-    # -------------------------------   
-    
     y_true = torch.cat(y_true, 0)
     y_pred = torch.cat(y_pred, 0)
     h_true = torch.cat(h_true, 0)
@@ -783,19 +532,8 @@ def test_model(model, test_set, normalizer):
     total_test_loss = test_loss.compute()
     total_test_mae = test_mae.compute()
 
-    # Report HR smoothness loss if calculated
-    if use_hr_smoothness and smoothness_losses:
-        avg_smoothness = sum(smoothness_losses) / len(smoothness_losses)
-        print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} '
-              f'mean_absolute_error: {total_test_mae:.4f} '
-              f'hr_smoothness: {avg_smoothness:.4f}')
-        
-        # Log to wandb
-        wandb.log({"test_hr_smoothness": avg_smoothness})
-    else:
-        print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} '
-              f'mean_absolute_error: {total_test_mae:.4f}')
-        
+    print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} ',
+            f'mean_absolute_error: {total_test_mae:.4f}')
 
 
     with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
@@ -810,12 +548,16 @@ def test_model(model, test_set, normalizer):
     with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
         pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
-    # Return timing metrics for logging in wandb
-    return samples_per_second, per_sample_time, earth_time, earth_batch_time
-
-
+        
+        
 def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
-    icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
+    icon_data = IconIterableDataset_3D(
+        filenames, 
+        subsample=subsample, 
+        cache_dir='/tmp', 
+        shuffle=shuffle,
+        division_factor=args.triangle_division_factor
+    )
 
     # Prepare arguments for DataLoader
     dataloader_args = {
@@ -907,18 +649,25 @@ def main():
         train_cpu_time = tr2[1] - tr1[1]
         print(f'Training time: Real time: {train_real_time:.2f}, CPU time: {train_cpu_time:.2f}')
         
-
+        # Store training times for end summary
+        summary_metrics["train_real_time"] = train_real_time
+        summary_metrics["train_cpu_time"] = train_cpu_time
     
     if args.test:
-        #test1 = time.perf_counter(), time.process_time()
+        test1 = time.perf_counter(), time.process_time()
         test_loader = get_column_data_with_disk_cache(test_files, shuffle=False)
         
-        # First measure inference time
-        logger.info('---------------------------------------')
-        logger.info('Step 1: Measuring inference time...')
-        samples_per_second, per_sample_time, earth_time, earth_batch_time = test_model(model, test_loader, normalizer)
+        # Pass normalizer to test function
+        test_model(model, test_loader, normalizer)
+        test2 = time.perf_counter(), time.process_time()
         
-            
+        test_real_time = test2[0] - test1[0]
+        test_cpu_time = test2[1] - test1[1]
+        print(f'Test time: Real time: {test_real_time:.2f}, CPU time: {test_cpu_time:.2f}')
+        
+        summary_metrics["test_real_time"] = test_real_time
+        summary_metrics["test_cpu_time"] = test_cpu_time
+    
     # Log all summary metrics at the end
     wandb.log(summary_metrics, commit=True)
     

@@ -430,6 +430,7 @@ def train_model(model, train_set, valid_set, normalizer):
                 if i % 100 == 99:
                     if use_hr_smoothness:
                         print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, '
+                        print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, '
                               f'mse: {mse_loss:.4f}, smoothness: {smoothness_loss:.4f}, '
                               f'mean_absolute_error: {batch_mae:.4f}')
                     else:

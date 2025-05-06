@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch_geometric.nn import MessagePassing
 import torch.utils.checkpoint
 
@@ -53,7 +52,7 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         repeat_surface_at_all_levels = surface_features.repeat(1, L, 1)
         augmented_atmospheric_column = torch.cat([x3d_norm, repeat_surface_at_all_levels], dim=-1)
         
-        # Create extra surface nodes with zeros and match the batch dimension
+        # Create extra surface nodes with ones and match the batch dimension
         one_surface_tensor = torch.ones(B, 1, x2d_norm.shape[1], device=x3d_norm.device)
         append_one_surface_tensor = torch.cat([one_surface_tensor, surface_features], dim=-1)
         
@@ -75,12 +74,12 @@ class AtmosphericColumnGNN(BaseRadiationModel):
                 self.edge_index_cache[cache_key] = edge_index
         
         # Encode node features first
-        x = self.encoder.node_mlp(x)
+        x, _ = self.encoder.node_mlp(x)
         B, N, E = x.shape
         x = x.view(B*N, E)
         
       
-                    # Create zero-filled edge features with same dimension as node features
+        # Create zero-filled edge features with same dimension as node features
         num_edges = edge_index.size(1)
         embed_dim = x.size(1)
         edge_attr = torch.zeros(num_edges, embed_dim, device=x.device)
@@ -174,7 +173,6 @@ class GNNLayer(MessagePassing):
         return node_update, edge_update
     
     def message(self, edge_attr):
-        # Simply pass the updated edge features as messages
         return edge_attr
     
     def update(self, aggr_out):

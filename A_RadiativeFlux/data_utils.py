@@ -51,4 +51,41 @@ class DataNormalizer:
         # Normalize 2D data
         x2d_normalized = (x2d - self.mean2d) / self.std2d
         
-        return x3d_normalized, x2d_normalized, x2d_original 
+        return x3d_normalized, x2d_normalized, x2d_original
+
+
+
+def get_triangle_indices(triangle_id=1, total_cols=81920, division_factor=1):
+    """
+    Get indices of triangle cells for a specific triangle ID with optional division.
+    
+    Args:
+        triangle_id: ID of the triangle to select (0-19 for large triangles)
+        total_cols: Total number of columns in the grid
+        division_factor: Factor by which to divide the triangle 
+                        (1 for full triangle with 4096 columns, 
+                         4 for 1/4 triangle with 1024 columns,
+                         16 for 1/16 triangle with 256 columns)
+                         
+    Returns:
+        torch.Tensor: Indices for the selected triangle area
+    """
+    # First get the large triangle size (4096 columns)
+    large_triangle_size = total_cols // 20
+    
+    # Calculate actual block size based on division factor
+    block_size = large_triangle_size // division_factor
+    
+    # Calculate start index within the large triangle
+    large_triangle_start = (triangle_id // 20) * large_triangle_size
+    
+    # Calculate sub-block index within the large triangle
+    if division_factor > 1:
+        # For a division factor of 4, there are 4 possible sub-blocks (0,1,2,3)
+        sub_block_index = triangle_id % division_factor
+        start_idx = large_triangle_start + (sub_block_index * block_size)
+    else:
+        start_idx = large_triangle_start
+    
+    end_idx = min(start_idx + block_size, total_cols)
+    return torch.arange(start_idx, end_idx, dtype=torch.long) 
