@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch_geometric.nn import MessagePassing
 
 from .base_methods import BaseRadiationModel
@@ -51,16 +50,13 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         B, L, _ = x3d_norm.shape
 
         # Append surface features to each atmospheric level
-        surface_features = x2d_norm.unsqueeze(1)
-        repeat_surface_at_all_levels = surface_features.repeat(1, L, 1)
-        augmented_atmospheric_column = torch.cat([x3d_norm, repeat_surface_at_all_levels], dim=-1)
+        features_2d = x2d_norm.unsqueeze(1)
+        repeat_2d_at_all_levels = features_2d.repeat(1, L, 1) 
+        augmented_3d_column = torch.cat([x3d_norm, repeat_2d_at_all_levels], dim=-1)
         
-        # Create extra surface nodes with zeros and match the batch dimension
-        one_surface_tensor = torch.ones(B, 1, x2d_norm.shape[1], device=x3d_norm.device)
-        append_one_surface_tensor = torch.cat([one_surface_tensor, surface_features], dim=-1)
-        
-        # Combine extra zero surface nodes with atmospheric columns
-        x = torch.cat([augmented_atmospheric_column, append_one_surface_tensor], dim=1)
+        # Create extra 2d nodes with ones and concatenate with the 3d column
+        ones = torch.ones(B, 1, augmented_3d_column.shape[-1], device=x3d_norm.device)
+        x = torch.cat([ones, augmented_3d_column], dim=1)
         
         # create the edge indices based on chosen connectivity pattern
         if self.fully_connected:

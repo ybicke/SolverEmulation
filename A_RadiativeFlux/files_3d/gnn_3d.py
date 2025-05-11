@@ -1,26 +1,28 @@
 import torch
 import torch.nn as nn
 from torch_geometric.nn import MessagePassing
-from .graph_3d import get_3d_graph
-
+from .graph_3d_full import get_3d_graph
 from .base_methods import BaseRadiationModel
 
 
 
 class GNN3d(BaseRadiationModel):
     def __init__(self,
+                 total_cols,
                  grid_file_path,
-                 triangle_id=1,
-                 embed_dim=256,
-                 depth=8,
-                 dropout=0.0,
-                 channels_in_3d=6,
-                 channels_in_2d=6,
-                 channels_out=4,
-                 edge_channels_in=0,
-                 num_height_levels=70,
-                 device='cuda',
-                 division_factor=1,
+                 triangle_id,
+                 embed_dim,
+                 depth,
+                 dropout,
+                 channels_in_3d,
+                 channels_in_2d,
+                 channels_out,
+                 edge_channels_in,
+                 num_height_levels,
+                 device,
+                 division_factor,
+                 fully_connected,
+                 disable_horizontal,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,12 +30,16 @@ class GNN3d(BaseRadiationModel):
         self.device = device
         self.channels_out = channels_out
         self.edge_channels_in = edge_channels_in
+        self.embed_dim = embed_dim
         
         # Store graph parameters for later use
         self.grid_file_path = grid_file_path
         self.triangle_id = triangle_id
         self.num_height_levels = num_height_levels
         self.division_factor = division_factor
+        self.total_cols = total_cols
+        self.fully_connected = fully_connected
+        self.disable_horizontal = disable_horizontal
         
         # Core GNN components
         total_channels = channels_in_3d + channels_in_2d
@@ -43,19 +49,16 @@ class GNN3d(BaseRadiationModel):
         self.decoder = Decoder(embed_dim, channels_out, dropout=dropout)
     
     def forward(self, x3d_norm, x2d_norm, x2d_orig):
-        B, L, _ = x3d_norm.shape
+        B, N, L, _ = x3d_norm.shape
         
         # Append surface features to each atmospheric level
-        surface_features = x2d_norm.unsqueeze(1)
-        repeat_surface_at_all_levels = surface_features.repeat(1, L, 1)
-        augmented_atmospheric_column = torch.cat([x3d_norm, repeat_surface_at_all_levels], dim=-1)
+        features_2d = x2d_norm.unsqueeze(2)
+        repeat_2d_at_all_levels = features_2d.repeat(1, 1, L, 1) 
+        augmented_3d_column = torch.cat([x3d_norm, repeat_2d_at_all_levels], dim=-1)
         
-        # Create extra surface nodes with ones and match the batch dimension
-        one_surface_tensor = torch.ones(B, 1, x2d_norm.shape[1], device=x3d_norm.device)
-        append_one_surface_tensor = torch.cat([one_surface_tensor, surface_features], dim=-1)
-        
-        # Combine extra zero surface nodes with atmospheric columns
-        x = torch.cat([augmented_atmospheric_column, append_one_surface_tensor], dim=1)
+        # Create extra 2d nodes with ones and concatenate with the 3d column
+        ones_2d = torch.ones(B, N, 1, augmented_3d_column.shape[-1], device=x3d_norm.device)
+        x = torch.cat([ones_2d, augmented_3d_column], dim=2)
         
         # Get batched edge index using the simplified function
         batch_edge_index, N = get_3d_graph(
@@ -63,20 +66,26 @@ class GNN3d(BaseRadiationModel):
             triangle_id=self.triangle_id,
             num_height_levels=self.num_height_levels,
             batch_size=B,
+            total_cols=self.total_cols,
             division_factor=self.division_factor,
-            device=self.device
+            device=self.device,
+            fully_connected=self.fully_connected,
+            disable_horizontal=self.disable_horizontal
         )
+ 
+
         
-        # Create edge features here zeros
+        # TODO: Here I am not using the encoder for edge features as I consider my edge features to be zeros. Pass zeros directly to processor
+        # Could encode it if I want to use it for experiments, but I want to save some compute and memory and it might not make sense.
         num_edges = batch_edge_index.size(1)
-        edge_attr = torch.zeros(num_edges, self.edge_channels_in, device=x.device) 
-        
-        # Encode node features. Edge features are optional depending on comutational budget.
+        edge_attr = torch.zeros(num_edges, self.embed_dim, device=x.device)  
+
+        # Encode node features only
         x_features = x.reshape(B * N * (L+1), -1)  
-        x_encoded, _ = self.encoder(x_features, edge_attr)
-        
+        x_encoded = self.encoder.node_mlp(x_features)  # Only encode node features, don't use the full encoder
+
+        # Process with the encoded nodes and zero-initialized edges of the correct dimension
         x_processed = self.processor(x_encoded, batch_edge_index, edge_attr)
-        x_processed = x_processed.view(B, N * (L+1), -1)
         
         x_decoded = self.decoder(x_processed)
         

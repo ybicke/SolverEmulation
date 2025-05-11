@@ -21,7 +21,7 @@ from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
 
 from files_3d.data_loader_3d import IconIterableDataset_3D
-from data_utils import DataNormalizer
+from files_3d.data_utils import DataNormalizer
 
 
 
@@ -115,7 +115,9 @@ gnn_3d_group.add_argument('--grid-file-path', type=str, default=None, help='Path
 gnn_3d_group.add_argument('--triangle-id', type=int, default=1, help='ID of the triangle to use')
 gnn_3d_group.add_argument('--embed-dim', type=int, default=256, help='Embedding dimension for GNN 3d')
 gnn_3d_group.add_argument('--triangle-division-factor', type=int, default=4, 
-                           help='Factor by which to divide the triangle (1 for full 4096 columns, 4 for 1024 columns, 16 for 256 columns)')
+                        help='Factor by which to divide the triangle (1 for full 4096 columns, 4 for 1024 columns, 16 for 256 columns)')
+gnn_3d_group.add_argument('--fully-connected-vertical', action=argparse.BooleanOptionalAction, default=False, 
+                        help='Whether to use fully connected edges in the vertical dimension of the atmospheric column')
 
 # RNN specific parameters
 rnn_group = parser.add_argument_group('RNN model arguments')
@@ -276,9 +278,10 @@ def get_model(model_name):
         from files_3d.gnn_3d import GNN3d   
         
         model = GNN3d(
+            total_cols=args.num_cells,
             grid_file_path=args.grid_file_path,
             triangle_id=args.triangle_id,
-            embed_dim=args.embed_dim,
+            embed_dim=args.hidden_dim,
             depth=args.layers,
             dropout=args.dropout,
             channels_in_3d=args.channel_3d,
@@ -287,9 +290,10 @@ def get_model(model_name):
             edge_channels_in=args.edge_channels_in,
             num_height_levels=args.height_in,
             device=device,
-            division_factor=args.triangle_division_factor
+            division_factor=args.triangle_division_factor,
+            fully_connected_vertical=args.fully_connected_vertical
         ).to(device)
-        
+            
         
     elif model_name == 'rnn':
         from models.rnn import FastRnnIg
@@ -385,7 +389,7 @@ def train_model(model, train_set, valid_set, normalizer):
                 optimizer.step()
                 t2_1 = time.perf_counter()
                 
-                if i % 100 == 99:
+                if i % 10 == 9:
                     print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
                 
 
@@ -497,6 +501,29 @@ def test_model(model, test_set, normalizer):
     y_true, y_pred = list(), list()
     h_true, h_pred = list(), list()
     
+    # Timing configuration
+    num_timing_batches = 1000  
+    warmup_batches = 10       
+    timing_data = []
+    
+    # Perform warmup to stabilize GPU performance
+    logger.info(f'Performing {warmup_batches} warmup passes...')
+    warmup_iter = iter(test_set)
+    for _ in range(warmup_batches):
+        try:
+            data = next(warmup_iter)
+            batch_x3, batch_x2, _ = data
+            batch_x3, batch_x2 = batch_x3.to(device), batch_x2.to(device)
+            batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
+            with torch.no_grad():
+                _ = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+        except StopIteration:
+            # If we run out of data, just break the loop
+            break
+    
+    # Synchronize GPU to ensure warmup is complete
+    torch.cuda.synchronize()
+    
     t1 = time.perf_counter(), time.process_time()
     
     for i, data in enumerate(test_set):
@@ -509,7 +536,22 @@ def test_model(model, test_set, normalizer):
         
         model.eval()
         with torch.no_grad():
-            outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+            # Time inference for a subset of batches
+            if i < num_timing_batches:
+                # Ensure all previous GPU operations are complete
+                torch.cuda.synchronize()
+                
+                # Time forward pass
+                start = time.perf_counter()
+                outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+                
+                # Ensure forward pass is complete before stopping timer
+                torch.cuda.synchronize()
+                
+                end = time.perf_counter()
+                timing_data.append(end - start)
+            else:
+                outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
             
         y_true.append(batch_y.detach().cpu())
         y_pred.append(outputs.detach().cpu())
@@ -518,11 +560,17 @@ def test_model(model, test_set, normalizer):
 
         loss = test_loss(outputs, batch_y)
         mae = test_mae(outputs, batch_y)
-        if i % 1000 == 999:
+        if i % 10 == 9:
             print(f'batch {i+1} loss: {loss:.4f}, '
                     f'mean_absolute_error: {mae:.4f},')
 
     t2 = time.perf_counter(), time.process_time()
+    
+    # Process timing statistics
+    samples_per_second, per_sample_time, earth_time, earth_batch_time = None, None, None, None
+    if timing_data:
+        samples_per_second, per_sample_time, earth_time, earth_batch_time = process_timing_statistics(
+            timing_data, model, test_path)
     
     y_true = torch.cat(y_true, 0)
     y_pred = torch.cat(y_pred, 0)
@@ -548,12 +596,90 @@ def test_model(model, test_set, normalizer):
     with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
         pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
+    # Return timing metrics for logging in wandb
+    return samples_per_second, per_sample_time, earth_time, earth_batch_time
+
+def process_timing_statistics(timing_data, model, test_path):
+    """
+    Process and report timing statistics from collected data.
+    """
+    import math
+    
+    batch_size = args.batch_size
+    
+    # Calculate basic statistics
+    mean_time = sum(timing_data) / len(timing_data)
+    std_time = (sum((t - mean_time) ** 2 for t in timing_data) / len(timing_data)) ** 0.5
+    min_time = min(timing_data)
+    max_time = max(timing_data)
+    
+    # Calculate per-sample metrics
+    per_sample_time = mean_time / batch_size
+    samples_per_second = batch_size / mean_time
+    
+    # Calculate Earth-wide metrics
+    earth_cells = args.num_cells  # Number of columns in the entire Earth model
+    earth_time = earth_cells * per_sample_time  # Time to process entire Earth
+    earth_batches = math.ceil(earth_cells / batch_size)  # Number of batches needed
+    earth_batch_time = earth_batches * mean_time  # Time to process Earth in batches
+    
+    gpu_info = torch.cuda.get_device_name(0)
+    
+    summary_text = f"""
+    ==================== INFERENCE TIMING SUMMARY ====================
+    Model: {args.model}
+    Hardware: {gpu_info}
+    Parameters: {count_parameters(model):,}
+
+    Configuration:
+    Hidden Dimension: {args.hidden_dim}
+    Layers: {args.layers}
+    Train Batch Size: {args.batch_size}
+    Test Batch Size: {batch_size}
+
+    Batch Performance:
+    Batches measured: {len(timing_data)}
+    Mean batch time: {mean_time*1000:.3f} ms/batch
+    Std deviation: {std_time*1000:.3f} ms/batch
+    Min/Max batch time: {min_time*1000:.3f}/{max_time*1000:.3f} ms/batch
+    
+    Sample Performance:
+    Per sample time: {per_sample_time*1000:.3f} ms/sample
+    Throughput: {samples_per_second:.1f} samples/second
+
+    Earth-wide Performance (for {earth_cells:,} columns):
+    Sequential processing time: {earth_time*1000:.2f} ms ({earth_time:.6f} sec)
+    Batched processing time: {earth_batch_time*1000:.2f} ms ({earth_batch_time:.6f} sec)
+    Required batches: {earth_batches}
+    """
+    
+    summary_text += "\nStatistical Distribution (percentiles):\n"
+    sorted_times = sorted(timing_data)
+    percentiles = [10, 25, 50, 75, 90, 95, 99]
+    for p in percentiles:
+        idx = int(len(sorted_times) * p / 100)
+        summary_text += f"  {p}th percentile: {sorted_times[idx]*1000:.3f} ms\n"
         
+    summary_text += "================================================================\n"
+    
+    # Print to console
+    print(summary_text)
+    
+    # Save human-readable summary to text file
+    with open(join(test_path, 'inference_timing_summary.txt'), 'w') as f:
+        f.write(summary_text)
         
-def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
+    return samples_per_second, per_sample_time, earth_time, earth_batch_time
+
+
+# TODO: Might use subsampling here when I want to subsample a large triangle
+def get_column_data_with_disk_cache(filenames, 
+                                    #subsample=args.subsample, 
+                                    shuffle=False, 
+                                    num_workers=0):
     icon_data = IconIterableDataset_3D(
         filenames, 
-        subsample=subsample, 
+        # subsample=subsample, 
         cache_dir='/tmp', 
         shuffle=shuffle,
         division_factor=args.triangle_division_factor
@@ -610,6 +736,8 @@ def main():
     # First create the model before initializing wandb
     model = get_model(args.model)
     num_params = count_parameters(model)
+    print(f"Trainable parameters: {num_params:,}")
+
     
     # Initialize W&B here before anything else
     wandb.init(
@@ -639,8 +767,12 @@ def main():
 
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
-        train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
-        val_loader = get_column_data_with_disk_cache(val_files, shuffle=False, subsample=1.0)
+        train_loader = get_column_data_with_disk_cache(train_files, shuffle=True,
+                                                        #subsample=1.0
+                                                       )
+        val_loader = get_column_data_with_disk_cache(val_files, shuffle=False,
+                                                     #subsample=1.0
+                                                     )
         
         train_model(model, train_loader, val_loader, normalizer)
         
@@ -657,8 +789,11 @@ def main():
         test1 = time.perf_counter(), time.process_time()
         test_loader = get_column_data_with_disk_cache(test_files, shuffle=False)
         
-        # Pass normalizer to test function
-        test_model(model, test_loader, normalizer)
+        # First measure inference time
+        logger.info('---------------------------------------')
+        logger.info('Measuring inference time...')
+        samples_per_second, per_sample_time, earth_time, earth_batch_time = test_model(model, test_loader, normalizer)
+        
         test2 = time.perf_counter(), time.process_time()
         
         test_real_time = test2[0] - test1[0]
@@ -667,6 +802,14 @@ def main():
         
         summary_metrics["test_real_time"] = test_real_time
         summary_metrics["test_cpu_time"] = test_cpu_time
+        
+        # Log timing metrics in wandb
+        if samples_per_second is not None and per_sample_time is not None:
+            summary_metrics["samples_per_second"] = samples_per_second
+            summary_metrics["per_sample_time_ms"] = per_sample_time * 1000  # Convert to ms
+            summary_metrics["earth_time_seconds"] = earth_time
+            summary_metrics["earth_batch_time_seconds"] = earth_batch_time
+            print(f'Samples per second: {samples_per_second:.2f}, Per sample time: {per_sample_time*1000:.2f} ms')
     
     # Log all summary metrics at the end
     wandb.log(summary_metrics, commit=True)

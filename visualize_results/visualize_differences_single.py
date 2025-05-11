@@ -1,4 +1,3 @@
-import torch
 import pickle
 import numpy as np
 from os.path import join
@@ -9,8 +8,9 @@ from itertools import cycle
 # Define the model names and paths
 model_names = [
     'gnn_32_l3_optimized',
-    'gnn_32_l3_hrl_005',
     'gnn_32_l3_hrlu_005',
+    #'gnn_32_l3_hrl_005',
+    'gnn_32_l3_hrlu_0005',
 ]
 
 model_paths = [
@@ -22,7 +22,7 @@ model_paths = [
 models = [{'name': name, 'path': path} for name, path in zip(model_names, model_paths)]
 
 # Select a single sample
-sample_index = 93  # Change this to select a different sample
+sample_index = 90  # Change this to select a different sample
 
 # Define vertical level range to visualize
 min_level = 0  # Minimum vertical level (inclusive)

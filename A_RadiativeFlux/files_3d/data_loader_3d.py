@@ -3,11 +3,9 @@ import shutil
 import random
 import torch
 import h5py
-import numpy as np
 from os.path import join, basename, exists
 from torch.utils.data import IterableDataset
-from ..data_utils import get_triangle_indices
-
+from .data_utils import get_triangle_indices
 
 class IconIterableDataset_3D(IterableDataset):
     """

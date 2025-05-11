@@ -1,10 +1,10 @@
 import numpy as np
 import xarray as xr
 import torch
-from SolverEmulation.A_RadiativeFlux.data_utils import get_triangle_indices
+from .data_utils import get_triangle_indices
 
 
-def create_atmospheric_graph_from_xarray(grid_data, triangle_indices, num_height_levels=70, device='cuda'):
+def create_atmospheric_graph_from_xarray(grid_data, triangle_indices, num_height_levels, device):
     """
     Creates a graph structure for the atmospheric data and returns edge_index directly.
     """
@@ -58,8 +58,8 @@ def create_atmospheric_graph_from_xarray(grid_data, triangle_indices, num_height
 # Cache for edge indices (to avoid recomputing)
 EDGE_INDEX_CACHE = {}
 
-def get_3d_graph(grid_file_path, triangle_id=1, num_height_levels=70, batch_size=1,  
-                 total_cols=81920, division_factor=1, device='cuda'):
+def get_3d_graph(grid_file_path, triangle_id, num_height_levels, batch_size,  
+                 total_cols, division_factor, device):
     """
     Get edge index for 3D atmospheric graph, with caching.
     

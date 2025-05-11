@@ -1,0 +1,33 @@
+{
+    "name": "Python Debugger: train_diffusion",
+    "type": "debugpy",
+    "request": "launch",
+    "program": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion2/train.py",
+    "console": "integratedTerminal",
+    "python": "/myhome/mambaforge/envs/deepFlux/bin/python",
+    "env": {
+        "PYTHONPATH": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux"
+    },
+    "args": [
+        "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+        "--save", "/mydata/deepcloud/yves/results_git/diffusion_debug",
+        "--percent", "0.01",
+        "--subsample", "0.01",
+        "--num-workers", "2",
+        "--batch-size", "8",
+        "--learning-rate", "0.0001",
+        "--max-steps", "1000",
+        "--height-in", "71",
+        "--channel-out", "4",
+        "--channel-3d", "6",
+        "--channel-2d", "6",
+        "--cnn-units", "64", "128", "256", "512",
+        "--cnn-kernel-sizes", "2", "2", "2", "2",
+        "--dropout", "0.1",
+        "--num-sampling-steps", "10",
+        "--deterministic-sampling",
+        "--sigma-min", "0.002",
+        "--sigma-max", "80.0",
+        "--sigma-data", "0.5"
+    ]
+} 

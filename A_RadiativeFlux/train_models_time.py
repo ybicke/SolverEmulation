@@ -8,11 +8,10 @@ import pickle
 import logging
 import random
 import math
-import warnings
 
 
 import argparse
-from os.path import join, dirname, basename, normpath, isfile, exists
+from os.path import join, dirname, basename, normpath, isfile
 
 import wandb
 import torch
@@ -23,8 +22,7 @@ from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
 # Import matplotlib for visualizations
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from io import BytesIO
+
 
 from data_loader import IconColumnIterableDataset
 from data_utils import DataNormalizer
@@ -53,8 +51,6 @@ torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-import argparse
-import os
 
 parser = argparse.ArgumentParser(description='Train Transformer models.')
 
@@ -88,14 +84,10 @@ parser.add_argument('--patch-size', type=int, default=2, help='Patch size for tr
 parser.add_argument('--scale-output', action=argparse.BooleanOptionalAction, default=True, help='Whether to scale output')
 parser.add_argument('--height-in', type=int, default=70, help='Number of height levels')
 
-# Add to the parser arguments section
-parser.add_argument('--smoothness-weight', type=float, default=0.1, help='Weight for the heating rate smoothness loss')
-parser.add_argument('--smoothness-mode', type=str, default='diff', choices=['diff', 'abs', 'squared'], 
-                    help='Mode for smoothness penalty (diff: compare to ground truth gradients, abs: absolute gradients, squared: squared gradients)')
-parser.add_argument('--higher-level-weight', action=argparse.BooleanOptionalAction, default=False, 
-                    help='Whether to apply additional weight to higher level transitions')
-parser.add_argument('--higher-level-scale', type=float, default=2.0, 
-                    help='Scaling factor for higher levels when higher-level-weight is enabled')
+# Add this argument to your parser arguments section
+parser.add_argument('--hr-smoothness-weight', type=float, default=0.0, 
+                   help='Weight for heating rate smoothness loss (0.0 to disable, higher values create smoother profiles)')
+
 
 # ViT specific parameters
 vit_group = parser.add_argument_group('ViT model arguments')
@@ -126,6 +118,13 @@ rnn_group = parser.add_argument_group('RNN model arguments')
 rnn_group.add_argument('--lstm-units', nargs='+', type=int, default=[256, 512], help='LSTM units for RNN model')
 rnn_group.add_argument('--mlp-units', nargs='+', type=int, default=[256, 256], help='MLP units for RNN model')
 rnn_group.add_argument('--lstm-droprate', type=float, default=0.0, help='Dropout rate for LSTM layers')
+
+# Add these arguments to your parser arguments section
+unet_group = parser.add_argument_group('UNet model arguments')
+unet_group.add_argument('--cnn-units', nargs='+', type=int, default=[64, 128, 256, 512], 
+                     help='Number of filters in each CNN layer')
+unet_group.add_argument('--cnn-kernel-sizes', nargs='+', type=int, default=[2, 2, 2, 2], 
+                     help='Kernel sizes for maxpooling in CNN layers')
 
 
 args = parser.parse_args()
@@ -309,6 +308,20 @@ def get_model(model_name):
             device=device
         ).to(device)
         
+    elif model_name == 'unet':
+        from models.unet import UNet
+        
+        model = UNet(
+            height_in=args.height_in,
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channel_out=args.channel_out,
+            cnn_units=args.cnn_units,
+            kernel_sizes=args.cnn_kernel_sizes,
+            dropout=args.dropout,
+            device=device
+        ).to(device)
+        
         
     else:
         raise NotImplementedError('Model has not implemented yet!')
@@ -339,25 +352,7 @@ def train_model(model, train_set, valid_set, normalizer):
     else:
         raise NameError('optimizer not supported.')
     
-    # Create level weights if higher level weighting is enabled
-    higher_level_weight = None
-    if args.higher_level_weight:
-        # Create weights that increase with height level
-        # This gives stronger penalties for non-smoothness at higher levels
-        num_levels = args.height_in - 1  # Number of transitions between levels
-        # Exponential increasing weights from 1.0 to scale factor
-        higher_level_weight = torch.exp(torch.linspace(0, math.log(args.higher_level_scale), num_levels))
-        logger.info(f"Using higher level weighting with scale factor {args.higher_level_scale}")
-    
-    # Create our custom loss function
-    custom_loss = HeatingRateSmoothLoss(
-        smoothness_weight=args.smoothness_weight,
-        smoothness_mode=args.smoothness_mode,
-        higher_level_weight=higher_level_weight,
-        device=device
-    )
-    
-    # We still keep the metrics for tracking
+    # Standard loss function
     train_loss = MeanSquaredError().to(device)
     valid_loss = MeanSquaredError().to(device)
     train_mae = MeanAbsoluteError().to(device)
@@ -379,18 +374,12 @@ def train_model(model, train_set, valid_set, normalizer):
     epoch_number = init_epoch
     best_loss = 1e9999999 
       
-    # For tracking smoothness loss
-    smoothness_loss_epoch = 0.0
-    batch_count = 0
-
     # Training loop
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
         
         model.train(True)
-        smoothness_loss_epoch = 0.0
-        batch_count = 0
         
         for i, data in enumerate(train_set):
             
@@ -405,33 +394,26 @@ def train_model(model, train_set, valid_set, normalizer):
             # Forward pass with normalized data
             outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
             
-            # Use our custom loss function
-            total_loss, mse_loss, smoothness_loss = custom_loss(outputs, batch_y, batch_x3, batch_x2)
+            # Use standard MSE loss
+            loss = train_loss(outputs, batch_y)
             
             # Update metrics for logging
-            train_loss.update(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
-            
-            # Track smoothness loss
-            smoothness_loss_epoch += smoothness_loss.item()
-            batch_count += 1
             
             if i > 0:
                 optimizer.zero_grad()
-                total_loss.backward()
+                loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
                 optimizer.step()
                 t2_1 = time.perf_counter()
                 
                 if i % 100 == 99:
-                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, total_loss: {total_loss:.4f}, mse_loss: {mse_loss:.4f}, '
-                          f'smoothness_loss: {smoothness_loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, '
+                          f'mean_absolute_error: {batch_mae:.4f}')
                 
 
         # Validation step
         model.eval()
-        val_smoothness_loss = 0.0
-        val_batch_count = 0
         with torch.no_grad():
             for i, v_data in enumerate(valid_set):
                 
@@ -444,25 +426,14 @@ def train_model(model, train_set, valid_set, normalizer):
                 # Forward pass with normalized data
                 v_outputs = model(vx3d_norm, vx2d_norm, vx2d_orig)
                 
-                # Calculate validation losses
-                _, _, v_smoothness_loss = custom_loss(v_outputs, v_labels, vx3d, vx2d)
-                
                 valid_loss.update(v_outputs, v_labels)
                 valid_mae.update(v_outputs, v_labels)
-                
-                # Track validation smoothness loss
-                val_smoothness_loss += v_smoothness_loss.item()
-                val_batch_count += 1
 
         total_train_loss = train_loss.compute()
         total_valid_loss = valid_loss.compute()
         total_train_mae = train_mae.compute()
         total_valid_mae = valid_mae.compute()
         
-        # Calculate average smoothness loss
-        avg_smoothness_loss = smoothness_loss_epoch / max(1, batch_count)
-        avg_val_smoothness_loss = val_smoothness_loss / max(1, val_batch_count)
-
         t2 = time.perf_counter()
 
         # Keep logging metrics continuously
@@ -472,18 +443,14 @@ def train_model(model, train_set, valid_set, normalizer):
             'val_loss': total_valid_loss,
             'mean_absolute_error': total_train_mae,
             'val_mean_absolute_error': total_valid_mae,
-            'smoothness_loss': avg_smoothness_loss,
-            'val_smoothness_loss': avg_val_smoothness_loss
             })
 
         # Print epoch summary
         print(f'{epoch_number:03}/{args.num_epoch}: ',
               f'time: {t2-t1:.3f}', 
               f'loss: {total_train_loss:.4f} ',
-              f'smoothness_loss: {avg_smoothness_loss:.4f}, ',
               f'mean_absolute_error: {total_train_mae:.4f}, ',
               f'val_loss: {total_valid_loss:.4f}, ',
-              f'val_smoothness_loss: {avg_val_smoothness_loss:.4f}, ',
               f'val_mean_absolute_error: {total_valid_mae:.4f}')
         
         # Save checkpoints
@@ -609,98 +576,6 @@ def process_timing_statistics(timing_data, model, test_path):
     return samples_per_second, per_sample_time, earth_time, earth_batch_time
 
 
-def visualize_heating_rates(model, test_loader, normalizer, num_samples=4):
-    """
-    Visualize the heating rates and their gradients for a few test samples.
-    
-    This helps verify that the smoothness loss is having the intended effect.
-    
-    Args:
-        model: Trained model
-        test_loader: DataLoader for test data
-        normalizer: Data normalizer
-        num_samples: Number of samples to visualize
-    """
-    logger.info(f"Visualizing heating rates for {num_samples} samples...")
-    
-    # Load best model
-    best_chkpt = join(checkpoint_path, 'best_model.pth')
-    assert isfile(best_chkpt), 'Checkpoint not found, visualization failed!'
-    checkpoint = torch.load(best_chkpt, map_location=torch.device(device))
-    model.load_state_dict(checkpoint['model_state_dict'])
-    model.eval()
-    
-    # Get sample data
-    sample_data = []
-    with torch.no_grad():
-        for batch in test_loader:
-            batch_x3, batch_x2, batch_y = batch
-            batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
-            
-            # Normalize test data
-            batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
-            
-            # Forward pass with normalized data
-            outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
-            
-            # Calculate heating rates
-            hr_true = calculate_heating_rates(batch_y, batch_x3, batch_x2)
-            hr_pred = calculate_heating_rates(outputs, batch_x3, batch_x2)
-            
-            # Calculate gradients
-            hr_diff_true = hr_true[:, 1:, :] - hr_true[:, :-1, :]
-            hr_diff_pred = hr_pred[:, 1:, :] - hr_pred[:, :-1, :]
-            
-            # Store data for each sample in batch
-            for i in range(min(batch_x3.shape[0], num_samples - len(sample_data))):
-                sample_data.append({
-                    'hr_true': hr_true[i].detach().cpu().numpy(),
-                    'hr_pred': hr_pred[i].detach().cpu().numpy(),
-                    'hr_diff_true': hr_diff_true[i].detach().cpu().numpy(),
-                    'hr_diff_pred': hr_diff_pred[i].detach().cpu().numpy()
-                })
-                
-            if len(sample_data) >= num_samples:
-                break
-    
-    # Create a figure for each sample
-    for i, data in enumerate(sample_data):
-        fig, axs = plt.subplots(2, 2, figsize=(12, 10), constrained_layout=True)
-        fig.suptitle(f'Sample {i+1} - Heating Rates and Gradients', fontsize=16)
-        
-        hr_types = ['Longwave', 'Shortwave']
-        
-        # Plot heating rates
-        for j, hr_type in enumerate(hr_types):
-            ax = axs[0, j]
-            ax.plot(data['hr_true'][:, j], range(data['hr_true'].shape[0]), 'b-', label='True')
-            ax.plot(data['hr_pred'][:, j], range(data['hr_pred'].shape[0]), 'r-', label='Predicted')
-            ax.set_title(f'{hr_type} Heating Rate')
-            ax.set_xlabel('Heating Rate (K/day)')
-            ax.set_ylabel('Height Level')
-            ax.legend()
-            ax.grid(True)
-            
-        # Plot heating rate gradients
-        for j, hr_type in enumerate(hr_types):
-            ax = axs[1, j]
-            ax.plot(data['hr_diff_true'][:, j], range(data['hr_diff_true'].shape[0]), 'b-', label='True')
-            ax.plot(data['hr_diff_pred'][:, j], range(data['hr_diff_pred'].shape[0]), 'r-', label='Predicted')
-            ax.set_title(f'{hr_type} Heating Rate Gradient')
-            ax.set_xlabel('Gradient (K/day/level)')
-            ax.set_ylabel('Height Level')
-            ax.legend()
-            ax.grid(True)
-        
-        # Save the figure
-        plt.savefig(join(test_path, f'heating_rate_sample_{i+1}.png'), dpi=150)
-        plt.close(fig)
-        
-        # Log to wandb
-        if args.wandb_mode != 'disabled':
-            wandb.log({f"heating_rate_sample_{i+1}": wandb.Image(join(test_path, f'heating_rate_sample_{i+1}.png'))})
-    
-    logger.info(f"Heating rate visualizations saved to {test_path}")
 
 
 def test_model(model, test_set, normalizer):
@@ -826,8 +701,6 @@ def test_model(model, test_set, normalizer):
     with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
         pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
-    # After saving test predictions, visualize heating rates
-    visualize_heating_rates(model, test_set, normalizer)
         
     # Return timing metrics for logging in wandb
     return samples_per_second, per_sample_time, earth_time, earth_batch_time
@@ -850,82 +723,10 @@ def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle
     return DataLoader(**dataloader_args)
 
 
-# Custom loss function for smooth heating rates
-class HeatingRateSmoothLoss(torch.nn.Module):
-    def __init__(self, smoothness_weight=0.1, smoothness_mode='diff', higher_level_weight=None, device='cpu'):
-        """
-        Custom loss function that adds a penalty for non-smooth heating rate profiles.
-        
-        Args:
-            smoothness_weight (float): Weight for the smoothness term
-            smoothness_mode (str): Mode for calculating smoothness penalty:
-                - 'diff': Penalizes the model for having different gradients than ground truth
-                - 'abs': Directly penalizes large absolute gradients (regardless of ground truth)
-                - 'squared': Penalizes squared gradients (stronger penalty for large jumps)
-            higher_level_weight (list, optional): Additional weights for specific height regions.
-                If provided, should be a tensor of shape [height-1] for weighting each level transition.
-                This allows more penalty on transitions at higher levels where jumps can be problematic.
-            device (str): Device to use
-        """
-        super(HeatingRateSmoothLoss, self).__init__()
-        self.mse = torch.nn.MSELoss()
-        self.smoothness_weight = smoothness_weight
-        self.smoothness_mode = smoothness_mode
-        self.device = device
-        
-        # Initialize level weighting if provided
-        self.higher_level_weight = higher_level_weight
-        
-    def forward(self, outputs, targets, x3d, x2d):
-        # Standard MSE loss on the outputs
-        mse_loss = self.mse(outputs, targets)
-        
-        # Calculate heating rates for prediction and target
-        hr_pred = calculate_heating_rates(outputs, x3d, x2d)
-        hr_true = calculate_heating_rates(targets, x3d, x2d)
-        
-        # Calculate differences between adjacent height levels
-        hr_diff_pred = hr_pred[:, 1:, :] - hr_pred[:, :-1, :]
-        
-        # Apply different smoothness penalties based on mode
-        if self.smoothness_mode == 'diff':
-            # Penalize the model for having different gradients than ground truth
-            hr_diff_true = hr_true[:, 1:, :] - hr_true[:, :-1, :]
-            
-            # Apply additional weighting by height level if provided
-            if self.higher_level_weight is not None:
-                # Reshape for broadcasting
-                weights = self.higher_level_weight.view(1, -1, 1).to(self.device)
-                smoothness_loss = self.mse(hr_diff_pred * weights, hr_diff_true * weights)
-            else:
-                smoothness_loss = self.mse(hr_diff_pred, hr_diff_true)
-                
-        elif self.smoothness_mode == 'abs':
-            # Directly penalize large absolute gradients
-            smoothness_loss = torch.mean(torch.abs(hr_diff_pred))
-            
-        elif self.smoothness_mode == 'squared':
-            # Penalize squared gradients (stronger penalty for large jumps)
-            smoothness_loss = torch.mean(hr_diff_pred**2)
-            
-        else:
-            raise ValueError(f"Unknown smoothness mode: {self.smoothness_mode}")
-        
-        # Combined loss with weighting factor
-        total_loss = mse_loss + self.smoothness_weight * smoothness_loss
-        
-        return total_loss, mse_loss, smoothness_loss
 
 
 def main():
     logger.info('Code started...')
-    
-    # Log information about smoothness loss if it's being used
-    if args.smoothness_weight > 0:
-        logger.info(f"Using heating rate smoothness loss with weight={args.smoothness_weight}, "
-                   f"mode={args.smoothness_mode}")
-        if args.higher_level_weight:
-            logger.info(f"Applying higher-level weighting with scale factor={args.higher_level_scale}")
     
     FILENAMES = glob.glob(join(args.dataset, '*.h5'))
     time_indices = [float(re.search( r'\_time_(.*?)\.h5', f).group(1)) for f in FILENAMES]

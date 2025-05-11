@@ -1,13 +1,13 @@
 import networkx as nx
 import numpy as np
+
+
 import xarray as xr
 import torch
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
-from torch_geometric.data import Data
-from torch_geometric.utils.convert import from_networkx
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+
 
 # --- 1. Function to get triangle indices (Original - Correct for your goal) ---
 def get_triangle_indices(triangle_id=1, total_cols=81920):
@@ -105,7 +105,7 @@ def get_centroids_from_indices(grid_data, triangle_indices):
     return torch.tensor(clon, dtype=torch.float32), torch.tensor(clat, dtype=torch.float32)
 
 
-def plot_horizontal_graph_edges(grid_data, triangle_indices, horizontal_edges_list, node_ids):
+def plot_horizontal_graph_edges(grid_data, triangle_indices, horizontal_edges_list, node_ids, num_height_levels):
     """
     Plots the horizontal edges of the graph on a map.
      """
@@ -113,12 +113,9 @@ def plot_horizontal_graph_edges(grid_data, triangle_indices, horizontal_edges_li
     clon_deg = np.rad2deg(clon.numpy())
     clat_deg = np.rad2deg(clat.numpy())
     num_columns = len(triangle_indices)
-    num_height_levels = 1 
-
+    
     # Create the plot
     plt.figure(figsize=(15, 15))
-    ax = plt.axes() 
-
     plt.grid(True) 
 
     # Plot cell centroids
@@ -132,10 +129,14 @@ def plot_horizontal_graph_edges(grid_data, triangle_indices, horizontal_edges_li
             unique_edges.add((src, tgt))
 
     for src, tgt in unique_edges:
-        # For visualization, convert node indices back to column indices (assuming 1 height level)
-        src_col = (src) // num_height_levels
-        tgt_col = (tgt) // num_height_levels
+        # Convert node indices back to column indices using the provided height levels
+        src_col = src // num_height_levels
+        tgt_col = tgt // num_height_levels
         
+        # Skip edges where source or target columns would be out of bounds
+        if src_col >= num_columns or tgt_col >= num_columns:
+            continue
+            
         # Extract longitude and latitude coordinates for source and target nodes
         src_lon, src_lat = clon_deg[src_col], clat_deg[src_col]
         tgt_lon, tgt_lat = clon_deg[tgt_col], clat_deg[tgt_col]
@@ -158,171 +159,10 @@ def plot_horizontal_graph_edges(grid_data, triangle_indices, horizontal_edges_li
     plt.show()
 
 
-def verify_edge_index_matches_edges_list(edge_index, horizontal_edges_list, vertical_edges_list=None):
-    """
-    Verifies that the edge_index tensor correctly represents the edges in the edge lists.
-    
-    Parameters:
-    -----------
-    edge_index : torch.Tensor
-        The edge_index tensor of shape (2, num_edges)
-    horizontal_edges_list : list
-        List of horizontal edges as [src, tgt] pairs
-    vertical_edges_list : list, optional
-        List of vertical edges as [src, tgt] pairs
-        
-    Returns:
-    --------
-    bool
-        True if the edge_index correctly represents all edges, False otherwise
-    """
-    # Convert edge_index to a set of (src, tgt) tuples for comparison
-    edge_index_set = set()
-    for i in range(edge_index.shape[1]):
-        src = edge_index[0, i].item()
-        tgt = edge_index[1, i].item()
-        edge_index_set.add((src, tgt))
-    
-    # Convert the horizontal edges list to a set
-    horiz_edges_set = set()
-    for edge in horizontal_edges_list:
-        src, tgt = edge
-        horiz_edges_set.add((src, tgt))
-    
-    # Check if all horizontal edges are in the edge_index
-    horiz_edges_in_index = horiz_edges_set.issubset(edge_index_set)
-    print(f"All horizontal edges in edge_index: {horiz_edges_in_index}")
-    
-    # If vertical edges are provided, check those too
-    if vertical_edges_list:
-        vert_edges_set = set()
-        for edge in vertical_edges_list:
-            src, tgt = edge
-            vert_edges_set.add((src, tgt))
-        
-        vert_edges_in_index = vert_edges_set.issubset(edge_index_set)
-        print(f"All vertical edges in edge_index: {vert_edges_in_index}")
-        
-        # Check if the combined set exactly matches
-        combined_edges_set = horiz_edges_set.union(vert_edges_set)
-        exact_match = combined_edges_set == edge_index_set
-        print(f"Exact match between edge lists and edge_index: {exact_match}")
-        
-        return horiz_edges_in_index and vert_edges_in_index and exact_match
-    else:
-        # For 2D graph with only horizontal edges
-        exact_match = horiz_edges_set == edge_index_set
-        print(f"Exact match between horizontal edges and edge_index: {exact_match}")
-        print(f"Edge_index size: {len(edge_index_set)}, Horizontal edges size: {len(horiz_edges_set)}")
-        
-        if not exact_match:
-            missing_in_edge_index = horiz_edges_set - edge_index_set
-            missing_in_horiz_list = edge_index_set - horiz_edges_set
-            
-            if missing_in_edge_index:
-                print(f"Edges in horizontal_edges_list but missing in edge_index (sample): {list(missing_in_edge_index)[:5]}")
-            if missing_in_horiz_list:
-                print(f"Edges in edge_index but missing in horizontal_edges_list (sample): {list(missing_in_horiz_list)[:5]}")
-        
-        return horiz_edges_in_index and exact_match
-
-
-def visualize_edge_index(grid_data, triangle_indices, edge_index, num_height_levels=1):
-    """
-    Directly visualizes the edge_index tensor from PyTorch Geometric.
-    This shows the exact connectivity pattern that will be used in the model.
-    
-    Parameters:
-    -----------
-    grid_data : xarray.Dataset
-        The grid data containing centroids
-    triangle_indices : torch.Tensor
-        The indices of triangles to plot
-    edge_index : torch.Tensor
-        The edge_index tensor of shape (2, num_edges) from PyTorch Geometric
-    num_height_levels : int
-        Number of height levels in the graph
-    """
-    # Get centroids for plotting
-    clon, clat = get_centroids_from_indices(grid_data, triangle_indices)
-    clon_deg = np.rad2deg(clon.numpy())
-    clat_deg = np.rad2deg(clat.numpy())
-    num_columns = len(triangle_indices)
-    
-    # Create a new figure
-    plt.figure(figsize=(15, 15))
-    ax = plt.axes()
-    plt.grid(True)
-    
-    # Plot nodes - colorize by index
-    scatter = plt.scatter(clon_deg, clat_deg, c=range(1, num_columns + 1), cmap='viridis', s=100)
-    
-    # Add node labels
-    for i in range(num_columns):
-        plt.annotate(str(i+1), (clon_deg[i], clat_deg[i]),
-                    xytext=(5, 5), textcoords='offset points', fontsize=8, 
-                    ha='center', va='bottom', transform=ccrs.PlateCarree())
-    
-    # Create a set to track plotted edges and avoid duplicates
-    plotted_edges = set()
-    
-    # Directly plot edges from edge_index
-    # Convert to numpy for easier iteration
-    edge_index_np = edge_index.cpu().numpy()
-    
-    for i in range(edge_index_np.shape[1]):
-        src = edge_index_np[0, i]
-        tgt = edge_index_np[1, i]
-        
-        # Convert to column indices (if using multiple height levels)
-        src_col = src // num_height_levels
-        tgt_col = tgt // num_height_levels
-        
-        # Only plot edges between different columns (horizontal edges)
-        # and avoid duplicate edges
-        if src_col != tgt_col and (src, tgt) not in plotted_edges and (tgt, src) not in plotted_edges:
-            plotted_edges.add((src, tgt))
-            
-            # Get coordinates
-            src_lon, src_lat = clon_deg[src_col], clat_deg[src_col]
-            tgt_lon, tgt_lat = clon_deg[tgt_col], clat_deg[tgt_col]
-            
-            # Plot the edge
-            plt.plot([src_lon, tgt_lon], [src_lat, tgt_lat], 
-                     'r-', alpha=0.6, linewidth=1)
-    
-    # Set labels and title
-    plt.title('Connectivity Pattern from Edge Index Tensor')
-    plt.colorbar(scatter, label='Cell Index (1-based)')
-    plt.xlabel('Longitude (degrees)')
-    plt.ylabel('Latitude (degrees)')
-    plt.savefig('edge_index_visualization.png', dpi=300)
-    plt.tight_layout()
-    plt.show()
-    
-    print(f"Plotted {len(plotted_edges)} unique edges from edge_index tensor")
 
 
 def visualize_3d_graph_plotly(grid_data, triangle_indices, edge_index, node_ids, num_height_levels, height_scale=0.01):
-    """
-    Creates a simple interactive 3D visualization of the atmospheric graph using Plotly.
-    This will display directly in Jupyter notebooks or open in a browser outside notebooks.
-    
-    Parameters:
-    -----------
-    grid_data : xarray.Dataset
-        The grid data containing centroids
-    triangle_indices : torch.Tensor
-        The indices of triangles to plot
-    edge_index : torch.Tensor
-        The edge_index tensor from PyTorch Geometric
-    node_ids : dict
-        Dictionary mapping (column_idx, height_level) to node index
-    num_height_levels : int
-        Number of height levels in the graph
-    height_scale : float
-        Scaling factor for the height dimension
-    """
+
     # Get centroids for plotting
     clon, clat = get_centroids_from_indices(grid_data, triangle_indices)
     clon_deg = np.rad2deg(clon.numpy())
@@ -376,7 +216,6 @@ def visualize_3d_graph_plotly(grid_data, triangle_indices, edge_index, node_ids,
     )
     
     # Process edge coordinates
-    edge_x, edge_y, edge_z = [], [], []
     horiz_edges_x, horiz_edges_y, horiz_edges_z = [], [], []
     vert_edges_x, vert_edges_y, vert_edges_z = [], [], []
     
@@ -475,15 +314,112 @@ def visualize_3d_graph_plotly(grid_data, triangle_indices, edge_index, node_ids,
     print(f"Horizontal edges: {len(horiz_edges_x)//3}, Vertical edges: {len(vert_edges_x)//3}")
 
 
+def visualize_edge_index(edge_index, num_height_levels=3):
+    """
+    Visualizes just the edge_index tensor without using grid_data or triangle_indices.
+    Creates a simple graph visualization using only connectivity information.
+    Shows both horizontal and vertical connections with different colors.
+    
+    Parameters:
+    -----------
+    edge_index : torch.Tensor
+        The edge_index tensor of shape [2, num_edges]
+    num_height_levels : int
+        Number of height levels in the graph
+    """
+    
+    # Convert edge_index to numpy for easier processing
+    edge_index_np = edge_index.cpu().numpy()
+    
+    # Create the graph directly from edge_index
+    # Each column in edge_index_np represents an edge (source, target)
+    edges = [(edge_index_np[0, i], edge_index_np[1, i]) for i in range(edge_index_np.shape[1])]
+    
+    # Create a directed graph first to preserve the original edge directions
+    G_directed = nx.DiGraph()
+    G_directed.add_edges_from(edges)
+    
+    # Convert to undirected for visualization (to avoid duplicate edges)
+    G = nx.Graph(G_directed)
+    
+    # Find all unique nodes in the graph
+    all_nodes = set(G.nodes())
+    num_nodes = len(all_nodes)
+    
+    # Add attributes to nodes
+    for node in all_nodes:
+        column_idx = node // num_height_levels
+        height_idx = node % num_height_levels
+        G.nodes[node]['column'] = column_idx
+        G.nodes[node]['height'] = height_idx
+    
+    # Find the number of unique columns
+    unique_columns = set(node // num_height_levels for node in all_nodes)
+    num_columns = len(unique_columns)
+    
+    print(f"Number of unique nodes: {num_nodes}")
+    print(f"Number of unique columns: {num_columns}")
+    
+    # Categorize edges for coloring
+    horizontal_edges = []
+    vertical_edges = []
+    
+    for u, v in G.edges():
+        u_col = u // num_height_levels
+        v_col = v // num_height_levels
+        
+        if u_col == v_col:
+            vertical_edges.append((u, v))
+        else:
+            horizontal_edges.append((u, v))
+    
+    # Create a spring layout that positions nodes well
+    pos = nx.spring_layout(G, seed=42)
+    plt.figure(figsize=(14, 10))
+    
+    # Color nodes by height level
+    height_colors = [G.nodes[node]['height'] for node in G.nodes()]
+    nodes = nx.draw_networkx_nodes(G, pos, 
+                        node_color=height_colors, 
+                        cmap='viridis', 
+                        node_size=100,
+                        alpha=0.8)
+    plt.colorbar(nodes, label='Height Level')
+    
+    nx.draw_networkx_edges(G, pos, 
+                        edgelist=horizontal_edges,
+                        edge_color='red',
+                        alpha=0.4,
+                        label='Horizontal Connections')
+    
+    nx.draw_networkx_edges(G, pos, 
+                        edgelist=vertical_edges, 
+                        edge_color='blue',
+                        alpha=0.4,
+                        label='Vertical Connections')
+    
+    if num_nodes <= 100:
+        nx.draw_networkx_labels(G, pos, font_size=8)
+    
+    plt.title('Complete Graph Structure from Edge Index')
+    plt.legend()
+    plt.axis('off')
+    plt.savefig('pure_edge_index_visualization.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    
+    print(f"Plotted {len(horizontal_edges)} horizontal edges and {len(vertical_edges)} vertical edges")
+    return G
+
+
 if __name__ == '__main__':
     grid_file_path = "/mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc" # Replace with your actual path
     grid_ds = xr.open_dataset(grid_file_path)
-    triangle_id = 1
+    triangle_id = 0
     triangle_indices = get_triangle_indices(triangle_id, total_cols=81920)
 
     # Create a 2D graph with exactly 1 height level - this is specifically for visualization
     # This ensures one-to-one correspondence between graph creation and plotting
-    visualization_height_levels = 2
+    visualization_height_levels = 3
     edge_index, node_ids, horizontal_edges_list = create_atmospheric_graph_from_xarray(
         grid_ds,
         triangle_indices,
@@ -494,29 +430,24 @@ if __name__ == '__main__':
     print(f"Created Edge Index shape: {edge_index.shape}")
     print(f"Number of Horizontal Edges: {len(horizontal_edges_list)}")
 
-    # After creating the graph and before plotting
-    print("\nVerifying edge_index matches the edge lists:")
-    verification_result = verify_edge_index_matches_edges_list(edge_index, horizontal_edges_list)
-    print(f"Edge index verification result: {verification_result}")
+    # Visualize the pure edge_index without grid data
+    print("\nVisualizing pure edge_index:")
+    visualize_edge_index(edge_index, visualization_height_levels)
 
-    # After verification and before the regular plot
-    print("\nVisualizing the edge_index tensor directly:")
-    visualize_edge_index(grid_ds, triangle_indices, edge_index, visualization_height_levels)
-    
     # Regular plot using horizontal_edges_list
     print("\nPlotting using horizontal_edges_list:")
-    # plot_horizontal_graph_edges(grid_ds, triangle_indices, horizontal_edges_list, node_ids)
+    plot_horizontal_graph_edges(grid_ds, triangle_indices, horizontal_edges_list, node_ids, visualization_height_levels)
 
     # Add 3D interactive visualization after the existing plots
     print("\nCreating interactive 3D visualization with Plotly:")
-    visualize_3d_graph_plotly(
-        grid_ds, 
-        triangle_indices, 
-        edge_index, 
-        node_ids, 
-        visualization_height_levels, 
-        height_scale=0.1
-    )
+    #visualize_3d_graph_plotly(
+    #    grid_ds, 
+    #    triangle_indices, 
+    #    edge_index, 
+    #    node_ids, 
+    #    visualization_height_levels, 
+    #    height_scale=0.1
+    #)
 
     grid_ds.close()
 
