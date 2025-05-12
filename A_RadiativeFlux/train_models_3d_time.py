@@ -377,24 +377,20 @@ def train_model(model, train_set, valid_set, normalizer):
             batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
 
             # Forward pass with normalized data
-            t_forward_start = time.perf_counter()
             outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
-            t_forward_end = time.perf_counter()
             
             loss = train_loss(outputs, batch_y)
             batch_mae = train_mae(outputs, batch_y)
             
             if i > 0:
-                t_backward_start = time.perf_counter()
                 optimizer.zero_grad()
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
                 optimizer.step()
-                t_backward_end = time.perf_counter()
                 t2_1 = time.perf_counter()
                 
                 if i % 10 == 9:
-                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}, forward: {t_forward_end-t_forward_start:.3f}, backward: {t_backward_end-t_backward_start:.3f}')
+                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
                 
 
         # Validation step

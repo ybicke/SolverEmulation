@@ -73,5 +73,4 @@ class BaseRadiationModel(nn.Module):
                 y_pred_scaled.append(f_pred)
 
         y_pred = torch.cat(y_pred_scaled, dim=-1)
-        return y_pred
-    
+        return y_pred 

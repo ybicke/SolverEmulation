@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch_geometric.nn import MessagePassing
 from .graph_3d_full import get_3d_graph
 from .base_methods import BaseRadiationModel
-import time
 
 
 
@@ -50,19 +49,18 @@ class GNN3d(BaseRadiationModel):
         self.decoder = Decoder(embed_dim, channels_out, dropout=dropout)
     
     def forward(self, x3d_norm, x2d_norm, x2d_orig):
-        start_time = time.time()
-        
-        # Feature preparation
         B, N, L, _ = x3d_norm.shape
+        
+        # Append surface features to each atmospheric level
         features_2d = x2d_norm.unsqueeze(2)
         repeat_2d_at_all_levels = features_2d.repeat(1, 1, L, 1) 
         augmented_3d_column = torch.cat([x3d_norm, repeat_2d_at_all_levels], dim=-1)
+        
+        # Create extra 2d nodes with ones and concatenate with the 3d column
         ones_2d = torch.ones(B, N, 1, augmented_3d_column.shape[-1], device=x3d_norm.device)
         x = torch.cat([ones_2d, augmented_3d_column], dim=2)
         
-        prep_time = time.time()
-        
-        # Graph construction or retrieval
+        # Get batched edge index using the simplified function
         batch_edge_index, N = get_3d_graph(
             grid_file_path=self.grid_file_path,
             triangle_id=self.triangle_id,
@@ -74,40 +72,28 @@ class GNN3d(BaseRadiationModel):
             fully_connected=self.fully_connected,
             disable_horizontal=self.disable_horizontal
         )
+ 
+
         
-        graph_time = time.time()
-        
-        # Edge feature initialization
+        # TODO: Here I am not using the encoder for edge features as I consider my edge features to be zeros. Pass zeros directly to processor
+        # Could encode it if I want to use it for experiments, but I want to save some compute and memory and it might not make sense.
         num_edges = batch_edge_index.size(1)
-        edge_attr = torch.zeros(num_edges, self.embed_dim, device=x.device)
-        
-        # Node encoding
-        x_features = x.reshape(B * N * (L+1), -1)
-        x_encoded = self.encoder.node_mlp(x_features)
-        
-        encode_time = time.time()
-        
-        # Message passing
+        edge_attr = torch.zeros(num_edges, self.embed_dim, device=x.device)  
+
+        # Encode node features only
+        x_features = x.reshape(B * N * (L+1), -1)  
+        x_encoded = self.encoder.node_mlp(x_features)  # Only encode node features, don't use the full encoder
+
+        # Process with the encoded nodes and zero-initialized edges of the correct dimension
         x_processed = self.processor(x_encoded, batch_edge_index, edge_attr)
         
-        process_time = time.time()
-        
-        # Decoding and output
         x_decoded = self.decoder(x_processed)
+        
+        # Reshape to final output format - remove surface nodes
         x_output = x_decoded.view(B, N, L+1, self.channels_out)
+        
+        # Apply radiation-specific scaling
         output = self._scale_output(x_output, x2d_orig)
-        
-        end_time = time.time()
-        
-        # Print timing metrics
-        if True:  # Only print for first batch to avoid cluttering logs
-            print(f"Feature prep: {(prep_time - start_time)*1000:.2f}ms")
-            print(f"Graph construction: {(graph_time - prep_time)*1000:.2f}ms")
-            print(f"Encoding: {(encode_time - graph_time)*1000:.2f}ms")
-            print(f"Message passing: {(process_time - encode_time)*1000:.2f}ms")
-            print(f"Decoding: {(end_time - process_time)*1000:.2f}ms")
-            print(f"Total forward pass: {(end_time - start_time)*1000:.2f}ms")
-            print(f"Number of edges: {num_edges}")
         
         return output
     

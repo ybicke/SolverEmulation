@@ -29,12 +29,11 @@ class EDM:
     S_noise: float = 1.003
 
     def __init__(self, sigma_min=None, sigma_max=None, sigma_data=None):
-        if sigma_min is not None:
-            self.sigma_min = sigma_min
-        if sigma_max is not None:
-            self.sigma_max = sigma_max
-        if sigma_data is not None:
-            self.sigma_data = sigma_data
+        
+        self.sigma_min = sigma_min
+        self.sigma_max = sigma_max
+        self.sigma_data = sigma_data
+
 
     def sigma(self, eps):
         return (eps * self.P_std + self.P_mean).exp()

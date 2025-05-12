@@ -27,7 +27,7 @@ echo "GNN3d training started!"
 python train_models_3d_time.py \
     --model gnn_3d   \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l3_indep_testing4 \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l3_nonFully\
     --percent 1 \
     --num-workers 4 \
     --prefetch-factor 2 \
@@ -51,6 +51,6 @@ python train_models_3d_time.py \
     --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
     --triangle-id 39 \
     --triangle-division-factor 4 \
-    --fully-connected \
-    --disable-horizontal \
-    --wandb-mode offline
+    --no-fully-connected \
+    --no-disable-horizontal \
+    --wandb-mode online

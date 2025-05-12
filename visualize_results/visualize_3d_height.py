@@ -5,9 +5,21 @@ import os
 from os.path import join
 # Configure models to visualize
 models = [
-    {'name': 'GNN-3D-32-l3-fully', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_32_l3_fully/test'},
-    {'name': 'GNN-3D-32-l3', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_32_l3/test'},
-    {'name': 'GNN-32-l3-optimized', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_optimized/test'},
+    #{'name': 'GNN-3D-32-l3-fully', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_32_l3_fully/test'},
+    #{'name': 'GNN-3D-32-l3', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_32_l3/test'},
+    # {'name': 'GNN-32-l3-single-columns', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_optimized/test'},
+    {'name': 'GNN-64-l2-single-columns', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l2/test'},
+
+    #{'name': 'GNN-3D-32-l3-horizontal', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l3/test'},
+    #{'name': 'GNN-3D-32-l3-indep', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l3_indep/test'},
+    {'name': 'GNN-3D-32-l2', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l2/test'},
+    {'name': 'GNN-3D-64-l2', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb64_l2/test'},
+    {'name': 'GNN-3D-128-l2', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb128_l2/test'},
+    
+
+    
+    
+    
     # Add more single-column models if needed
 ]
 
@@ -130,7 +142,7 @@ def main():
     ax1.legend(fontsize="10", loc='lower left')
     plt.suptitle('Mean Absolute Error (MAE) by Height Level', fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.96])  # Make room for the suptitle
-    plt.savefig(join(output_dir, '3D_mae_3d_vs_1d.png'), bbox_inches='tight', dpi=300)
+    plt.savefig(join(output_dir, '3D_mae_different_embeddings.png'), bbox_inches='tight', dpi=300)
     
     # Create RMSE plot
     #fig = plt.figure(figsize=(12, 16))
