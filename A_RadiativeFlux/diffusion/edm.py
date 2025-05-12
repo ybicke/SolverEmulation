@@ -85,9 +85,6 @@ class LightningEDM(L.LightningModule):
         Stochastic sampling can be more accurate but usually requires more (e.g. 256) steps.
     edm : EDM, optional
         The EDM model parameters.
-    autoencoder : None or LithningAutoencoder, optional
-        If provided, the autoencoder used to obtain the latent representations.
-        The diffusion model will then generate these latent representations instead of the original signal [2].
 
     References
     ----------
@@ -113,65 +110,78 @@ class LightningEDM(L.LightningModule):
         self.num_sampling_steps = num_sampling_steps
         self.deterministic_sampling = deterministic_sampling
         self.edm = edm
-        # self.autoencoder = autoencoder.eval() if autoencoder else None
-        # if self.autoencoder:
-        #     for param in self.autoencoder.parameters():
-        #         param.requires_grad = False
+
 
         self.save_hyperparameters(ignore=("autoencoder"))
 
-    def forward(self, sample, sigma, cond_sample=None,cond=None):
-        """Make a forward pass through the network with skip connection."""
+    def forward(self, sample, sigma, cond=None):
+        """Make a forward pass through the network with skip connection.
+        
+        Args:
+            sample: The noisy flux sample to denoise [B, 71, 4]
+            sigma: Noise level
+            cond: Conditioning dictionary with physical features:
+                - x3d_norm: 3D atmospheric features
+                - x2d_norm: 2D global features 
+                - x2d_orig: Original 2D features (for output scaling)
+        
+        Returns:
+            Denoised flux prediction
+        """
         dim = sample.dim()
+        # Scale the input according to the noise level
         sample_in = sample * append_dims(self.edm.in_scaling(sigma), dim)
         
-        input = sample_in if cond_sample is None else torch.cat((sample_in, cond_sample), dim=1)
+        # Get the noise conditioning signal
         noise_cond = self.edm.noise_conditioning(sigma)
         
-        # Inside the forward method, we call our UNet to do the denoising
-        out = self.unet(x=input, # Noisy version of flux
-                        time_cond=noise_cond, # Time conditioning (noise level)
-                        cond=cond # Physical features dictionary
-                        )
+        # Pass to UNet for denoising, with parameters in the expected order
+        out = self.unet(
+            noisy_sample=sample_in,  # Noisy version of flux
+            time_cond=noise_cond,    # Time conditioning (noise level)
+            cond=cond                # Physical features dictionary
+        )
         
+        # Apply skip connection and output scaling
         skip = append_dims(self.edm.skip_scaling(sigma), dim) * sample
         return out * append_dims(self.edm.out_scaling(sigma), dim) + skip
 
 
     def step(self, batch, batch_idx):
-        """A single step in the training loop."""
-        # TODO: need to be changed to extract sample and conditions
-        sample = batch["sample"] # Y # Sample is fluxes  (Bx71x4)
-        cond = batch["cond"]     # X (physical input 3d: (Bx71x4) and broadcasted 2d (Bx71x4) --> (Bx71x9) 
+        """A single step in the training loop.
         
-        # embedding of sample and cond in same dimension 
-        cond_sample = batch["cond_signal"] if "cond_signal" in batch else None
-        # cond = batch["cond"] if "cond" in batch else None
-
-        #if self.autoencoder:
-        #    sample = self.autoencoder.encode(sample)
-        #    if cond_sample is not None:
-        #        cond_sample = self.autoencoder.encode(cond_sample)
-
+        Args:
+            batch: Dictionary containing:
+                - sample: Target flux values [B, 71, 4]
+                - cond: Dictionary with conditioning information
+                   - x3d_norm: Normalized 3D features
+                   - x2d_norm: Normalized 2D features
+                   - x2d_orig: Original 2D features
+        """
+        # Extract flux target (to be denoised) and physical conditioning
+        sample = batch["sample"]  # Flux values [B, 71, 4]
+        cond = batch["cond"]      # Physical features dictionary
+        
         # Add noise to the sample
         eps = torch.randn(sample.shape[0], device=self.device)
         sigma = self.edm.sigma(eps)
         noise = torch.randn_like(sample) * append_dims(sigma, sample.dim())
         
-        # Then it calls the forward method to predict the clean sample
+        # Get model prediction
         pred = self(
-            sample=sample + noise, # Noisy version of flux
-            sigma=sigma,           # Noise level
-            cond_sample=cond_sample, # Physical features dictionary
-            cond=cond)
+            sample=sample + noise,  # Noisy version of flux
+            sigma=sigma,            # Noise level
+            cond=cond               # Physical features dictionary
+        )
 
+        # Calculate loss
         loss = (pred - sample) ** 2
         loss_weight = append_dims(self.edm.loss_weight(sigma), loss.dim())
 
         return (loss * loss_weight).mean()
 
     def training_step(self, batch, batch_idx):
-        loss= self.step(batch, batch_idx)
+        loss = self.step(batch, batch_idx)
         self.log("training/loss", loss.item())
         return loss
 
@@ -181,33 +191,34 @@ class LightningEDM(L.LightningModule):
         return loss
 
     @torch.no_grad()
-    def sample(self, shape, cond_sample=None, cond=None):
-        """Sample using Heun's second order method."""
-        dtype = torch.float32 if self.device.type == "mps" else torch.float64
-        # if self.autoencoder:
-        #     if cond_sample is not None:
-        #         cond_sample = self.autoencoder.encode(cond_sample)
-
-        #     # infer latent shape
-        #     dummy = torch.zeros(shape, device=self.device)
-        #     latent = self.autoencoder.encode(dummy)
-        #     shape = latent.shape
-
-        sigmas = self.edm.sampling_sigmas(self.num_sampling_steps, device=self.device)
-        eps = torch.randn(shape, device=self.device, dtype=dtype) * sigmas[0]
-
+    def sample(self, shape, cond=None):
+        """Sample using Heun's second order method.
         
+        Args:
+            shape: Shape of the output sample [B, 71, 4]
+            cond: Dictionary with conditioning information
+        
+        Returns:
+            Generated flux prediction
+        """
+        dtype = torch.float32 if self.device.type == "mps" else torch.float64
+
+        # Generate sampling trajectory
+        sigmas = self.edm.sampling_sigmas(self.num_sampling_steps, device=self.device)
+        
+        # Start with random noise
+        eps = torch.randn(shape, device=self.device, dtype=dtype) * sigmas[0]
+        
+        # Sample using either deterministic or stochastic process
         if self.deterministic_sampling:
-            sample = self.sample_deterministically(eps, sigmas, cond_sample, cond)
+            sample = self.sample_deterministically(eps, sigmas, cond)
         else:
-            sample = self.sample_stochastically(eps, sigmas, cond_sample, cond)
+            sample = self.sample_stochastically(eps, sigmas, cond)
 
-        sample = sample.to(torch.float32)
-        # if self.autoencoder:
-        #     return self.autoencoder.decode(sample)
-        return sample
+        return sample.to(torch.float32)
 
-    def sample_deterministically(self, eps, sigmas, cond_sample=None, cond=None):
+    def sample_deterministically(self, eps, sigmas, cond=None):
+        """Deterministic sampling using Heun's 2nd order method."""
         dtype = torch.float32 if self.device.type == "mps" else torch.float64
         sample_next = eps
         for i, (sigma, sigma_next) in enumerate(zip(sigmas[:-1], sigmas[1:])):
@@ -215,8 +226,7 @@ class LightningEDM(L.LightningModule):
             pred_curr = self(
                 sample=sample_curr.to(self.dtype),
                 sigma=sigma.to(self.dtype).repeat(len(sample_curr)),
-                cond_sample=cond_sample,
-                cond=cond,
+                cond=cond
             ).to(dtype)
             d_cur = (sample_curr - pred_curr) / sigma
             sample_next = sample_curr + d_cur * (sigma_next - sigma)
@@ -226,15 +236,15 @@ class LightningEDM(L.LightningModule):
                 pred_next = self(
                     sample=sample_next.to(self.dtype),
                     sigma=sigma_next.to(self.dtype).repeat(len(sample_curr)),
-                    cond_sample=cond_sample,
-                    cond=cond,
+                    cond=cond
                 ).to(dtype)
                 d_prime = (sample_next - pred_next) / sigma_next
                 sample_next = sample_curr + (sigma_next - sigma) * (0.5 * d_cur + 0.5 * d_prime)
 
         return sample_next
 
-    def sample_stochastically(self, eps, sigmas, cond_sample=None, cond=None):
+    def sample_stochastically(self, eps, sigmas, cond=None):
+        """Stochastic sampling with noise injection for better quality."""
         dtype = torch.float32 if self.device.type == "mps" else torch.float64
         sample_next = eps
         for i, (sigma, sigma_next) in enumerate(zip(sigmas[:-1], sigmas[1:])):
@@ -247,10 +257,9 @@ class LightningEDM(L.LightningModule):
 
             # euler step
             pred_hat = self(
-                sample_hat.to(self.dtype),
-                sigma_hat.to(self.dtype).repeat(len(sample_hat)),
-                cond_sample,
-                cond, 
+                sample=sample_hat.to(self.dtype),
+                sigma=sigma_hat.to(self.dtype).repeat(len(sample_hat)),
+                cond=cond
             ).to(dtype)
             d_cur = (sample_hat - pred_hat) / sigma_hat
             sample_next = sample_hat + d_cur * (sigma_next - sigma_hat)
@@ -258,10 +267,9 @@ class LightningEDM(L.LightningModule):
             # second order correction
             if i < self.num_sampling_steps - 1:
                 pred_next = self(
-                    sample_next.to(self.dtype),
-                    sigma_next.to(self.dtype).repeat(len(sample_hat)),
-                    cond_sample,
-                    cond,
+                    sample=sample_next.to(self.dtype),
+                    sigma=sigma_next.to(self.dtype).repeat(len(sample_hat)),
+                    cond=cond
                 ).to(dtype)
                 d_prime = (sample_next - pred_next) / sigma_next
                 sample_next = sample_hat + (sigma_next - sigma_hat) * (0.5 * d_cur + 0.5 * d_prime)
@@ -271,14 +279,10 @@ class LightningEDM(L.LightningModule):
     @torch.no_grad()
     def evaluate(self, batch):
         """Evaluate the model on a batch of data."""
-        # TODO: need to be changed to extract sample and conditions
-        sample = batch["sample"]
-        cond = batch["cond"]
-
-        cond_sample = batch["cond_signal"] if "cond_signal" in batch else None
-        # cond = batch["cond"] if "cond" in batch else None
-        return self.sample(
-            shape=sample.shape, cond_sample=cond_sample, cond=cond)
+        sample = batch["sample"]  # Flux values [B, 71, 4]
+        cond = batch["cond"]      # Physical features dictionary
+        
+        return self.sample(shape=sample.shape, cond=cond)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.optimizer_params["learning_rate"])
