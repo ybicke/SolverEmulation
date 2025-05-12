@@ -1,40 +1,48 @@
 #!/bin/bash
-# Script to train a diffusion model for radiative flux prediction
 
-# Set dataset path - modify as needed
-DATASET_PATH="/mydata/deepcloud/salman/dataset/h5_data_all_chuncked"
+# Set to fail on error
+set -e
 
-# Set output path - modify as needed
-OUTPUT_PATH="/mydata/deepcloud/yves/results_git/diffusion_model"
+# Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
+source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.sh
 
-# Add necessary paths to PYTHONPATH
-export PYTHONPATH=/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux
+# Check if GPU available
+#nvidia-smi
 
-# Change directory to where the train.py file is located
-cd /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion2
+myproject="deepcloud"
+myusername="yves"
+myfolder=/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion
+
+
+# run script
+
+cd $myfolder
+echo "Diffusion training started!"
+
 
 # Run the training script
 python -m train \
-  --dataset ${DATASET_PATH} \
-  --save ${OUTPUT_PATH} \
+  --dataset "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked"\
+  --save "/mydata/deepcloud/yves/A_RadiativeFlux/diffusion_model" \
   --percent 0.1 \
   --subsample 0.1 \
-  --num-workers 4 \
-  --batch-size 32 \
+  --num-workers 0 \
+  --batch-size 512 \
   --learning-rate 0.0001 \
-  --max-steps 50000 \
+  --max-epochs 100 \
   --height-in 71 \
   --channel-out 4 \
   --channel-3d 6 \
   --channel-2d 6 \
-  --cnn-units 64 128 256 512 \
-  --cnn-kernel-sizes 2 2 2 2 \
+  --cnn-units 128 256 512 1024 \
+  --cnn-kernel-sizes 1 2 5 7 \
   --dropout 0.1 \
   --num-sampling-steps 25 \
   --deterministic-sampling \
   --sigma-min 0.002 \
   --sigma-max 80.0 \
-  --sigma-data 0.5
+  --sigma-data 0.5 \
+  --time-embedding-dim 128
 
 # Notes:
 # - The script uses a small percentage of data (10%) for faster testing

@@ -47,13 +47,20 @@ class DataNormalizer:
         # Store original 2D data for scaling output
         x2d_original = x2d.clone()
         
+        # Ensure stats are on CPU if the input tensors are on CPU
+        device = x3d.device
+        mean3d = self.mean3d.to(device)
+        std3d = self.std3d.to(device)
+        mean2d = self.mean2d.to(device)
+        std2d = self.std2d.to(device)
+        
         # Check if inputs are individual samples or batches
         if x3d.dim() == 2:  # [height, channels] - individual sample
-            x3d_normalized = (x3d - self.mean3d.view(1, -1)) / self.std3d.view(1, -1)
-            x2d_normalized = (x2d - self.mean2d) / self.std2d
+            x3d_normalized = (x3d - mean3d.view(1, -1)) / std3d.view(1, -1)
+            x2d_normalized = (x2d - mean2d) / std2d
         else:  # [batch, height, channels] - batched data
-            x3d_normalized = (x3d - self.mean3d.view(1, 1, -1)) / self.std3d.view(1, 1, -1)
-            x2d_normalized = (x2d - self.mean2d.view(1, -1)) / self.std2d.view(1, -1)
+            x3d_normalized = (x3d - mean3d.view(1, 1, -1)) / std3d.view(1, 1, -1)
+            x2d_normalized = (x2d - mean2d.view(1, -1)) / std2d.view(1, -1)
         
         return x3d_normalized, x2d_normalized, x2d_original
 
@@ -89,13 +96,7 @@ class IconDiffusionDataset(IterableDataset):
                 x3d = torch.tensor(x3d)
                 x2d = torch.tensor(x2d)
                 y = torch.tensor(y)
-                
-            # Add batch dimension for consistent handling
-            if x3d.dim() == 2:
-                x3d = x3d.unsqueeze(0)  # [H,C] -> [1,H,C]
-                x2d = x2d.unsqueeze(0)  # [C] -> [1,C]
-                y = y.unsqueeze(0)      # [H,C] -> [1,H,C]
-                
+            
             # Normalize with batch dimension
             x3d_norm, x2d_norm, x2d_orig = self.normalizer.normalize(x3d, x2d)
             

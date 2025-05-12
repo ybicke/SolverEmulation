@@ -29,11 +29,9 @@ class EDM:
     S_noise: float = 1.003
 
     def __init__(self, sigma_min=None, sigma_max=None, sigma_data=None):
-        
         self.sigma_min = sigma_min
         self.sigma_max = sigma_max
         self.sigma_data = sigma_data
-
 
     def sigma(self, eps):
         return (eps * self.P_std + self.P_mean).exp()
@@ -111,8 +109,8 @@ class LightningEDM(L.LightningModule):
         self.deterministic_sampling = deterministic_sampling
         self.edm = edm
 
-
-        self.save_hyperparameters(ignore=("autoencoder"))
+        # It's redundant since the UNet weights are already saved in the state_dict
+        self.save_hyperparameters(ignore=["autoencoder", "unet"])
 
     def forward(self, sample, sigma, cond=None):
         """Make a forward pass through the network with skip connection.

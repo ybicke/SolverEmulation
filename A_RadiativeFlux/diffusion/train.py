@@ -17,7 +17,7 @@ from lightning import Trainer
 from torch.utils.data import DataLoader
 from lightning.pytorch.callbacks import ModelCheckpoint
 
-from unet import UNet
+from unet import UNetDiffusion
 from data_utils_diffusion import DataNormalizer, IconDiffusionDataset
 from edm import LightningEDM, EDM
 
@@ -33,6 +33,11 @@ def get_normalization_params(stats_file, device):
 
 
 def main():
+    # Set multiprocessing start method to 'spawn' for CUDA compatibility
+    import torch.multiprocessing as mp
+    if mp.get_start_method(allow_none=True) != 'spawn':
+        mp.set_start_method('spawn', force=True)
+        
     parser = argparse.ArgumentParser(description='Train diffusion model for radiation flux prediction')
     
     # General parameters
@@ -43,8 +48,8 @@ def main():
     parser.add_argument('--num-workers', type=int, default=4, help='Number of data loader workers')
     parser.add_argument('--batch-size', type=int, default=32, help='Batch size')
     parser.add_argument('--learning-rate', type=float, default=1e-4, help='Learning rate')
-    parser.add_argument('--max-steps', type=int, default=100000, help='Maximum training steps')
-    
+    # parser.add_argument('--max-steps', type=int, default=100000, help='Maximum training steps')
+    parser.add_argument('--max-epochs', type=int, default=100, help='Maximum training epochs')
     # Model parameters
     parser.add_argument('--height-in', type=int, default=71, help='Number of height levels')
     parser.add_argument('--channel-out', type=int, default=4, help='Output channels')
@@ -67,6 +72,8 @@ def main():
                        help='Maximum noise level for diffusion model')
     parser.add_argument('--sigma-data', type=float, default=0.5, 
                        help='Data noise level for diffusion model')
+    parser.add_argument('--time-embedding-dim', type=int, default=128, 
+                       help='Time embedding dimension for diffusion model')
     
     args = parser.parse_args()
     
@@ -131,7 +138,7 @@ def main():
         train_dataset, 
         batch_size=args.batch_size, 
         num_workers=args.num_workers,
-        pin_memory=True,
+        pin_memory=False,
         persistent_workers=True if args.num_workers > 0 else False
     )
     
@@ -139,14 +146,23 @@ def main():
         val_dataset, 
         batch_size=args.batch_size, 
         num_workers=args.num_workers,
-        pin_memory=True,
+        pin_memory=False,
         persistent_workers=True if args.num_workers > 0 else False
     )
     
-    # Configure optimizer params
+    # TODO: Configure optimizer params a bit hacky now
+    # Calculate approximate steps based on dataset size and epochs
+    steps_per_epoch = len(train_files) // args.batch_size
+    if args.subsample:
+        steps_per_epoch = int(steps_per_epoch * args.subsample)
+    if args.percent < 1.0:
+        steps_per_epoch = int(steps_per_epoch * args.percent)
+    
+    max_steps = steps_per_epoch * args.max_epochs
+    
     optimizer_params = {
         "learning_rate": args.learning_rate,
-        "max_steps": args.max_steps
+        "max_steps": max_steps  # Required by EDM's CosineAnnealingLR scheduler
     }
     
     # Setup EDM
@@ -158,14 +174,14 @@ def main():
     
     # Build UNet model
     logging.info("Building UNet model...")
-    unet = UNet(
+    unet = UNetDiffusion(
         height_in=args.height_in,
         channel_3d=args.channel_3d,
         channel_2d=args.channel_2d,
         channel_out=args.channel_out,
         cnn_units=args.cnn_units,
         kernel_sizes=args.cnn_kernel_sizes,
-        time_embedding_dim=args.time_embedding_dim,
+        time_embed_dim=args.time_embedding_dim,
         dropout=args.dropout,
         device=device
     )
@@ -206,7 +222,8 @@ def main():
     
     trainer = Trainer(
         precision=32,
-        max_steps=args.max_steps,
+        # max_steps=args.max_steps,
+        max_epochs=args.max_epochs,
         accelerator='gpu' if torch.cuda.is_available() else 'cpu',
         devices=1,
         num_nodes=1,

@@ -310,7 +310,6 @@ def get_model(model_name):
         
     elif model_name == 'unet':
         from models.unet import UNet
-        
         model = UNet(
             height_in=args.height_in,
             channel_3d=args.channel_3d,
@@ -762,13 +761,6 @@ def main():
     model = get_model(args.model)
     num_params = count_parameters(model)
     
-    # Update wandb_config with smoothness parameters
-    wandb_config.update({
-        'smoothness_weight': args.smoothness_weight,
-        'smoothness_mode': args.smoothness_mode,
-        'higher_level_weight': args.higher_level_weight,
-        'higher_level_scale': args.higher_level_scale if args.higher_level_weight else None
-    })
     
     # Initialize W&B here before anything else
     wandb.init(
