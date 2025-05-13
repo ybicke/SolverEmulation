@@ -1,0 +1,169 @@
+{
+    "os": "Linux-6.8.0-52-generic-x86_64-with-glibc2.31",
+    "python": "3.9.15",
+    "heartbeatAt": "2025-04-17T08:24:14.134179",
+    "startedAt": "2025-04-17T08:24:13.061525",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--model",
+        "FastRnnIg",
+        "--dataset",
+        "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+        "--save",
+        "/mydata/deepcloud/yves/results_git/rnn_BiLSTM_fast_small",
+        "--percent",
+        "0.1",
+        "--subsample",
+        "0.1",
+        "--num-workers",
+        "4",
+        "--prefetch-factor",
+        "2",
+        "--num-cells",
+        "81920",
+        "--train",
+        "--test",
+        "--shuffle",
+        "--batch-size",
+        "512",
+        "--optimizer",
+        "adamw",
+        "--clip",
+        "1",
+        "--num-epoch",
+        "30",
+        "--learning-rate",
+        "0.0005",
+        "--wandb-mode",
+        "online",
+        "--channel-out",
+        "4",
+        "--channel-3d",
+        "6",
+        "--channel-2d",
+        "6",
+        "--lstm-units",
+        "16",
+        "32",
+        "--mlp-units",
+        "16",
+        "32",
+        "--lstm-droprate",
+        "0.0",
+        "--scale-output"
+    ],
+    "state": "running",
+    "program": "/mydata/deepcloud/yves/SolverEmulation/train_column_rnn.py",
+    "codePathLocal": "train_column_rnn.py",
+    "codePath": "train_column_rnn.py",
+    "host": "rnn-fast-small-0-3",
+    "username": "root",
+    "executable": "/myhome/mambaforge/envs/deepFlux/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 2999.9959999999996,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 1875.5519676208496,
+            "used": 634.3847198486328
+        }
+    },
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA A100 80GB PCIe",
+            "memory_total": 85899345920
+        }
+    ],
+    "memory": {
+        "total": 125.79447555541992
+    }
+}

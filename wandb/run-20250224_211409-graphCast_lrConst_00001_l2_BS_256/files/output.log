@@ -1,0 +1,4 @@
+
+2025-02-24 21:14:11,931 No scheduler. Using constant LR = args.learning_rate
+total_optimization_steps: 172800
+2025-02-24 21:14:16,421 Epoch=1, batch=0, LR=0.000100, loss=31232.8516, mae=123.8972

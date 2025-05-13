@@ -1,0 +1,393 @@
+2025-04-23 19:01:31,532 INFO    StreamThr :52 [internal.py:wandb_internal():85] W&B internal server running at pid: 52, started at: 2025-04-23 19:01:31.526062
+2025-04-23 19:01:31,535 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status
+2025-04-23 19:01:31,540 INFO    WriterThread:52 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/run-gnn_32_l6.wandb
+2025-04-23 19:01:31,549 DEBUG   SenderThread:52 [sender.py:send():378] send: header
+2025-04-23 19:01:31,549 DEBUG   SenderThread:52 [sender.py:send():378] send: run
+2025-04-23 19:01:31,572 INFO    SenderThread:52 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/gnn_32_l6
+2025-04-23 19:01:31,899 INFO    SenderThread:52 [sender.py:_setup_resume():826] configured resuming with: ResumeState(resumed=True,step=31,history=31,events=1667,output=1088,runtime=50094.330499,wandb_runtime=None,summary={'_runtime': 49112.8859474659, '_step': 30, '_timestamp': 1745202784.3335686, 'epoch': 30, 'gradients/decoder.mlp.0.bias': {'_type': 'histogram'}, 'gradients/decoder.mlp.0.weight': {'_type': 'histogram'}, 'gradients/decoder.mlp.3.bias': {'_type': 'histogram'}, 'gradients/decoder.mlp.3.weight': {'_type': 'histogram'}, 'gradients/encoder.edge_mlp.0.bias': {'_type': 'histogram'}, 'gradients/encoder.edge_mlp.0.weight': {'_type': 'histogram'}, 'gradients/encoder.edge_mlp.3.bias': {'_type': 'histogram'}, 'gradients/encoder.edge_mlp.3.weight': {'_type': 'histogram'}, 'gradients/encoder.node_mlp.0.bias': {'_type': 'histogram'}, 'gradients/encoder.node_mlp.0.weight': {'_type': 'histogram'}, 'gradients/encoder.node_mlp.3.bias': {'_type': 'histogram'}, 'gradients/encoder.node_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.0.edge_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.0.edge_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.0.edge_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.0.edge_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.0.node_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.0.node_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.0.node_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.0.node_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.1.edge_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.1.edge_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.1.edge_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.1.edge_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.1.node_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.1.node_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.1.node_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.1.node_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.2.edge_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.2.edge_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.2.edge_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.2.edge_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.2.node_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.2.node_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.2.node_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.2.node_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.3.edge_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.3.edge_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.3.edge_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.3.edge_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.3.node_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.3.node_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.3.node_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.3.node_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.4.edge_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.4.edge_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.4.edge_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.4.edge_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.4.node_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.4.node_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.4.node_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.4.node_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.5.edge_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.5.edge_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.5.edge_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.5.edge_mlp.3.weight': {'_type': 'histogram'}, 'gradients/processor.layers.5.node_mlp.0.bias': {'_type': 'histogram'}, 'gradients/processor.layers.5.node_mlp.0.weight': {'_type': 'histogram'}, 'gradients/processor.layers.5.node_mlp.3.bias': {'_type': 'histogram'}, 'gradients/processor.layers.5.node_mlp.3.weight': {'_type': 'histogram'}, 'loss': 58.4153938293457, 'mean_absolute_error': 2.831578016281128, 'num_parameters': 33668, 'test_cpu_time': 1193.793533668009, 'test_real_time': 665.6964548099786, 'train_cpu_time': 91557.185278862, 'train_real_time': 18800.6460745777, 'val_loss': 58.07872009277344, 'val_mean_absolute_error': 2.73000168800354},config={'clip': {'desc': None, 'value': 1}, 'save': {'desc': None, 'value': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l6'}, 'seed': {'desc': None, 'value': 42}, 'test': {'desc': None, 'value': True}, 'heads': {'desc': None, 'value': 6}, 'model': {'desc': None, 'value': 'gnn'}, 'train': {'desc': None, 'value': False}, '_wandb': {'desc': None, 'value': {'t': {'1': [1, 55, 77], '2': [1, 55, 77], '3': [1, 5, 13, 14, 15, 16, 23, 35, 62], '4': '3.9.15', '5': '0.17.0', '8': [5], '13': 'linux-x86_64'}, 'code_path': 'code/train_models.py', 'framework': 'torch', 'start_time': 1745434355, 'cli_version': '0.17.0', 'is_jupyter_run': False, 'python_version': '3.9.15', 'is_kaggle_kernel': False}}, 'layers': {'desc': None, 'value': 6}, 'dataset': {'desc': None, 'value': '/mydata/deepcloud/salman/dataset/h5_data_all_chuncked'}, 'dropout': {'desc': None, 'value': 0}, 'percent': {'desc': None, 'value': 0.1}, 'shuffle': {'desc': None, 'value': True}, 'dim_head': {'desc': None, 'value': 64}, 'max_skip': {'desc': None, 'value': 3}, 'height_in': {'desc': None, 'value': 70}, 'mlp_ratio': {'desc': None, 'value': 4}, 'mlp_units': {'desc': None, 'value': [256, 256]}, 'num_cells': {'desc': None, 'value': 81920}, 'num_epoch': {'desc': None, 'value': 30}, 'optimizer': {'desc': None, 'value': 'adamw'}, 'subsample': {'desc': None, 'value': 0.1}, 'batch_size': {'desc': None, 'value': 512}, 'channel_2d': {'desc': None, 'value': 6}, 'channel_3d': {'desc': None, 'value': 6}, 'fno_blocks': {'desc': None, 'value': 8}, 'hidden_dim': {'desc': None, 'value': 32}, 'lstm_units': {'desc': None, 'value': [256, 512]}, 'patch_size': {'desc': None, 'value': 2}, 'wandb_mode': {'desc': None, 'value': 'online'}, 'channel_out': {'desc': None, 'value': 4}, 'double_skip': {'desc': None, 'value': True}, 'emb_dropout': {'desc': None, 'value': 0}, 'num_workers': {'desc': None, 'value': 4}, 'heights_file': {'desc': None, 'value': None}, 'scale_output': {'desc': None, 'value': True}, 'learning_rate': {'desc': None, 'value': 0.0005}, 'lstm_droprate': {'desc': None, 'value': 0}, 'fully_connected': {'desc': None, 'value': True}, 'prefetch_factor': {'desc': None, 'value': 2}, 'cutoff_frequency': {'desc': None, 'value': 0.1}, 'edge_channels_in': {'desc': None, 'value': 1}, 'zero_freq_indices': {'desc': None, 'value': None}, 'hidden_size_factor': {'desc': None, 'value': 1}, 'afno_sparsity_threshold': {'desc': None, 'value': 0.01}, 'hard_thresholding_fraction': {'desc': None, 'value': 1}},tags=['icon grid'])
+2025-04-23 19:01:32,272 INFO    SenderThread:52 [dir_watcher.py:__init__():211] watching files in: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files
+2025-04-23 19:01:32,272 INFO    SenderThread:52 [sender.py:_start_run_threads():1123] run started: gnn_32_l6 with start time 1745384797.202938
+2025-04-23 19:01:32,273 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: summary_record
+2025-04-23 19:01:32,278 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: check_version
+2025-04-23 19:01:32,358 INFO    SenderThread:52 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-23 19:01:32,359 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: check_version
+2025-04-23 19:01:32,481 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: run_start
+2025-04-23 19:01:32,495 DEBUG   HandlerThread:52 [system_info.py:__init__():26] System info init
+2025-04-23 19:01:32,495 DEBUG   HandlerThread:52 [system_info.py:__init__():41] System info init done
+2025-04-23 19:01:32,495 INFO    HandlerThread:52 [system_monitor.py:start():194] Starting system monitor
+2025-04-23 19:01:32,495 INFO    SystemMonitor:52 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2025-04-23 19:01:32,496 INFO    SystemMonitor:52 [interfaces.py:start():188] Started cpu monitoring
+2025-04-23 19:01:32,497 INFO    SystemMonitor:52 [interfaces.py:start():188] Started disk monitoring
+2025-04-23 19:01:32,499 INFO    SystemMonitor:52 [interfaces.py:start():188] Started gpu monitoring
+2025-04-23 19:01:32,500 INFO    SystemMonitor:52 [interfaces.py:start():188] Started memory monitoring
+2025-04-23 19:01:32,501 INFO    SystemMonitor:52 [interfaces.py:start():188] Started network monitoring
+2025-04-23 19:01:33,256 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: python_packages
+2025-04-23 19:01:33,256 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: python_packages
+2025-04-23 19:01:33,259 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:01:33,303 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/wandb-summary.json
+2025-04-23 19:01:33,304 DEBUG   SenderThread:52 [sender.py:send():378] send: telemetry
+2025-04-23 19:01:33,304 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:01:33,308 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/requirements.txt
+2025-04-23 19:01:33,486 DEBUG   SenderThread:52 [sender.py:send():378] send: telemetry
+2025-04-23 19:01:34,302 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log
+2025-04-23 19:01:36,384 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log
+2025-04-23 19:01:36,544 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:01:41,546 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:01:46,549 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:01:48,257 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:01:48,258 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:01:52,492 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:01:57,497 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:02,505 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:03,257 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:02:03,258 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:02:03,450 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/config.yaml
+2025-04-23 19:02:08,440 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:13,441 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:18,257 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:02:18,258 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:02:18,475 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:23,475 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:28,526 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:32,502 DEBUG   SystemMonitor:52 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2025-04-23 19:02:32,505 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:02:33,257 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:02:33,258 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:02:34,454 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:39,457 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:44,464 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:48,257 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:02:48,259 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:02:50,435 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:02:55,438 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:00,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:02,511 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:03:03,257 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:03:03,258 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:03:06,433 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:11,435 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:16,437 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:18,258 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:03:18,259 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:03:21,482 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:26,484 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:31,488 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:32,508 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:03:33,258 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:03:33,259 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:03:37,456 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:42,457 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:47,458 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:48,258 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:03:48,259 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:03:52,525 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:03:57,527 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:02,509 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:04:03,258 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:04:03,259 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:04:03,431 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:08,432 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:13,434 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:18,258 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:04:18,259 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:04:18,442 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:23,443 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:28,444 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:32,510 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:04:33,258 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:04:33,260 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:04:34,440 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:39,444 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:44,446 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:48,259 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:04:48,260 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:04:49,459 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:54,460 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:04:59,527 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:02,511 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:05:03,266 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:05:03,266 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:05:05,526 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:10,525 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:15,526 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:18,266 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:05:18,266 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:05:21,515 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:26,526 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:31,527 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:32,513 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:05:33,266 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:05:33,267 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:05:37,449 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:42,450 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:47,451 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:48,266 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:05:48,267 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:05:53,427 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:05:58,430 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:02,516 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:06:03,266 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:06:03,266 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:06:03,471 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:08,526 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:13,528 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:18,268 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:06:18,269 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:06:19,452 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:24,453 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:29,454 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:32,516 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:06:33,266 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:06:33,267 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:06:34,495 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:39,530 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:44,532 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:48,267 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:06:48,267 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:06:50,479 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:06:55,527 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:00,528 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:02,532 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:07:03,267 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:07:03,267 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:07:06,526 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:11,528 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:16,529 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:18,267 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:07:18,267 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:07:22,494 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:27,495 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:32,496 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:32,537 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:07:33,267 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:07:33,267 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:07:38,455 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:43,456 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:48,350 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:07:48,355 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:07:48,519 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:53,527 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:07:58,531 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:02,532 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:08:03,351 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:08:03,353 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:08:04,529 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:09,531 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:14,532 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:18,350 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:08:18,351 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:08:19,587 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:24,589 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:29,590 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:32,534 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:08:33,351 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:08:33,352 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:08:35,550 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:40,552 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:45,553 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:48,353 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:08:48,353 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:08:51,553 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:08:56,627 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:01,628 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:02,535 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:09:03,351 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:09:03,351 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:09:07,527 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:12,528 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:17,533 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:18,352 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:09:18,352 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:09:23,526 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:28,525 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:32,539 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:09:33,352 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:09:33,354 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:09:33,580 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:38,581 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:43,625 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:48,352 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:09:48,353 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:09:49,600 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:54,601 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:09:59,606 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:02,540 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:10:03,432 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:10:03,437 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:10:04,648 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:09,649 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:14,658 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:18,427 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:10:18,428 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:10:20,650 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:25,651 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:30,653 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:32,542 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:10:33,428 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:10:33,429 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:10:36,088 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:37,498 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log
+2025-04-23 19:10:41,089 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:46,227 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:47,533 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log
+2025-04-23 19:10:48,431 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:10:48,432 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:10:51,732 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:10:56,723 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:01,725 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:02,544 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:11:03,428 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:11:03,432 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:11:07,725 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:12,726 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:17,728 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:18,428 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:11:18,428 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:11:23,643 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:28,645 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:32,545 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:11:33,432 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:11:33,440 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:11:33,726 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:38,731 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:43,731 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:48,471 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 19:11:48,473 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 19:11:48,746 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:49,362 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log
+2025-04-23 19:11:53,747 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:58,748 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:59,834 DEBUG   SenderThread:52 [sender.py:send():378] send: exit
+2025-04-23 19:11:59,834 INFO    SenderThread:52 [sender.py:send_exit():585] handling exit code: 1
+2025-04-23 19:11:59,834 INFO    SenderThread:52 [sender.py:send_exit():587] handling runtime: 627
+2025-04-23 19:11:59,882 INFO    SenderThread:52 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-23 19:11:59,883 INFO    SenderThread:52 [sender.py:send_exit():593] send defer
+2025-04-23 19:11:59,883 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:11:59,883 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 0
+2025-04-23 19:11:59,884 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:11:59,884 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 0
+2025-04-23 19:11:59,884 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 1
+2025-04-23 19:11:59,884 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:11:59,884 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 1
+2025-04-23 19:11:59,885 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:11:59,885 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 1
+2025-04-23 19:11:59,885 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 2
+2025-04-23 19:11:59,885 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:11:59,885 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 2
+2025-04-23 19:11:59,885 INFO    HandlerThread:52 [system_monitor.py:finish():203] Stopping system monitor
+2025-04-23 19:11:59,886 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined cpu monitor
+2025-04-23 19:11:59,887 DEBUG   SystemMonitor:52 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2025-04-23 19:11:59,887 DEBUG   SystemMonitor:52 [system_monitor.py:_start():183] Publishing last batch of metrics
+2025-04-23 19:11:59,889 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined disk monitor
+2025-04-23 19:11:59,898 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined gpu monitor
+2025-04-23 19:11:59,899 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined memory monitor
+2025-04-23 19:11:59,899 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined network monitor
+2025-04-23 19:11:59,900 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:11:59,900 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 2
+2025-04-23 19:11:59,900 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 3
+2025-04-23 19:11:59,900 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-23 19:11:59,901 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:11:59,901 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 3
+2025-04-23 19:11:59,901 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:11:59,901 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 3
+2025-04-23 19:11:59,902 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 4
+2025-04-23 19:11:59,902 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:11:59,902 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 4
+2025-04-23 19:11:59,902 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:11:59,902 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 4
+2025-04-23 19:11:59,902 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 5
+2025-04-23 19:11:59,902 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:11:59,903 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 5
+2025-04-23 19:11:59,904 DEBUG   SenderThread:52 [sender.py:send():378] send: summary
+2025-04-23 19:11:59,924 INFO    SenderThread:52 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-23 19:11:59,924 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:11:59,924 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 5
+2025-04-23 19:11:59,924 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 6
+2025-04-23 19:11:59,924 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:11:59,925 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 6
+2025-04-23 19:11:59,925 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:11:59,925 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 6
+2025-04-23 19:11:59,925 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 7
+2025-04-23 19:11:59,926 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:11:59,926 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:11:59,926 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 7
+2025-04-23 19:11:59,926 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:11:59,926 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 7
+2025-04-23 19:12:00,391 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/wandb-summary.json
+2025-04-23 19:12:00,812 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-23 19:12:01,423 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log
+2025-04-23 19:12:02,892 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 8
+2025-04-23 19:12:02,892 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: poll_exit
+2025-04-23 19:12:02,893 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:12:02,893 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 8
+2025-04-23 19:12:02,893 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:12:02,893 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 8
+2025-04-23 19:12:02,894 INFO    SenderThread:52 [job_builder.py:build():432] Attempting to build job artifact
+2025-04-23 19:12:02,896 WARNING SenderThread:52 [job_builder.py:_log_if_verbose():267] Ensure read and write access to run files dir: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files, control this via the WANDB_DIR env var. See https://docs.wandb.ai/guides/track/environment-variables
+2025-04-23 19:12:02,896 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 9
+2025-04-23 19:12:02,897 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:12:02,897 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 9
+2025-04-23 19:12:02,897 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:12:02,897 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 9
+2025-04-23 19:12:02,897 INFO    SenderThread:52 [dir_watcher.py:finish():358] shutting down directory watcher
+2025-04-23 19:12:03,426 INFO    SenderThread:52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log
+2025-04-23 19:12:03,428 INFO    SenderThread:52 [dir_watcher.py:finish():388] scan: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files
+2025-04-23 19:12:03,429 INFO    SenderThread:52 [dir_watcher.py:finish():402] scan save: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/wandb-summary.json wandb-summary.json
+2025-04-23 19:12:03,429 INFO    SenderThread:52 [dir_watcher.py:finish():402] scan save: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/config.yaml config.yaml
+2025-04-23 19:12:03,432 INFO    SenderThread:52 [dir_watcher.py:finish():402] scan save: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/requirements.txt requirements.txt
+2025-04-23 19:12:03,435 INFO    SenderThread:52 [dir_watcher.py:finish():402] scan save: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log output.log
+2025-04-23 19:12:03,436 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 10
+2025-04-23 19:12:03,437 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:12:03,437 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 10
+2025-04-23 19:12:03,441 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:12:03,441 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 10
+2025-04-23 19:12:03,441 INFO    SenderThread:52 [file_pusher.py:finish():169] shutting down file pusher
+2025-04-23 19:12:03,813 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-23 19:12:03,814 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: poll_exit
+2025-04-23 19:12:04,081 INFO    wandb-upload_3:52 [upload_job.py:push():130] Uploaded file /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/output.log
+2025-04-23 19:12:04,088 INFO    wandb-upload_2:52 [upload_job.py:push():130] Uploaded file /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/requirements.txt
+2025-04-23 19:12:04,098 INFO    wandb-upload_1:52 [upload_job.py:push():130] Uploaded file /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/config.yaml
+2025-04-23 19:12:04,122 INFO    wandb-upload_0:52 [upload_job.py:push():130] Uploaded file /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/files/wandb-summary.json
+2025-04-23 19:12:04,323 INFO    Thread-11 :52 [sender.py:transition_state():613] send defer: 11
+2025-04-23 19:12:04,323 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:12:04,323 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 11
+2025-04-23 19:12:04,324 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:12:04,324 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 11
+2025-04-23 19:12:04,324 INFO    SenderThread:52 [file_pusher.py:join():175] waiting for file pusher
+2025-04-23 19:12:04,325 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 12
+2025-04-23 19:12:04,325 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:12:04,325 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 12
+2025-04-23 19:12:04,326 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:12:04,326 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 12
+2025-04-23 19:12:04,326 INFO    SenderThread:52 [file_stream.py:finish():601] file stream finish called
+2025-04-23 19:12:04,684 INFO    SenderThread:52 [file_stream.py:finish():605] file stream finish is done
+2025-04-23 19:12:04,684 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 13
+2025-04-23 19:12:04,684 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:12:04,685 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 13
+2025-04-23 19:12:04,685 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:12:04,685 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 13
+2025-04-23 19:12:04,685 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 14
+2025-04-23 19:12:04,686 DEBUG   SenderThread:52 [sender.py:send():378] send: final
+2025-04-23 19:12:04,686 DEBUG   SenderThread:52 [sender.py:send():378] send: footer
+2025-04-23 19:12:04,687 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-23 19:12:04,687 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 14
+2025-04-23 19:12:04,687 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-23 19:12:04,687 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 14
+2025-04-23 19:12:04,688 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-23 19:12:04,689 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: poll_exit
+2025-04-23 19:12:04,690 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-23 19:12:04,691 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: poll_exit
+2025-04-23 19:12:04,691 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: server_info
+2025-04-23 19:12:04,692 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: server_info
+2025-04-23 19:12:04,695 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: get_summary
+2025-04-23 19:12:04,697 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: sampled_history
+2025-04-23 19:12:04,697 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: internal_messages
+2025-04-23 19:12:04,888 INFO    MainThread:52 [wandb_run.py:_footer_history_summary_info():3994] rendering history
+2025-04-23 19:12:04,889 INFO    MainThread:52 [wandb_run.py:_footer_history_summary_info():4026] rendering summary
+2025-04-23 19:12:04,890 INFO    MainThread:52 [wandb_run.py:_footer_sync_info():3953] logging synced files
+2025-04-23 19:12:04,890 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: shutdown
+2025-04-23 19:12:04,891 INFO    HandlerThread:52 [handler.py:finish():882] shutting down handler
+2025-04-23 19:12:05,692 INFO    WriterThread:52 [datastore.py:close():296] close: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_190131-gnn_32_l6/run-gnn_32_l6.wandb
+2025-04-23 19:12:05,888 INFO    SenderThread:52 [sender.py:finish():1545] shutting down sender
+2025-04-23 19:12:05,888 INFO    SenderThread:52 [file_pusher.py:finish():169] shutting down file pusher
+2025-04-23 19:12:05,889 INFO    SenderThread:52 [file_pusher.py:join():175] waiting for file pusher

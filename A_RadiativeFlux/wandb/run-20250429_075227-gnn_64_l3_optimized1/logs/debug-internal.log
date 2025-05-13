@@ -1,0 +1,51 @@
+2025-04-29 07:52:27,385 INFO    StreamThr :36 [internal.py:wandb_internal():85] W&B internal server running at pid: 36, started at: 2025-04-29 07:52:27.379055
+2025-04-29 07:52:27,388 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status
+2025-04-29 07:52:27,390 INFO    WriterThread:36 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075227-gnn_64_l3_optimized1/run-gnn_64_l3_optimized1.wandb
+2025-04-29 07:52:27,401 DEBUG   SenderThread:36 [sender.py:send():378] send: header
+2025-04-29 07:52:27,401 DEBUG   SenderThread:36 [sender.py:send():378] send: run
+2025-04-29 07:52:27,425 INFO    SenderThread:36 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/gnn_64_l3_optimized1
+2025-04-29 07:52:27,861 ERROR   SenderThread:36 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-29 07:52:27,861 ERROR   SenderThread:36 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_64_l3_optimized1 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-29 07:52:29,132 ERROR   SenderThread:36 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-29 07:52:29,132 ERROR   SenderThread:36 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_64_l3_optimized1 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-29 07:52:31,500 ERROR   SenderThread:36 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-29 07:52:31,501 ERROR   SenderThread:36 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_64_l3_optimized1 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-29 07:52:31,501 INFO    SenderThread:36 [retry.py:__call__():172] Retry attempt failed:
+Traceback (most recent call last):
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/lib/retry.py", line 131, in __call__
+    result = self._call_fn(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/internal/internal_api.py", line 340, in execute
+    return self.client.execute(*args, **kwargs)  # type: ignore
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/lib/gql_request.py", line 59, in execute
+    request.raise_for_status()
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/requests/models.py", line 1021, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 409 Client Error: Conflict for url: https://api.wandb.ai/graphql
+2025-04-29 07:52:32,389 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:52:35,834 ERROR   SenderThread:36 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-29 07:52:35,834 ERROR   SenderThread:36 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_64_l3_optimized1 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-29 07:52:37,391 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:52:42,393 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:52:44,563 ERROR   SenderThread:36 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-29 07:52:44,563 ERROR   SenderThread:36 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_64_l3_optimized1 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-29 07:52:47,395 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:52:52,396 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:52:57,398 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:01,971 ERROR   SenderThread:36 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-29 07:53:01,972 ERROR   SenderThread:36 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_64_l3_optimized1 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-29 07:53:02,400 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:07,401 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:12,403 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:17,405 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:22,406 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:27,412 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:32,411 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:34,559 ERROR   SenderThread:36 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-29 07:53:34,559 ERROR   SenderThread:36 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_64_l3_optimized1 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-29 07:53:37,413 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:42,415 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-29 07:53:47,422 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive

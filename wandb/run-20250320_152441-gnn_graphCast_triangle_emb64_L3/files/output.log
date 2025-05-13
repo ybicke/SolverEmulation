@@ -1,0 +1,89 @@
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 535, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 523, in main
+    train_model(model, train_loader, val_loader) # Profile training
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 243, in train_model
+    outputs = model(batch_x3, batch_x2)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 120, in forward
+    x = self.processor(x, graph_data.edge_index) # Access edge_index as graph_data.edge_index
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 230, in forward
+    x = x + self.layer_norm(layer(x, edge_index))
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 268, in forward
+    return self.propagate(edge_index, x=x)
+  File "/tmp/triangle_files.graphCast_triangle_TriangleGNNLayer_propagate_bv44zeon.py", line 170, in propagate
+    out = self.message(
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 272, in message
+    return self.edge_mlp(x_j)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/normalization.py", line 201, in forward
+    return F.layer_norm(
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/functional.py", line 2573, in layer_norm
+    return torch.layer_norm(input, normalized_shape, weight, bias, eps, torch.backends.cudnn.enabled)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 8.62 GiB. GPU
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_triangle.py 535 <module>
+[1mmain()
+[1mtrain_column_triangle.py 523 main
+[1mtrain_model(model, train_loader, val_loader) # Profile training
+[1mtrain_column_triangle.py 243 train_model
+[1moutputs = model(batch_x3, batch_x2)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgraphCast_triangle.py 120 forward
+[1mx = self.processor(x, graph_data.edge_index) # Access edge_index as graph_data.edge_index
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgraphCast_triangle.py 230 forward
+[1mx = x + self.layer_norm(layer(x, edge_index))
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgraphCast_triangle.py 268 forward
+[1mreturn self.propagate(edge_index, x=x)
+[1mtriangle_files.graphCast_triangle_TriangleGNNLayer_propagate_bv44zeon.py 170 propagate
+[1mout = self.message(
+[1mgraphCast_triangle.py 272 message
+[1mreturn self.edge_mlp(x_j)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mcontainer.py 217 forward
+[1minput = module(input)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mnormalization.py 201 forward
+[1mreturn F.layer_norm(
+[1mfunctional.py 2573 layer_norm
+[1mreturn torch.layer_norm(input, normalized_shape, weight, bias, eps, torch.backends.cudnn.enabled)
+[1mtorch.cuda.OutOfMemoryError:
+[1mCUDA out of memory. Tried to allocate 8.62 GiB. GPU 

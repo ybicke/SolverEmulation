@@ -1,0 +1,60 @@
+2025-02-17 17:01:13,401 INFO    StreamThr :52 [internal.py:wandb_internal():85] W&B internal server running at pid: 52, started at: 2025-02-17 17:01:13.394648
+2025-02-17 17:01:13,402 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status
+2025-02-17 17:01:13,411 INFO    WriterThread:52 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250217_170113-gnn_graphCast_Emb128/run-gnn_graphCast_Emb128.wandb
+2025-02-17 17:01:13,430 DEBUG   SenderThread:52 [sender.py:send():378] send: header
+2025-02-17 17:01:13,430 DEBUG   SenderThread:52 [sender.py:send():378] send: run
+2025-02-17 17:01:13,486 INFO    SenderThread:52 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/gnn_graphCast_Emb128
+2025-02-17 17:01:14,006 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-17 17:01:14,006 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_graphCast_Emb128 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-17 17:01:15,371 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-17 17:01:15,371 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_graphCast_Emb128 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-17 17:01:17,884 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-17 17:01:17,884 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_graphCast_Emb128 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-17 17:01:17,884 INFO    SenderThread:52 [retry.py:__call__():172] Retry attempt failed:
+Traceback (most recent call last):
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/lib/retry.py", line 131, in __call__
+    result = self._call_fn(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/internal/internal_api.py", line 340, in execute
+    return self.client.execute(*args, **kwargs)  # type: ignore
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/lib/gql_request.py", line 59, in execute
+    request.raise_for_status()
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/requests/models.py", line 1021, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 409 Client Error: Conflict for url: https://api.wandb.ai/graphql
+2025-02-17 17:01:18,413 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:01:22,397 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-17 17:01:22,397 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_graphCast_Emb128 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-17 17:01:23,419 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:01:28,422 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:01:31,134 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-17 17:01:31,134 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_graphCast_Emb128 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-17 17:01:33,424 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:01:38,446 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:01:43,441 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:01:48,446 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:01:50,068 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-17 17:01:50,068 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_graphCast_Emb128 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-17 17:01:53,452 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:01:58,457 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:03,459 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:08,461 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:13,467 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:18,468 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:23,470 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:28,367 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-17 17:02:28,367 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_graphCast_Emb128 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-17 17:02:28,472 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:33,473 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:38,475 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-17 17:02:43,478 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: cancel
+2025-02-17 17:02:43,478 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: cancel
+2025-02-17 17:02:43,479 DEBUG   SenderThread:52 [sender.py:send():387] Record cancelled: run
+2025-02-17 17:02:43,479 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-17 17:02:43,655 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: shutdown
+2025-02-17 17:02:43,656 INFO    HandlerThread:52 [handler.py:finish():882] shutting down handler
+2025-02-17 17:02:44,479 INFO    SenderThread:52 [sender.py:finish():1545] shutting down sender
+2025-02-17 17:02:44,479 INFO    WriterThread:52 [datastore.py:close():296] close: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250217_170113-gnn_graphCast_Emb128/run-gnn_graphCast_Emb128.wandb

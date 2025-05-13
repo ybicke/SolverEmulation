@@ -1,0 +1,9 @@
+2025-04-10 13:58:02,405 No scheduler. Using constant LR = args.learning_rate
+2025-04-10 13:58:02,411 Loading checkpoint: 2, /mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L4_H70_Emb256/checkpoint_epoch_2.pth
+2025-04-10 13:58:02,609 Training will continue from epoch: 2/30
+batch 100, time:1.860, lr: 0.000500, loss: 94.9687, mean_absolute_error: 4.1891
+batch 200, time:1.817, lr: 0.000500, loss: 81.1198, mean_absolute_error: 3.8687
+batch 300, time:1.843, lr: 0.000500, loss: 102.7444, mean_absolute_error: 4.4374
+batch 400, time:1.814, lr: 0.000500, loss: 115.3782, mean_absolute_error: 4.3955
+batch 500, time:1.819, lr: 0.000500, loss: 89.8150, mean_absolute_error: 4.0266
+batch 600, time:1.722, lr: 0.000500, loss: 81.9166, mean_absolute_error: 4.0937

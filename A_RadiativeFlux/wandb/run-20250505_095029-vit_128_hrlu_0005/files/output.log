@@ -1,0 +1,131 @@
+
+Trainable parameters: 933,026
+2025-05-05 09:50:30,920 Train started...
+2025-05-05 09:50:30,926 Using heating rate smoothness loss with weight=0.0005, applied to top 30 levels
+batch 100, time:0.126, loss: 368.2821, mse: 351.2335, smoothness: 17.0486, mean_absolute_error: 9.9542
+batch 200, time:0.133, loss: 215.9929, mse: 211.2011, smoothness: 4.7919, mean_absolute_error: 7.3501
+batch 300, time:0.134, loss: 169.8904, mse: 166.5935, smoothness: 3.2969, mean_absolute_error: 6.6396
+batch 400, time:0.133, loss: 147.6611, mse: 137.3128, smoothness: 10.3483, mean_absolute_error: 5.8565
+batch 500, time:0.126, loss: 132.4220, mse: 130.2515, smoothness: 2.1705, mean_absolute_error: 5.4137
+batch 600, time:0.120, loss: 125.8388, mse: 124.3956, smoothness: 1.4432, mean_absolute_error: 5.1856
+batch 700, time:0.132, loss: 110.8868, mse: 107.3918, smoothness: 3.4950, mean_absolute_error: 4.7851
+001/60: time: 1683.614, loss: 441.9381, mean_absolute_error: 8.5040, val_loss: 120.2756, val_mean_absolute_error: 5.3122, hr_smoothness: 106.9178, val_hr_smoothness: 0.8804
+batch 100, time:0.141, loss: 108.9916, mse: 108.0561, smoothness: 0.9355, mean_absolute_error: 5.0550
+batch 200, time:0.123, loss: 112.0053, mse: 111.4875, smoothness: 0.5178, mean_absolute_error: 4.6971
+batch 300, time:0.117, loss: 98.3388, mse: 97.2879, smoothness: 1.0509, mean_absolute_error: 4.7678
+batch 400, time:0.102, loss: 102.3295, mse: 101.9146, smoothness: 0.4149, mean_absolute_error: 4.5091
+batch 500, time:0.135, loss: 100.4864, mse: 99.9810, smoothness: 0.5053, mean_absolute_error: 4.5088
+batch 600, time:0.100, loss: 89.4710, mse: 88.5808, smoothness: 0.8901, mean_absolute_error: 4.2999
+batch 700, time:0.126, loss: 115.9175, mse: 114.9768, smoothness: 0.9408, mean_absolute_error: 5.3812
+002/60: time: 1077.589, loss: 102.6618, mean_absolute_error: 4.6601, val_loss: 87.8041, val_mean_absolute_error: 4.1925, hr_smoothness: 1.4767, val_hr_smoothness: 2.2915
+batch 100, time:0.123, loss: 90.2381, mse: 89.5579, smoothness: 0.6802, mean_absolute_error: 4.5272
+batch 200, time:0.122, loss: 80.0938, mse: 79.8043, smoothness: 0.2894, mean_absolute_error: 4.0451
+batch 300, time:0.134, loss: 95.3780, mse: 94.9163, smoothness: 0.4617, mean_absolute_error: 4.2862
+batch 400, time:0.117, loss: 79.2737, mse: 79.0557, smoothness: 0.2180, mean_absolute_error: 3.9028
+batch 500, time:0.091, loss: 78.0335, mse: 77.3861, smoothness: 0.6475, mean_absolute_error: 3.9317
+batch 600, time:0.123, loss: 92.0093, mse: 91.7098, smoothness: 0.2996, mean_absolute_error: 4.1291
+batch 700, time:0.131, loss: 93.8549, mse: 93.1509, smoothness: 0.7040, mean_absolute_error: 4.4031
+003/60: time: 1029.689, loss: 88.8834, mean_absolute_error: 4.2148, val_loss: 85.8518, val_mean_absolute_error: 3.9517, hr_smoothness: 0.7566, val_hr_smoothness: 0.5969
+batch 100, time:0.127, loss: 78.3901, mse: 77.8832, smoothness: 0.5069, mean_absolute_error: 3.8544
+batch 200, time:0.119, loss: 89.0124, mse: 88.2647, smoothness: 0.7477, mean_absolute_error: 4.1039
+batch 300, time:0.123, loss: 75.6055, mse: 75.4141, smoothness: 0.1914, mean_absolute_error: 3.6691
+batch 400, time:0.144, loss: 94.4977, mse: 94.2622, smoothness: 0.2355, mean_absolute_error: 3.9263
+batch 500, time:0.142, loss: 79.3820, mse: 79.2338, smoothness: 0.1481, mean_absolute_error: 3.6743
+batch 600, time:0.130, loss: 73.6396, mse: 73.4056, smoothness: 0.2340, mean_absolute_error: 3.7611
+batch 700, time:0.127, loss: 87.4088, mse: 86.9826, smoothness: 0.4262, mean_absolute_error: 3.8512
+004/60: time: 1007.461, loss: 83.3729, mean_absolute_error: 3.9746, val_loss: 76.9846, val_mean_absolute_error: 3.6974, hr_smoothness: 0.4502, val_hr_smoothness: 0.4607
+batch 100, time:0.122, loss: 82.8644, mse: 82.7149, smoothness: 0.1495, mean_absolute_error: 3.8018
+batch 200, time:0.108, loss: 77.5306, mse: 77.3586, smoothness: 0.1720, mean_absolute_error: 3.7661
+batch 300, time:0.130, loss: 74.7028, mse: 74.4989, smoothness: 0.2039, mean_absolute_error: 3.6785
+batch 400, time:0.131, loss: 82.7078, mse: 82.5213, smoothness: 0.1865, mean_absolute_error: 3.8408
+batch 500, time:0.114, loss: 72.1083, mse: 71.9554, smoothness: 0.1529, mean_absolute_error: 3.6674
+batch 600, time:0.110, loss: 76.0424, mse: 75.8616, smoothness: 0.1808, mean_absolute_error: 3.6908
+batch 700, time:0.136, loss: 71.8347, mse: 71.0038, smoothness: 0.8309, mean_absolute_error: 3.5629
+005/60: time: 965.550, loss: 78.3553, mean_absolute_error: 3.7812, val_loss: 74.7782, val_mean_absolute_error: 3.5974, hr_smoothness: 0.4413, val_hr_smoothness: 0.3546
+batch 100, time:0.117, loss: 77.9189, mse: 76.6188, smoothness: 1.3001, mean_absolute_error: 3.5633
+batch 200, time:0.118, loss: 71.3461, mse: 71.1684, smoothness: 0.1777, mean_absolute_error: 3.5591
+batch 300, time:0.123, loss: 72.5767, mse: 72.4112, smoothness: 0.1655, mean_absolute_error: 3.4675
+batch 400, time:0.102, loss: 70.3434, mse: 70.2204, smoothness: 0.1230, mean_absolute_error: 3.3435
+batch 500, time:0.121, loss: 79.3341, mse: 79.1353, smoothness: 0.1989, mean_absolute_error: 3.7177
+batch 600, time:0.128, loss: 79.2038, mse: 79.0874, smoothness: 0.1164, mean_absolute_error: 3.7449
+batch 700, time:0.116, loss: 74.8130, mse: 74.6950, smoothness: 0.1180, mean_absolute_error: 3.5223
+006/60: time: 924.070, loss: 75.3031, mean_absolute_error: 3.6676, val_loss: 72.3955, val_mean_absolute_error: 3.5908, hr_smoothness: 0.3134, val_hr_smoothness: 0.2515
+batch 100, time:0.079, loss: 92.2393, mse: 87.9429, smoothness: 4.2964, mean_absolute_error: 4.4465
+batch 200, time:0.124, loss: 62.6943, mse: 62.5087, smoothness: 0.1856, mean_absolute_error: 3.2519
+batch 300, time:0.102, loss: 94.4469, mse: 94.3421, smoothness: 0.1048, mean_absolute_error: 3.9032
+batch 400, time:0.114, loss: 84.9956, mse: 84.4492, smoothness: 0.5464, mean_absolute_error: 3.7571
+batch 500, time:0.141, loss: 66.3491, mse: 66.2124, smoothness: 0.1367, mean_absolute_error: 3.4286
+batch 600, time:0.119, loss: 69.6755, mse: 69.5573, smoothness: 0.1182, mean_absolute_error: 3.3656
+batch 700, time:0.097, loss: 86.5536, mse: 86.4403, smoothness: 0.1133, mean_absolute_error: 3.8128
+007/60: time: 911.073, loss: 73.9597, mean_absolute_error: 3.5947, val_loss: 74.6016, val_mean_absolute_error: 3.5812, hr_smoothness: 0.3254, val_hr_smoothness: 0.1430
+batch 100, time:0.141, loss: 76.3212, mse: 76.2164, smoothness: 0.1047, mean_absolute_error: 3.4599
+batch 200, time:0.135, loss: 72.3614, mse: 72.2795, smoothness: 0.0819, mean_absolute_error: 3.3920
+batch 300, time:0.121, loss: 59.7619, mse: 59.5352, smoothness: 0.2267, mean_absolute_error: 3.0701
+batch 400, time:0.122, loss: 78.2798, mse: 77.8080, smoothness: 0.4718, mean_absolute_error: 3.6001
+batch 500, time:0.120, loss: 66.5751, mse: 66.4822, smoothness: 0.0929, mean_absolute_error: 3.3017
+batch 600, time:0.114, loss: 86.3222, mse: 85.0347, smoothness: 1.2875, mean_absolute_error: 4.2748
+batch 700, time:0.133, loss: 67.7126, mse: 67.6022, smoothness: 0.1105, mean_absolute_error: 3.3825
+008/60: time: 882.105, loss: 71.4958, mean_absolute_error: 3.4896, val_loss: 70.5955, val_mean_absolute_error: 3.5745, hr_smoothness: 0.3787, val_hr_smoothness: 0.0807
+batch 100, time:0.126, loss: 63.7859, mse: 63.6806, smoothness: 0.1052, mean_absolute_error: 3.3199
+batch 200, time:0.117, loss: 66.3125, mse: 65.9157, smoothness: 0.3968, mean_absolute_error: 3.2838
+batch 300, time:0.126, loss: 73.2564, mse: 73.1561, smoothness: 0.1003, mean_absolute_error: 3.3584
+batch 400, time:0.128, loss: 71.8401, mse: 71.7275, smoothness: 0.1126, mean_absolute_error: 3.4339
+batch 500, time:0.133, loss: 72.1958, mse: 72.1088, smoothness: 0.0870, mean_absolute_error: 3.3738
+batch 600, time:0.121, loss: 79.9496, mse: 79.2539, smoothness: 0.6957, mean_absolute_error: 3.7638
+batch 700, time:0.103, loss: 79.3617, mse: 79.1315, smoothness: 0.2302, mean_absolute_error: 3.5749
+009/60: time: 858.484, loss: 70.2012, mean_absolute_error: 3.4246, val_loss: 67.6048, val_mean_absolute_error: 3.2944, hr_smoothness: 0.2068, val_hr_smoothness: 0.0913
+batch 100, time:0.136, loss: 62.2750, mse: 62.1483, smoothness: 0.1266, mean_absolute_error: 3.2023
+batch 200, time:0.134, loss: 68.6573, mse: 68.5586, smoothness: 0.0987, mean_absolute_error: 3.2387
+batch 300, time:0.100, loss: 66.5176, mse: 66.3835, smoothness: 0.1341, mean_absolute_error: 3.2432
+batch 400, time:0.102, loss: 68.5151, mse: 68.3907, smoothness: 0.1244, mean_absolute_error: 3.3293
+batch 500, time:0.117, loss: 75.2796, mse: 75.0536, smoothness: 0.2260, mean_absolute_error: 3.3794
+batch 600, time:0.121, loss: 56.7744, mse: 56.6531, smoothness: 0.1213, mean_absolute_error: 3.0904
+batch 700, time:0.120, loss: 64.8479, mse: 64.6747, smoothness: 0.1732, mean_absolute_error: 3.3132
+010/60: time: 853.424, loss: 68.7016, mean_absolute_error: 3.3606, val_loss: 70.3681, val_mean_absolute_error: 3.5033, hr_smoothness: 0.1986, val_hr_smoothness: 0.0990
+batch 100, time:0.136, loss: 66.1019, mse: 66.0293, smoothness: 0.0726, mean_absolute_error: 3.2677
+batch 200, time:0.124, loss: 62.9449, mse: 62.7518, smoothness: 0.1931, mean_absolute_error: 3.1607
+batch 300, time:0.132, loss: 65.7369, mse: 65.5428, smoothness: 0.1941, mean_absolute_error: 3.3300
+batch 400, time:0.123, loss: 64.4010, mse: 64.3325, smoothness: 0.0685, mean_absolute_error: 3.2382
+batch 500, time:0.094, loss: 59.6342, mse: 59.5653, smoothness: 0.0689, mean_absolute_error: 3.0909
+batch 600, time:0.095, loss: 65.9932, mse: 65.2821, smoothness: 0.7111, mean_absolute_error: 3.1153
+batch 700, time:0.111, loss: 70.5544, mse: 70.4750, smoothness: 0.0794, mean_absolute_error: 3.6045
+011/60: time: 849.917, loss: 66.9624, mean_absolute_error: 3.2826, val_loss: 65.8024, val_mean_absolute_error: 3.1468, hr_smoothness: 0.2039, val_hr_smoothness: 0.0609
+batch 100, time:0.140, loss: 68.9407, mse: 68.7203, smoothness: 0.2204, mean_absolute_error: 3.5977
+batch 200, time:0.097, loss: 68.4621, mse: 68.3919, smoothness: 0.0702, mean_absolute_error: 3.2741
+batch 300, time:0.102, loss: 74.9415, mse: 74.8819, smoothness: 0.0596, mean_absolute_error: 3.2198
+batch 400, time:0.143, loss: 67.5388, mse: 67.4637, smoothness: 0.0752, mean_absolute_error: 3.2277
+batch 500, time:0.126, loss: 64.6213, mse: 64.4790, smoothness: 0.1423, mean_absolute_error: 3.0567
+batch 600, time:0.114, loss: 73.1316, mse: 72.8438, smoothness: 0.2878, mean_absolute_error: 3.7159
+batch 700, time:0.136, loss: 69.4037, mse: 69.3485, smoothness: 0.0553, mean_absolute_error: 3.6187
+012/60: time: 837.457, loss: 66.3819, mean_absolute_error: 3.2561, val_loss: 70.9960, val_mean_absolute_error: 3.7819, hr_smoothness: 0.1506, val_hr_smoothness: 1.2416
+batch 100, time:0.095, loss: 67.7016, mse: 67.6296, smoothness: 0.0720, mean_absolute_error: 3.3024
+batch 200, time:0.093, loss: 72.6555, mse: 72.4364, smoothness: 0.2191, mean_absolute_error: 3.5853
+batch 300, time:0.121, loss: 65.5995, mse: 65.5327, smoothness: 0.0668, mean_absolute_error: 3.3146
+batch 400, time:0.096, loss: 73.2495, mse: 73.1945, smoothness: 0.0550, mean_absolute_error: 3.2972
+batch 500, time:0.118, loss: 62.5683, mse: 62.2217, smoothness: 0.3466, mean_absolute_error: 3.0404
+batch 600, time:0.117, loss: 62.6172, mse: 62.5621, smoothness: 0.0552, mean_absolute_error: 3.0575
+batch 700, time:0.120, loss: 77.4810, mse: 77.4245, smoothness: 0.0565, mean_absolute_error: 3.6297
+013/60: time: 846.258, loss: 66.1140, mean_absolute_error: 3.2306, val_loss: 67.1019, val_mean_absolute_error: 3.3562, hr_smoothness: 0.1185, val_hr_smoothness: 0.0747
+batch 100, time:0.116, loss: 68.6269, mse: 68.5042, smoothness: 0.1227, mean_absolute_error: 3.1988
+batch 200, time:0.105, loss: 56.3006, mse: 56.2378, smoothness: 0.0628, mean_absolute_error: 2.8808
+batch 300, time:0.121, loss: 69.3579, mse: 69.2888, smoothness: 0.0691, mean_absolute_error: 3.1089
+batch 400, time:0.104, loss: 68.6861, mse: 68.5288, smoothness: 0.1572, mean_absolute_error: 3.2983
+batch 500, time:0.098, loss: 57.1893, mse: 57.1358, smoothness: 0.0535, mean_absolute_error: 2.9598
+batch 600, time:0.138, loss: 64.3980, mse: 64.3171, smoothness: 0.0809, mean_absolute_error: 3.0327
+batch 700, time:0.118, loss: 77.1429, mse: 77.0668, smoothness: 0.0761, mean_absolute_error: 3.5653
+014/60: time: 837.042, loss: 64.9400, mean_absolute_error: 3.1611, val_loss: 66.1393, val_mean_absolute_error: 3.1389, hr_smoothness: 0.1391, val_hr_smoothness: 0.0766
+batch 100, time:0.094, loss: 68.3857, mse: 68.3379, smoothness: 0.0478, mean_absolute_error: 3.0756
+batch 200, time:0.160, loss: 73.5500, mse: 73.3718, smoothness: 0.1783, mean_absolute_error: 3.1394
+batch 300, time:0.109, loss: 67.0448, mse: 66.9646, smoothness: 0.0802, mean_absolute_error: 3.3275
+batch 400, time:0.115, loss: 70.3357, mse: 70.2879, smoothness: 0.0478, mean_absolute_error: 3.2225
+batch 500, time:0.154, loss: 58.8372, mse: 58.7494, smoothness: 0.0878, mean_absolute_error: 3.1280
+batch 600, time:0.097, loss: 72.2994, mse: 72.1407, smoothness: 0.1587, mean_absolute_error: 3.3089
+batch 700, time:0.147, loss: 70.6893, mse: 70.4832, smoothness: 0.2061, mean_absolute_error: 3.3564
+015/60: time: 874.385, loss: 64.3629, mean_absolute_error: 3.1359, val_loss: 67.8725, val_mean_absolute_error: 3.1667, hr_smoothness: 0.1551, val_hr_smoothness: 0.0545
+batch 100, time:0.132, loss: 62.1691, mse: 62.0999, smoothness: 0.0692, mean_absolute_error: 2.9900
+batch 200, time:0.132, loss: 67.1376, mse: 67.0836, smoothness: 0.0540, mean_absolute_error: 3.1674
+batch 300, time:0.133, loss: 62.5057, mse: 62.0391, smoothness: 0.4666, mean_absolute_error: 3.1650
+batch 400, time:0.125, loss: 63.7569, mse: 63.7026, smoothness: 0.0544, mean_absolute_error: 3.0275
+batch 500, time:0.133, loss: 58.8328, mse: 58.7771, smoothness: 0.0557, mean_absolute_error: 2.9312
+batch 600, time:0.131, loss: 62.9548, mse: 62.9127, smoothness: 0.0421, mean_absolute_error: 3.0247
+batch 700, time:0.140, loss: 53.1206, mse: 52.8292, smoothness: 0.2914, mean_absolute_error: 2.8266

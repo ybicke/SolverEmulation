@@ -1,0 +1,16 @@
+
+Trainable parameters: 17,732
+2025-05-06 14:22:49,665 Train started...
+2025-05-06 14:22:49,671 Loading checkpoint: 5, /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_32_l3/checkpoint_epoch_5.pth
+2025-05-06 14:22:49,707 Training will continue from epoch: 5/30
+Graph construction: 12.213s
+Graph has 581632 nodes and 4582144 edges
+Message passing: 0.100s
+Graph construction: 0.000s
+Graph has 581632 nodes and 4582144 edges
+Message passing: 0.071s
+Graph construction: 0.000s
+Graph has 581632 nodes and 4582144 edges
+Message passing: 0.070s
+Graph construction: 0.000s
+Graph has 581632 nodes and 4582144 edges

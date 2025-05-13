@@ -1,0 +1,25 @@
+
+2025-02-10 17:31:40,248 Data loading completed in 1990.19 seconds.
+2025-02-10 17:40:39,141 Initializing RandomForestRegressor...
+2025-02-10 17:40:39,146 Fitting RandomForestRegressor on shape X=(1474560, 910), y=(1474560, 490)
+building tree 1 of 10building tree 2 of 10
+building tree 3 of 10building tree 4 of 10
+building tree 5 of 10
+building tree 6 of 10building tree 7 of 10building tree 8 of 10
+[Parallel(n_jobs=-1)]: Using backend ThreadingBackend with 8 concurrent workers.
+building tree 9 of 10
+building tree 10 of 10
+[Parallel(n_jobs=-1)]: Done   7 out of  10 | elapsed: 184.0min remaining: 78.9min
+[Parallel(n_jobs=-1)]: Done  10 out of  10 | elapsed: 280.1min finished
+2025-02-10 22:26:50,543 RF fit done in 17171.40 seconds.
+[Parallel(n_jobs=8)]: Using backend ThreadingBackend with 8 concurrent workers.
+[Parallel(n_jobs=8)]: Done   7 out of  10 | elapsed:  5.5min remaining:  2.4min
+[Parallel(n_jobs=8)]: Done  10 out of  10 | elapsed:  6.7min finished
+2025-02-10 22:41:40,241 Validation MSE: 0.9197, MAE: 0.1750
+2025-02-10 22:41:40,457 Saved RF model to /mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_RF_1_new/rf_model.pkl
+2025-02-10 22:41:41,211 Starting Random Forest test...
+[Parallel(n_jobs=8)]: Using backend ThreadingBackend with 8 concurrent workers.
+[Parallel(n_jobs=8)]: Done   7 out of  10 | elapsed: 16.2min remaining:  6.9min
+[Parallel(n_jobs=8)]: Done  10 out of  10 | elapsed: 20.4min finished
+2025-02-10 23:25:59,637 Test MSE: 0.8412, MAE: 0.2088
+2025-02-10 23:26:16,549 Code ended!

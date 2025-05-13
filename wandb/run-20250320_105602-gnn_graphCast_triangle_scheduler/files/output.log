@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 506, in <module>
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 494, in main
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 212, in train_model
+    epoch_number = init_epoch
+AttributeError: 'Namespace' object has no attribute 'vbatch'
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_triangle.py 506 <module>
+[1mtrain_column_triangle.py 494 main
+[1mtrain_column_triangle.py 212 train_model
+[1mepoch_number = init_epoch
+[1mAttributeError:
+[1m'Namespace' object has no attribute 'vbatch'

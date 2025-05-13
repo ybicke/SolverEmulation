@@ -1,0 +1,47 @@
+2025-05-13 14:44:12,374 INFO    StreamThr :52 [internal.py:wandb_internal():85] W&B internal server running at pid: 52, started at: 2025-05-13 14:44:12.366994
+2025-05-13 14:44:12,377 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status
+2025-05-13 14:44:12,379 INFO    WriterThread:52 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion/wandb/run-20250513_144412-diffusion_model_test5/run-diffusion_model_test5.wandb
+2025-05-13 14:44:12,391 DEBUG   SenderThread:52 [sender.py:send():378] send: header
+2025-05-13 14:44:12,391 DEBUG   SenderThread:52 [sender.py:send():378] send: run
+2025-05-13 14:44:12,430 INFO    SenderThread:52 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/diffusion_model_test5
+2025-05-13 14:44:13,069 INFO    SenderThread:52 [dir_watcher.py:__init__():211] watching files in: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion/wandb/run-20250513_144412-diffusion_model_test5/files
+2025-05-13 14:44:13,069 INFO    SenderThread:52 [sender.py:_start_run_threads():1123] run started: diffusion_model_test5 with start time 1747147452.37151
+2025-05-13 14:44:13,084 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: check_version
+2025-05-13 14:44:13,085 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: check_version
+2025-05-13 14:44:13,241 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: run_start
+2025-05-13 14:44:13,259 DEBUG   HandlerThread:52 [system_info.py:__init__():26] System info init
+2025-05-13 14:44:13,260 DEBUG   HandlerThread:52 [system_info.py:__init__():41] System info init done
+2025-05-13 14:44:13,260 INFO    HandlerThread:52 [system_monitor.py:start():194] Starting system monitor
+2025-05-13 14:44:13,260 INFO    SystemMonitor:52 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2025-05-13 14:44:13,260 INFO    HandlerThread:52 [system_monitor.py:probe():214] Collecting system info
+2025-05-13 14:44:13,261 INFO    SystemMonitor:52 [interfaces.py:start():188] Started cpu monitoring
+2025-05-13 14:44:13,262 INFO    SystemMonitor:52 [interfaces.py:start():188] Started disk monitoring
+2025-05-13 14:44:13,263 INFO    SystemMonitor:52 [interfaces.py:start():188] Started gpu monitoring
+2025-05-13 14:44:13,264 INFO    SystemMonitor:52 [interfaces.py:start():188] Started memory monitoring
+2025-05-13 14:44:13,265 INFO    SystemMonitor:52 [interfaces.py:start():188] Started network monitoring
+2025-05-13 14:44:13,281 DEBUG   HandlerThread:52 [system_info.py:probe():150] Probing system
+2025-05-13 14:44:13,281 DEBUG   HandlerThread:52 [system_info.py:probe():198] Probing system done
+2025-05-13 14:44:13,282 DEBUG   HandlerThread:52 [system_monitor.py:probe():223] {'os': 'Linux-6.8.0-52-generic-x86_64-with-glibc2.31', 'python': '3.9.15', 'heartbeatAt': '2025-05-13T14:44:13.281949', 'startedAt': '2025-05-13T14:44:12.263562', 'docker': None, 'cuda': None, 'args': ('--dataset', '/mydata/deepcloud/salman/dataset/h5_data_all_chuncked', '--save', '/mydata/deepcloud/yves/A_RadiativeFlux/diffusion_model_test5', '--percent', '0.1', '--subsample', '0.1', '--num-workers', '4', '--prefetch-factor', '2', '--batch-size', '512', '--learning-rate', '0.0001', '--max-epochs', '30', '--height-in', '71', '--channel-out', '4', '--channel-3d', '6', '--channel-2d', '6', '--cnn-units', '128', '256', '512', '1024', '--cnn-kernel-sizes', '1', '2', '5', '7', '--dropout', '0', '--num-sampling-steps', '25', '--deterministic-sampling', '--sigma-min', '0.002', '--sigma-max', '80.0', '--sigma-data', '0.5', '--time-embedding-dim', '128', '--wandb-mode', 'online'), 'state': 'running', 'program': '-m train', 'codePathLocal': None, 'host': 'diffusion-test-2-0-6', 'username': 'root', 'executable': '/myhome/mambaforge/envs/deepFlux/bin/python', 'cpu_count': 32, 'cpu_count_logical': 32, 'cpu_freq': {'current': 2999.9959999999996, 'min': 0.0, 'max': 0.0}, 'cpu_freq_per_core': [{'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}], 'disk': {'/': {'total': 1875.5519676208496, 'used': 644.6151847839355}}, 'gpu': 'NVIDIA A100 80GB PCIe', 'gpu_count': 1, 'gpu_devices': [{'name': 'NVIDIA A100 80GB PCIe', 'memory_total': 85899345920}], 'memory': {'total': 251.6952781677246}}
+2025-05-13 14:44:13,282 INFO    HandlerThread:52 [system_monitor.py:probe():224] Finished collecting system info
+2025-05-13 14:44:13,282 INFO    HandlerThread:52 [system_monitor.py:probe():227] Publishing system info
+2025-05-13 14:44:13,282 DEBUG   HandlerThread:52 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2025-05-13 14:44:14,077 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion/wandb/run-20250513_144412-diffusion_model_test5/files/conda-environment.yaml
+2025-05-13 14:44:22,910 DEBUG   HandlerThread:52 [system_info.py:_save_conda():222] Saving conda packages done
+2025-05-13 14:44:22,911 DEBUG   HandlerThread:52 [system_info.py:_save_code():44] Saving code
+2025-05-13 14:44:22,911 WARNING HandlerThread:52 [system_info.py:_save_code():46] unable to save code -- program entry not found
+2025-05-13 14:44:22,927 INFO    HandlerThread:52 [system_monitor.py:probe():229] Finished publishing system info
+2025-05-13 14:44:22,975 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 14:44:22,975 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-05-13 14:44:22,975 DEBUG   SenderThread:52 [sender.py:send():378] send: files
+2025-05-13 14:44:22,976 INFO    SenderThread:52 [sender.py:_save_file():1389] saving file wandb-metadata.json with policy now
+2025-05-13 14:44:23,100 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion/wandb/run-20250513_144412-diffusion_model_test5/files/conda-environment.yaml
+2025-05-13 14:44:23,100 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion/wandb/run-20250513_144412-diffusion_model_test5/files/wandb-metadata.json
+2025-05-13 14:44:23,547 INFO    wandb-upload_0:52 [upload_job.py:push():130] Uploaded file /tmp/tmp0quyl4chwandb/vg1ie8k5-wandb-metadata.json
+2025-05-13 14:44:23,977 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 14:44:24,019 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: python_packages
+2025-05-13 14:44:24,019 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: python_packages
+2025-05-13 14:44:24,021 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 14:44:24,034 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 14:44:24,113 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/diffusion/wandb/run-20250513_144412-diffusion_model_test5/files/requirements.txt
+2025-05-13 14:44:24,234 DEBUG   SenderThread:52 [sender.py:send():378] send: telemetry
+2025-05-13 14:44:24,234 DEBUG   SenderThread:52 [sender.py:send():378] send: telemetry

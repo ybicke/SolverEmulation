@@ -23,26 +23,28 @@ echo "Diffusion training started!"
 # Run the training script
 python -m train \
   --dataset "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked"\
-  --save "/mydata/deepcloud/yves/A_RadiativeFlux/diffusion_model" \
+  --save "/mydata/deepcloud/yves/A_RadiativeFlux/diffusion_model_test7" \
   --percent 0.1 \
   --subsample 0.1 \
-  --num-workers 0 \
+  --num-workers 4 \
+  --prefetch-factor 2 \
   --batch-size 512 \
   --learning-rate 0.0001 \
-  --max-epochs 100 \
+  --max-epochs 30 \
   --height-in 71 \
   --channel-out 4 \
   --channel-3d 6 \
   --channel-2d 6 \
   --cnn-units 128 256 512 1024 \
   --cnn-kernel-sizes 1 2 5 7 \
-  --dropout 0.1 \
+  --dropout 0 \
   --num-sampling-steps 25 \
   --deterministic-sampling \
   --sigma-min 0.002 \
   --sigma-max 80.0 \
   --sigma-data 0.5 \
-  --time-embedding-dim 128
+  --time-embedding-dim 128 \
+  --wandb-mode online
 
 # Notes:
 # - The script uses a small percentage of data (10%) for faster testing

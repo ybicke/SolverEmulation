@@ -1,0 +1,160 @@
+2025-02-24 16:16:50,709 INFO    StreamThr :52 [internal.py:wandb_internal():85] W&B internal server running at pid: 52, started at: 2025-02-24 16:16:50.702284
+2025-02-24 16:16:50,711 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status
+2025-02-24 16:16:50,722 INFO    WriterThread:52 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250224_161650-afno_clean_GC/run-afno_clean_GC.wandb
+2025-02-24 16:16:50,735 DEBUG   SenderThread:52 [sender.py:send():378] send: header
+2025-02-24 16:16:50,736 DEBUG   SenderThread:52 [sender.py:send():378] send: run
+2025-02-24 16:16:50,769 INFO    SenderThread:52 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/afno_clean_GC
+2025-02-24 16:16:51,081 INFO    SenderThread:52 [sender.py:_setup_resume():826] configured resuming with: ResumeState(resumed=True,step=0,history=0,events=28,output=6,runtime=871.138378,wandb_runtime=None,summary={},config={'clip': {'desc': None, 'value': 1}, 'save': {'desc': None, 'value': '/mydata/deepcloud/yves/results_git/afno_clean_GC'}, 'seed': {'desc': None, 'value': 42}, 'test': {'desc': None, 'value': True}, 'heads': {'desc': None, 'value': 8}, 'model': {'desc': None, 'value': 'afno'}, 'train': {'desc': None, 'value': True}, '_wandb': {'desc': None, 'value': {'t': {'1': [1, 41, 49, 55, 63], '2': [1, 41, 49, 55, 63], '3': [1, 13, 14, 15, 16, 23, 35], '4': '3.9.15', '5': '0.17.0', '8': [5], '13': 'linux-x86_64'}, 'code_path': 'code/train_column_gnn_new.py', 'framework': 'torch', 'start_time': 1740412731, 'cli_version': '0.17.0', 'is_jupyter_run': False, 'python_version': '3.9.15', 'is_kaggle_kernel': False}}, 'layers': {'desc': None, 'value': 4}, 'vbatch': {'desc': None, 'value': 1}, 'dataset': {'desc': None, 'value': '/mydata/deepcloud/salman/dataset/h5_data_all_chuncked'}, 'dropout': {'desc': None, 'value': 0}, 'percent': {'desc': None, 'value': 0.1}, 'shuffle': {'desc': None, 'value': True}, 'num_cells': {'desc': None, 'value': 81920}, 'num_epoch': {'desc': None, 'value': 100}, 'optimizer': {'desc': None, 'value': 'adamw'}, 'subsample': {'desc': None, 'value': 0.1}, 'batch_size': {'desc': None, 'value': 512}, 'hidden_dim': {'desc': None, 'value': 128}, 'patch_size': {'desc': None, 'value': 1}, 'wandb_mode': {'desc': None, 'value': 'online'}, 'num_workers': {'desc': None, 'value': 4}, 'learning_rate': {'desc': None, 'value': 0.0005}, 'prefetch_factor': {'desc': None, 'value': 2}, 'afno_sparsity_threshold': {'desc': None, 'value': 0.01}, 'hard_thresholding_fraction': {'desc': None, 'value': 1}},tags=['icon grid'])
+2025-02-24 16:16:51,463 INFO    SenderThread:52 [dir_watcher.py:__init__():211] watching files in: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250224_161650-afno_clean_GC/files
+2025-02-24 16:16:51,463 INFO    SenderThread:52 [sender.py:_start_run_threads():1123] run started: afno_clean_GC with start time 1740412939.577491
+2025-02-24 16:16:51,465 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: check_version
+2025-02-24 16:16:51,466 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: check_version
+2025-02-24 16:16:51,596 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: run_start
+2025-02-24 16:16:51,620 DEBUG   HandlerThread:52 [system_info.py:__init__():26] System info init
+2025-02-24 16:16:51,621 DEBUG   HandlerThread:52 [system_info.py:__init__():41] System info init done
+2025-02-24 16:16:51,621 INFO    HandlerThread:52 [system_monitor.py:start():194] Starting system monitor
+2025-02-24 16:16:51,621 INFO    SystemMonitor:52 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2025-02-24 16:16:51,622 INFO    SystemMonitor:52 [interfaces.py:start():188] Started cpu monitoring
+2025-02-24 16:16:51,625 INFO    SystemMonitor:52 [interfaces.py:start():188] Started disk monitoring
+2025-02-24 16:16:51,627 INFO    SystemMonitor:52 [interfaces.py:start():188] Started gpu monitoring
+2025-02-24 16:16:51,632 INFO    SystemMonitor:52 [interfaces.py:start():188] Started memory monitoring
+2025-02-24 16:16:51,633 INFO    SystemMonitor:52 [interfaces.py:start():188] Started network monitoring
+2025-02-24 16:16:53,245 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: python_packages
+2025-02-24 16:16:53,246 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: python_packages
+2025-02-24 16:16:53,247 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:16:53,264 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:16:53,468 DEBUG   SenderThread:52 [sender.py:send():378] send: telemetry
+2025-02-24 16:16:53,468 DEBUG   SenderThread:52 [sender.py:send():378] send: telemetry
+2025-02-24 16:16:53,483 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250224_161650-afno_clean_GC/files/requirements.txt
+2025-02-24 16:16:56,470 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:01,471 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:06,473 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:08,246 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:17:08,248 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:17:12,463 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:17,465 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:22,476 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:22,887 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250224_161650-afno_clean_GC/files/config.yaml
+2025-02-24 16:17:23,246 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:17:23,248 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:17:28,468 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:33,515 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:38,246 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:17:38,257 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:17:39,416 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:44,417 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:49,426 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:51,633 DEBUG   SystemMonitor:52 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2025-02-24 16:17:51,636 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-02-24 16:17:53,246 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:17:53,247 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:17:54,477 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:17:59,478 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:04,480 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:08,246 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:18:08,247 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:18:10,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:15,441 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:20,442 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:21,640 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-02-24 16:18:23,246 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:18:23,247 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:18:25,446 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:30,447 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:35,454 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:38,247 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:18:38,248 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:18:40,478 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:45,479 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:50,535 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:18:51,641 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-02-24 16:18:53,247 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:18:53,247 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:18:56,482 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:01,484 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:06,125 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250224_161650-afno_clean_GC/files/output.log
+2025-02-24 16:19:06,619 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:08,141 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250224_161650-afno_clean_GC/files/output.log
+2025-02-24 16:19:08,247 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:19:08,248 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:19:09,282 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,295 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,306 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,314 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,315 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,316 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,322 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,322 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,323 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,323 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,330 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,342 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,345 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,350 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,351 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,352 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,353 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,354 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,355 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,356 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,357 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,357 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,365 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,373 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,381 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,388 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,438 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,438 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,438 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,438 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,438 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,439 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,440 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,440 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,440 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,440 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,440 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,442 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,450 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,458 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,466 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,467 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,467 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,468 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,469 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,469 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,470 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,471 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,472 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,472 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,473 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,522 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,522 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:09,522 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: partial_history
+2025-02-24 16:19:12,501 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:17,502 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:21,642 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-02-24 16:19:22,643 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:23,247 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:19:23,248 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:19:28,417 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:33,419 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:38,247 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:19:38,248 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:19:39,411 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:44,412 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:49,415 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:51,645 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-02-24 16:19:53,248 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-02-24 16:19:53,249 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-02-24 16:19:54,462 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 16:19:59,463 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report

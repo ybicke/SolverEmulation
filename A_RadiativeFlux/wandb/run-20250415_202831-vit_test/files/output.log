@@ -1,0 +1,29 @@
+
+Trainable parameters: 933,026
+2025-04-15 20:28:32,925 Train started...
+batch 100, time:0.017, loss: 278.0029, mean_absolute_error: 8.2755
+batch 200, time:0.132, loss: 143.4923, mean_absolute_error: 5.9810
+batch 300, time:0.111, loss: 152.3181, mean_absolute_error: 6.0905
+batch 400, time:0.127, loss: 122.9395, mean_absolute_error: 5.2962
+batch 500, time:0.133, loss: 134.8039, mean_absolute_error: 6.1415
+batch 600, time:0.131, loss: 125.0080, mean_absolute_error: 4.9845
+batch 700, time:0.112, loss: 109.4003, mean_absolute_error: 4.8255
+001/30:  time: 1746.562 loss: 341.4007  mean_absolute_error: 7.3350,  val_loss: 102.4444,  val_mean_absolute_error: 4.6692
+batch 100, time:0.131, loss: 97.4571, mean_absolute_error: 4.6513
+batch 200, time:0.129, loss: 116.1377, mean_absolute_error: 4.8785
+batch 300, time:0.120, loss: 86.0057, mean_absolute_error: 4.2763
+batch 400, time:0.124, loss: 86.1960, mean_absolute_error: 4.1565
+batch 500, time:0.128, loss: 91.4882, mean_absolute_error: 4.3414
+batch 600, time:0.128, loss: 91.3349, mean_absolute_error: 4.4240
+batch 700, time:0.137, loss: 103.0270, mean_absolute_error: 4.3948
+002/30:  time: 1121.695 loss: 98.7473  mean_absolute_error: 4.5372,  val_loss: 90.6027,  val_mean_absolute_error: 4.2385
+batch 100, time:0.129, loss: 74.6610, mean_absolute_error: 3.7521
+batch 200, time:0.125, loss: 84.4805, mean_absolute_error: 4.2419
+batch 300, time:0.121, loss: 88.8290, mean_absolute_error: 4.0167
+batch 400, time:0.123, loss: 80.5937, mean_absolute_error: 3.9913
+batch 500, time:0.130, loss: 87.4531, mean_absolute_error: 4.4097
+batch 600, time:0.119, loss: 87.5429, mean_absolute_error: 4.0457
+batch 700, time:0.125, loss: 80.8712, mean_absolute_error: 3.9904
+003/30:  time: 1088.065 loss: 86.8336  mean_absolute_error: 4.1179,  val_loss: 81.3072,  val_mean_absolute_error: 3.9558
+batch 100, time:0.128, loss: 81.1569, mean_absolute_error: 3.9725
+batch 200, time:0.131, loss: 84.3277, mean_absolute_error: 3.8926

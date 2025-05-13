@@ -1,0 +1,261 @@
+{
+    "os": "Linux-6.8.0-52-generic-x86_64-with-glibc2.31",
+    "python": "3.9.15",
+    "heartbeatAt": "2025-05-05T09:19:59.806946",
+    "startedAt": "2025-05-05T09:19:58.761019",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--model",
+        "vit",
+        "--dataset",
+        "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+        "--save",
+        "/mydata/deepcloud/yves/A_RadiativeFlux/results/vit_128_hrlu_0005",
+        "--percent",
+        "0.1",
+        "--subsample",
+        "0.1",
+        "--num-workers",
+        "4",
+        "--prefetch-factor",
+        "2",
+        "--num-cells",
+        "81920",
+        "--channel-3d",
+        "6",
+        "--channel-2d",
+        "6",
+        "--channel-out",
+        "4",
+        "--height-in",
+        "71",
+        "--train",
+        "--test",
+        "--shuffle",
+        "--batch-size",
+        "2048",
+        "--optimizer",
+        "adamw",
+        "--clip",
+        "1.0",
+        "--num-epoch",
+        "60",
+        "--learning-rate",
+        "0.0005",
+        "--patch-size",
+        "1",
+        "--hidden-dim",
+        "128",
+        "--layers",
+        "4",
+        "--heads",
+        "6",
+        "--dim-head",
+        "64",
+        "--dropout",
+        "0.0",
+        "--emb-dropout",
+        "0.0",
+        "--scale-output",
+        "--hr-smoothness-weight",
+        "0.0005",
+        "--hr-smoothness-top-levels",
+        "30",
+        "--wandb-mode",
+        "online"
+    ],
+    "state": "running",
+    "program": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_HRLU.py",
+    "codePathLocal": "train_models_HRLU.py",
+    "codePath": "train_models_HRLU.py",
+    "host": "vit-128-hrlu0005-0-0",
+    "username": "root",
+    "executable": "/myhome/mambaforge/envs/deepFlux/bin/python",
+    "cpu_count": 32,
+    "cpu_count_logical": 32,
+    "cpu_freq": {
+        "current": 2999.9959999999996,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.996,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 1875.5519676208496,
+            "used": 900.2132682800293
+        }
+    },
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA A100 80GB PCIe",
+            "memory_total": 85899345920
+        }
+    ],
+    "memory": {
+        "total": 251.6952781677246
+    }
+}

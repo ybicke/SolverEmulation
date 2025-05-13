@@ -1,0 +1,94 @@
+2025-04-17 19:00:48,436 Train started...
+2025-04-17 19:00:48,442 Loading checkpoint: 1, /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_small/checkpoint_epoch_1.pth
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 595, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 560, in main
+    train_model(model, train_loader, val_loader, normalizer)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 270, in train_model
+    model.load_state_dict(checkpoint['model_state_dict'])
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 2189, in load_state_dict
+    raise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+RuntimeError: Error(s) in loading state_dict for AtmosphericColumnGNN:
+	size mismatch for encoder.node_mlp.0.weight: copying a param with shape torch.Size([32, 6]) from checkpoint, the shape in current model is torch.Size([512, 6]).
+	size mismatch for encoder.node_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for encoder.node_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for encoder.node_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for encoder.edge_mlp.0.weight: copying a param with shape torch.Size([32, 1]) from checkpoint, the shape in current model is torch.Size([512, 1]).
+	size mismatch for encoder.edge_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for encoder.edge_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for encoder.edge_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.0.edge_mlp.0.weight: copying a param with shape torch.Size([32, 96]) from checkpoint, the shape in current model is torch.Size([512, 1536]).
+	size mismatch for processor.layers.0.edge_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.0.edge_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.0.edge_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.0.node_mlp.0.weight: copying a param with shape torch.Size([32, 64]) from checkpoint, the shape in current model is torch.Size([512, 1024]).
+	size mismatch for processor.layers.0.node_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.0.node_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.0.node_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.1.edge_mlp.0.weight: copying a param with shape torch.Size([32, 96]) from checkpoint, the shape in current model is torch.Size([512, 1536]).
+	size mismatch for processor.layers.1.edge_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.1.edge_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.1.edge_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.1.node_mlp.0.weight: copying a param with shape torch.Size([32, 64]) from checkpoint, the shape in current model is torch.Size([512, 1024]).
+	size mismatch for processor.layers.1.node_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.1.node_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.1.node_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.2.edge_mlp.0.weight: copying a param with shape torch.Size([32, 96]) from checkpoint, the shape in current model is torch.Size([512, 1536]).
+	size mismatch for processor.layers.2.edge_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.2.edge_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.2.edge_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.2.node_mlp.0.weight: copying a param with shape torch.Size([32, 64]) from checkpoint, the shape in current model is torch.Size([512, 1024]).
+	size mismatch for processor.layers.2.node_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.2.node_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for processor.layers.2.node_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for decoder.mlp.0.weight: copying a param with shape torch.Size([32, 32]) from checkpoint, the shape in current model is torch.Size([512, 512]).
+	size mismatch for decoder.mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+	size mismatch for decoder.mlp.3.weight: copying a param with shape torch.Size([4, 32]) from checkpoint, the shape in current model is torch.Size([4, 512]).
+[1m-------------------------------------------------------------------------------
+[1mtrain_models.py 595 <module>
+[1mmain()
+[1mtrain_models.py 560 main
+[1mtrain_model(model, train_loader, val_loader, normalizer)
+[1mtrain_models.py 270 train_model
+[1mmodel.load_state_dict(checkpoint['model_state_dict'])
+[1mmodule.py 2189 load_state_dict
+[1mraise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+[1mRuntimeError:
+[1mError(s) in loading state_dict for AtmosphericColumnGNN:
+[1m	size mismatch for encoder.node_mlp.0.weight: copying a param with shape torch.Size([32, 6]) from checkpoint, the shape in current model is torch.Size([512, 6]).
+[1m	size mismatch for encoder.node_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for encoder.node_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for encoder.node_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for encoder.edge_mlp.0.weight: copying a param with shape torch.Size([32, 1]) from checkpoint, the shape in current model is torch.Size([512, 1]).
+[1m	size mismatch for encoder.edge_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for encoder.edge_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for encoder.edge_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.0.edge_mlp.0.weight: copying a param with shape torch.Size([32, 96]) from checkpoint, the shape in current model is torch.Size([512, 1536]).
+[1m	size mismatch for processor.layers.0.edge_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.0.edge_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.0.edge_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.0.node_mlp.0.weight: copying a param with shape torch.Size([32, 64]) from checkpoint, the shape in current model is torch.Size([512, 1024]).
+[1m	size mismatch for processor.layers.0.node_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.0.node_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.0.node_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.1.edge_mlp.0.weight: copying a param with shape torch.Size([32, 96]) from checkpoint, the shape in current model is torch.Size([512, 1536]).
+[1m	size mismatch for processor.layers.1.edge_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.1.edge_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.1.edge_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.1.node_mlp.0.weight: copying a param with shape torch.Size([32, 64]) from checkpoint, the shape in current model is torch.Size([512, 1024]).
+[1m	size mismatch for processor.layers.1.node_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.1.node_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.1.node_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.2.edge_mlp.0.weight: copying a param with shape torch.Size([32, 96]) from checkpoint, the shape in current model is torch.Size([512, 1536]).
+[1m	size mismatch for processor.layers.2.edge_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.2.edge_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.2.edge_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.2.node_mlp.0.weight: copying a param with shape torch.Size([32, 64]) from checkpoint, the shape in current model is torch.Size([512, 1024]).
+[1m	size mismatch for processor.layers.2.node_mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.2.node_mlp.3.weight: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for processor.layers.2.node_mlp.3.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for decoder.mlp.0.weight: copying a param with shape torch.Size([32, 32]) from checkpoint, the shape in current model is torch.Size([512, 512]).
+[1m	size mismatch for decoder.mlp.0.bias: copying a param with shape torch.Size([32]) from checkpoint, the shape in current model is torch.Size([512]).
+[1m	size mismatch for decoder.mlp.3.weight: copying a param with shape torch.Size([4, 32]) from checkpoint, the shape in current model is torch.Size([4, 512]).
+Trainable parameters: 4,212,740

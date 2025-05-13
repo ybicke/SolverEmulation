@@ -1,0 +1,70 @@
+
+batch 100, time:0.020, loss: 84675.1797, mean_absolute_error: 177.3753
+batch 200, time:0.058, loss: 79675.4219, mean_absolute_error: 171.2732
+batch 300, time:0.016, loss: 82031.2188, mean_absolute_error: 175.0143
+batch 400, time:0.067, loss: 80759.8750, mean_absolute_error: 173.4696
+batch 500, time:0.020, loss: 81837.1562, mean_absolute_error: 174.3829
+batch 600, time:0.108, loss: 86972.8359, mean_absolute_error: 178.9627
+batch 700, time:0.016, loss: 79823.2109, mean_absolute_error: 171.2943
+001/100:  time: 1640.960 loss: 81975.4219  mean_absolute_error: 174.3884,  val_loss: 82063.6484,  val_mean_absolute_error: 174.5293
+2025-02-17 17:26:05,748 Epoch 1: Learning rate adjusted to 0.0001
+batch 100, time:0.071, loss: 85327.5234, mean_absolute_error: 178.2177
+batch 200, time:0.035, loss: 82284.1719, mean_absolute_error: 174.3212
+batch 300, time:0.017, loss: 80382.9219, mean_absolute_error: 173.9744
+batch 400, time:0.078, loss: 78803.5000, mean_absolute_error: 172.9610
+batch 500, time:0.033, loss: 82835.6484, mean_absolute_error: 174.6397
+batch 600, time:0.078, loss: 82319.9297, mean_absolute_error: 173.8201
+batch 700, time:0.019, loss: 80238.1016, mean_absolute_error: 171.9870
+002/100:  time: 1715.178 loss: 81958.9453  mean_absolute_error: 174.4468,  val_loss: 82021.0781,  val_mean_absolute_error: 174.4906
+2025-02-17 17:54:41,206 Epoch 2: Learning rate adjusted to 0.0001
+batch 100, time:0.050, loss: 86857.2422, mean_absolute_error: 178.8312
+batch 200, time:0.019, loss: 81487.3828, mean_absolute_error: 174.1146
+batch 300, time:0.050, loss: 79009.7500, mean_absolute_error: 171.0910
+batch 400, time:0.067, loss: 80120.1094, mean_absolute_error: 173.3630
+batch 500, time:0.030, loss: 82642.1797, mean_absolute_error: 175.2640
+batch 600, time:0.069, loss: 83646.1797, mean_absolute_error: 175.7455
+batch 700, time:0.031, loss: 80397.6172, mean_absolute_error: 172.2486
+003/100:  time: 1599.817 loss: 81995.1094  mean_absolute_error: 174.4097,  val_loss: 82027.7422,  val_mean_absolute_error: 174.4853
+2025-02-17 18:21:21,162 Epoch 3: Learning rate adjusted to 0.0001
+batch 100, time:0.035, loss: 82733.9609, mean_absolute_error: 175.7117
+batch 200, time:0.046, loss: 81778.2266, mean_absolute_error: 173.5774
+batch 300, time:0.046, loss: 84047.4219, mean_absolute_error: 176.7996
+batch 400, time:0.075, loss: 85251.6328, mean_absolute_error: 176.7305
+batch 500, time:0.079, loss: 79597.5781, mean_absolute_error: 171.9140
+batch 600, time:0.030, loss: 78391.0391, mean_absolute_error: 170.2607
+batch 700, time:0.038, loss: 85137.8906, mean_absolute_error: 177.3669
+004/100:  time: 1580.937 loss: 82046.6094  mean_absolute_error: 174.4804,  val_loss: 81997.1094,  val_mean_absolute_error: 174.4511
+2025-02-17 18:47:42,440 Epoch 4: Learning rate adjusted to 0.0001
+batch 100, time:0.015, loss: 82014.6172, mean_absolute_error: 173.8624
+batch 200, time:0.063, loss: 77574.8281, mean_absolute_error: 170.4556
+batch 300, time:0.073, loss: 83039.0391, mean_absolute_error: 176.0944
+batch 400, time:0.051, loss: 83532.0234, mean_absolute_error: 176.2828
+batch 500, time:0.062, loss: 81372.7344, mean_absolute_error: 174.0688
+batch 600, time:0.025, loss: 87375.3672, mean_absolute_error: 180.9631
+batch 700, time:0.056, loss: 78985.4219, mean_absolute_error: 170.6537
+005/100:  time: 1534.340 loss: 82081.7344  mean_absolute_error: 174.5607,  val_loss: 82048.1641,  val_mean_absolute_error: 174.5031
+2025-02-17 19:13:17,036 Epoch 5: Learning rate adjusted to 0.0001
+batch 100, time:0.062, loss: 80137.3203, mean_absolute_error: 172.8749
+batch 200, time:0.086, loss: 78507.8906, mean_absolute_error: 169.9963
+batch 300, time:0.063, loss: 79626.9688, mean_absolute_error: 173.3949
+batch 400, time:0.028, loss: 82188.3516, mean_absolute_error: 174.7826
+batch 500, time:0.017, loss: 81791.2266, mean_absolute_error: 174.7289
+batch 600, time:0.077, loss: 84775.9766, mean_absolute_error: 176.2653
+batch 700, time:0.065, loss: 85116.7188, mean_absolute_error: 177.3772
+2025-02-17 19:38:17,294 Epoch 6: Learning rate adjusted to 0.0001
+006/100:  time: 1499.954 loss: 81972.2500  mean_absolute_error: 174.4239,  val_loss: 82040.8984,  val_mean_absolute_error: 174.4791
+batch 100, time:0.058, loss: 81248.4922, mean_absolute_error: 173.6889
+batch 200, time:0.016, loss: 83115.5234, mean_absolute_error: 175.4460
+batch 300, time:0.038, loss: 78955.7969, mean_absolute_error: 171.7551
+batch 400, time:0.081, loss: 80518.7031, mean_absolute_error: 173.5624
+batch 500, time:0.022, loss: 84400.1562, mean_absolute_error: 176.7002
+batch 600, time:0.026, loss: 81944.0547, mean_absolute_error: 173.5134
+batch 700, time:0.021, loss: 83126.3516, mean_absolute_error: 175.5319
+007/100:  time: 1498.527 loss: 81902.3359  mean_absolute_error: 174.3279,  val_loss: 82025.0859,  val_mean_absolute_error: 174.4661
+2025-02-17 20:03:16,032 Epoch 7: Learning rate adjusted to 0.0001
+batch 100, time:0.079, loss: 80298.5781, mean_absolute_error: 173.4148
+batch 200, time:0.081, loss: 84397.9609, mean_absolute_error: 176.8125
+batch 300, time:0.063, loss: 80642.6719, mean_absolute_error: 174.1362
+batch 400, time:0.074, loss: 80010.4062, mean_absolute_error: 172.3170
+batch 500, time:0.037, loss: 83984.6016, mean_absolute_error: 176.6237
+batch 600, time:0.053, loss: 82255.1719, mean_absolute_error: 175.4411

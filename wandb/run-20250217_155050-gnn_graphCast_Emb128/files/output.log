@@ -1,0 +1,7 @@
+
+batch 100, time:0.008, loss: 84645.3359, mean_absolute_error: 177.3185
+batch 200, time:0.035, loss: 79644.5547, mean_absolute_error: 171.2150
+batch 300, time:0.011, loss: 82001.0234, mean_absolute_error: 174.9571
+batch 400, time:0.077, loss: 80730.3281, mean_absolute_error: 173.4135
+batch 500, time:0.014, loss: 81806.2578, mean_absolute_error: 174.3243
+batch 600, time:0.009, loss: 86943.8047, mean_absolute_error: 178.9074

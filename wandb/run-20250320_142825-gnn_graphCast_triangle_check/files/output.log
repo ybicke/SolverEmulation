@@ -1,0 +1,47 @@
+Encoder time: 0.1810 seconds
+Processor time: 0.4609 seconds
+Decoder time: 0.0002 seconds
+Encoder time: 0.0009 seconds
+Processor time: 0.0041 seconds
+Decoder time: 0.0002 seconds
+Encoder time: 0.0003 seconds
+Processor time: 0.0016 seconds
+Decoder time: 0.0002 seconds
+Encoder time: 0.0004 seconds
+Processor time: 0.0016 seconds
+Decoder time: 0.0002 seconds
+Encoder time: 0.0007 seconds
+Processor time: 0.0017 seconds
+Decoder time: 0.0002 seconds
+Encoder time: 0.0003 seconds
+Processor time: 0.0014 seconds
+Decoder time: 0.0002 seconds
+Encoder time: 0.0003 seconds
+Processor time: 0.0731 seconds
+Decoder time: 0.0004 seconds
+Encoder time: 0.0009 seconds
+Processor time: 0.0036 seconds
+Decoder time: 0.0009 seconds
+Encoder time: 0.0003 seconds
+Processor time: 0.0016 seconds
+Decoder time: 0.0002 seconds
+Encoder time: 0.0003 seconds
+Processor time: 0.0014 seconds
+Decoder time: 0.0002 seconds
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 533, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 521, in main
+    train_model(model, train_loader, val_loader) # Profile training
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 267, in train_model
+    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, data_time:{data_time:.3f}, forward_time:{forward_time:.3f}, loss_time:{loss_time:.3f}, backward_time:{backward_time:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+NameError: name 't1_1' is not defined
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_triangle.py 533 <module>
+[1mmain()
+[1mtrain_column_triangle.py 521 main
+[1mtrain_model(model, train_loader, val_loader) # Profile training
+[1mtrain_column_triangle.py 267 train_model
+[1mprint(f'batch {i+1}, time:{t2_1-t1_1:.3f}, data_time:{data_time:.3f}, forward_time:{forward_time:.3f}, loss_time:{loss_time:.3f}, backward_time:{backward_time:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+[1mNameError:
+[1mname 't1_1' is not defined

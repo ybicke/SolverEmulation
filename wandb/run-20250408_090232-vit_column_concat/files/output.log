@@ -1,0 +1,32 @@
+2025-04-08 09:02:34,272 Loading checkpoint: 100, /mydata/deepcloud/yves/results_git/vit_column_concat/checkpoint_epoch_100.pth
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column.py", line 1040, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column.py", line 1028, in main
+    train_model(model, train_loader, val_loader)
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column.py", line 742, in train_model
+    model.load_state_dict(checkpoint['model_state_dict'])
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 2189, in load_state_dict
+    raise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+RuntimeError: Error(s) in loading state_dict for ViT4:
+	Missing key(s) in state_dict: "dummy_vector".
+	size mismatch for to_patch_embedding.2.weight: copying a param with shape torch.Size([6]) from checkpoint, the shape in current model is torch.Size([12]).
+	size mismatch for to_patch_embedding.2.bias: copying a param with shape torch.Size([6]) from checkpoint, the shape in current model is torch.Size([12]).
+	size mismatch for to_patch_embedding.3.weight: copying a param with shape torch.Size([128, 6]) from checkpoint, the shape in current model is torch.Size([128, 12]).
+	size mismatch for to_patch_embedding_2D.0.weight: copying a param with shape torch.Size([128, 6]) from checkpoint, the shape in current model is torch.Size([128, 12]).
+[1m-------------------------------------------------------------------------------
+[1mtrain_column.py 1040 <module>
+[1mmain()
+[1mtrain_column.py 1028 main
+[1mtrain_model(model, train_loader, val_loader)
+[1mtrain_column.py 742 train_model
+[1mmodel.load_state_dict(checkpoint['model_state_dict'])
+[1mmodule.py 2189 load_state_dict
+[1mraise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+[1mRuntimeError:
+[1mError(s) in loading state_dict for ViT4:
+[1m	Missing key(s) in state_dict: "dummy_vector". 
+[1m	size mismatch for to_patch_embedding.2.weight: copying a param with shape torch.Size([6]) from checkpoint, the shape in current model is torch.Size([12]).
+[1m	size mismatch for to_patch_embedding.2.bias: copying a param with shape torch.Size([6]) from checkpoint, the shape in current model is torch.Size([12]).
+[1m	size mismatch for to_patch_embedding.3.weight: copying a param with shape torch.Size([128, 6]) from checkpoint, the shape in current model is torch.Size([128, 12]).
+[1m	size mismatch for to_patch_embedding_2D.0.weight: copying a param with shape torch.Size([128, 6]) from checkpoint, the shape in current model is torch.Size([128, 12]).

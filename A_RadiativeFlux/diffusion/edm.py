@@ -1,5 +1,8 @@
 import torch
 import lightning as L
+import time
+import logging
+import wandb
 
 
 # from tqdne.autoencoder import LithningAutoencoder
@@ -108,9 +111,85 @@ class LightningEDM(L.LightningModule):
         self.num_sampling_steps = num_sampling_steps
         self.deterministic_sampling = deterministic_sampling
         self.edm = edm
+        self.epoch_start_time = None
+        self.last_log_time = None
+        self.batch_times = []
+        
+        # Track accumulated losses
+        self.train_loss_values = []
+        self.train_mae_values = []
+        self.val_loss_values = []
+        self.val_mae_values = []
+        
+        # Current step counter
+        self.global_step_counter = 0
 
         # It's redundant since the UNet weights are already saved in the state_dict
         self.save_hyperparameters(ignore=["autoencoder", "unet"])
+
+    def on_train_epoch_start(self):
+        """Log at the start of each training epoch"""
+        self.epoch_start_time = time.time()
+        self.last_log_time = time.time()
+        self.batch_times = []
+        self.train_loss_values = []
+        self.train_mae_values = []
+        print(f"Epoch {self.current_epoch} started")
+    
+    def on_validation_epoch_start(self):
+        """Reset validation metrics"""
+        self.val_loss_values = []
+        self.val_mae_values = []
+    
+    def on_train_epoch_end(self):
+        """Log at the end of each training epoch"""
+        epoch_time = time.time() - self.epoch_start_time
+        avg_batch_time = sum(self.batch_times) / len(self.batch_times) if self.batch_times else 0
+        
+        # Calculate average loss and MAE for the epoch
+        avg_loss = sum(self.train_loss_values) / len(self.train_loss_values) if self.train_loss_values else 0
+        avg_mae = sum(self.train_mae_values) / len(self.train_mae_values) if self.train_mae_values else 0
+        
+        # Log to Lightning (will go to loggers)
+        self.log("train_loss", avg_loss, prog_bar=True, on_epoch=True)
+        self.log("train_mae", avg_mae, prog_bar=True, on_epoch=True)
+        self.log("epoch_time", epoch_time, prog_bar=False, on_epoch=True)
+        
+        # Log metrics to wandb if available
+        if wandb.run is not None:
+            wandb.log({
+                'epoch': self.current_epoch, 
+                'train_loss': avg_loss,
+                'train_mae': avg_mae,
+                'epoch_time': epoch_time,
+                'avg_batch_time_ms': avg_batch_time * 1000,  # Convert to ms
+            })
+        
+        print(f"Epoch {self.current_epoch} completed in {epoch_time:.2f}s. "
+              f"Loss: {avg_loss:.4f}, MAE: {avg_mae:.4f}, "
+              f"Batch time: {avg_batch_time*1000:.1f}ms")
+    
+    def on_validation_epoch_end(self):
+        """Log validation results"""
+        # Calculate average validation metrics
+        avg_val_loss = sum(self.val_loss_values) / len(self.val_loss_values) if self.val_loss_values else 0
+        avg_val_mae = sum(self.val_mae_values) / len(self.val_mae_values) if self.val_mae_values else 0
+        
+        # Log to Lightning (will go to loggers)
+        self.log("val_loss", avg_val_loss, prog_bar=True, on_epoch=True)
+        self.log("val_mae", avg_val_mae, prog_bar=True, on_epoch=True)
+        
+        # Log validation metrics to wandb
+        if wandb.run is not None:
+            wandb.log({
+                'epoch': self.current_epoch,
+                'val_loss': avg_val_loss,
+                'val_mae': avg_val_mae,
+            })
+        
+        print(f"Validation - Loss: {avg_val_loss:.4f}, MAE: {avg_val_mae:.4f}")
+        
+        
 
     def forward(self, sample, sigma, cond=None):
         """Make a forward pass through the network with skip connection.
@@ -176,16 +255,56 @@ class LightningEDM(L.LightningModule):
         loss = (pred - sample) ** 2
         loss_weight = append_dims(self.edm.loss_weight(sigma), loss.dim())
 
-        return (loss * loss_weight).mean()
+        # Calculate weighted loss
+        weighted_loss = (loss * loss_weight).mean()
+        
+        # Calculate MAE (for monitoring)
+        mae = torch.abs(pred - sample).mean()
+        
+        return weighted_loss, mae
 
     def training_step(self, batch, batch_idx):
-        loss = self.step(batch, batch_idx)
-        self.log("training/loss", loss.item())
+        self.global_step_counter += 1
+        batch_start = time.time()
+        
+        # Get loss and MAE
+        loss, mae = self.step(batch, batch_idx)
+        
+        # Log to Lightning (will go to loggers including WandB)
+        self.log("training/loss", loss.item(), prog_bar=False, on_step=True)
+        self.log("training/mae", mae.item(), prog_bar=False, on_step=True)
+        self.log("training/step", self.global_step_counter, prog_bar=False, on_step=True)
+        
+        # Store for epoch-end calculation
+        self.train_loss_values.append(loss.item())
+        self.train_mae_values.append(mae.item())
+        
+        # Store batch processing time
+        batch_time = time.time() - batch_start
+        self.batch_times.append(batch_time)
+        
+        # Log periodically without cluttering output
+        current_time = time.time()
+        if (batch_idx == 0 or batch_idx % 100 == 99 or 
+            current_time - self.last_log_time > 60):  # Log at most once per minute
+            
+            self.last_log_time = current_time
+            print(f"  Batch {batch_idx+1:5d}, Loss: {loss.item():.2f}, MAE: {mae.item():.4f}")
+            
         return loss
 
     def validation_step(self, batch, batch_idx):
-        loss = self.step(batch, batch_idx)
-        self.log("validation/loss", loss.item())
+        # Get loss and MAE 
+        loss, mae = self.step(batch, batch_idx)
+        
+        # Log to Lightning (will go to loggers including WandB)
+        self.log("validation/loss", loss.item(), prog_bar=False, on_step=True)
+        self.log("validation/mae", mae.item(), prog_bar=False, on_step=True)
+        
+        # Store for epoch-end calculation
+        self.val_loss_values.append(loss.item())
+        self.val_mae_values.append(mae.item())
+        
         return loss
 
     @torch.no_grad()

@@ -1,0 +1,30 @@
+
+Trainable parameters: 17,732
+2025-05-12 10:10:28,411 Train started...
+Creating new graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_False_False
+batch 10, time:0.102, loss: 3164.4187, mean_absolute_error: 33.3307, forward: 0.094, backward: 0.006
+batch 20, time:0.109, loss: 9358.4062, mean_absolute_error: 69.8694, forward: 0.101, backward: 0.005
+batch 30, time:0.103, loss: 958.0928, mean_absolute_error: 16.6905, forward: 0.093, backward: 0.008
+batch 40, time:0.106, loss: 2901.8574, mean_absolute_error: 30.5589, forward: 0.095, backward: 0.009
+batch 50, time:0.099, loss: 500.6268, mean_absolute_error: 11.2245, forward: 0.091, backward: 0.007
+batch 60, time:0.092, loss: 1792.3057, mean_absolute_error: 25.0800, forward: 0.083, backward: 0.006
+batch 70, time:0.107, loss: 784.8225, mean_absolute_error: 14.8434, forward: 0.100, backward: 0.005
+batch 80, time:0.033, loss: 412.5889, mean_absolute_error: 11.4906, forward: 0.024, backward: 0.007
+batch 90, time:0.125, loss: 2260.8892, mean_absolute_error: 31.5488, forward: 0.117, backward: 0.006
+batch 100, time:0.101, loss: 885.9610, mean_absolute_error: 18.1769, forward: 0.095, backward: 0.005
+batch 110, time:0.109, loss: 1438.8525, mean_absolute_error: 19.7385, forward: 0.100, backward: 0.007
+batch 120, time:0.095, loss: 4384.9990, mean_absolute_error: 33.1785, forward: 0.024, backward: 0.006
+batch 130, time:0.036, loss: 2029.1067, mean_absolute_error: 24.3382, forward: 0.024, backward: 0.010
+batch 140, time:0.100, loss: 1903.2218, mean_absolute_error: 24.0683, forward: 0.091, backward: 0.007
+batch 150, time:0.084, loss: 5356.2524, mean_absolute_error: 32.6553, forward: 0.077, backward: 0.005
+batch 160, time:0.035, loss: 3226.7336, mean_absolute_error: 29.3192, forward: 0.024, backward: 0.009
+batch 170, time:0.105, loss: 920.9775, mean_absolute_error: 13.4446, forward: 0.093, backward: 0.011
+batch 180, time:0.100, loss: 268.2921, mean_absolute_error: 8.3161, forward: 0.089, backward: 0.008
+batch 190, time:0.093, loss: 385.5763, mean_absolute_error: 9.5444, forward: 0.024, backward: 0.068
+batch 200, time:0.031, loss: 308.3960, mean_absolute_error: 10.1737, forward: 0.024, backward: 0.005
+batch 210, time:0.111, loss: 2864.2576, mean_absolute_error: 33.8920, forward: 0.102, backward: 0.008
+batch 220, time:0.097, loss: 250.6637, mean_absolute_error: 7.3516, forward: 0.090, backward: 0.005
+batch 230, time:0.037, loss: 853.1302, mean_absolute_error: 16.6235, forward: 0.024, backward: 0.011
+batch 240, time:0.104, loss: 3169.0061, mean_absolute_error: 27.8552, forward: 0.090, backward: 0.011
+batch 250, time:0.098, loss: 1112.8420, mean_absolute_error: 20.1040, forward: 0.092, backward: 0.005
+batch 260, time:0.034, loss: 2618.5400, mean_absolute_error: 27.2192, forward: 0.024, backward: 0.008

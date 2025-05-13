@@ -1,0 +1,143 @@
+
+batch 100, time:0.233, loss: 33660.3828, mean_absolute_error: 122.9326
+batch 200, time:0.234, loss: 33107.9570, mean_absolute_error: 120.5828
+batch 300, time:0.290, loss: 33839.8906, mean_absolute_error: 122.8790
+batch 400, time:0.297, loss: 33494.8672, mean_absolute_error: 121.9173
+batch 500, time:0.284, loss: 33071.6914, mean_absolute_error: 121.1800
+batch 600, time:0.282, loss: 33505.5781, mean_absolute_error: 121.5962
+batch 700, time:0.222, loss: 33128.7383, mean_absolute_error: 121.0363
+001/100:  time: 5884.744 loss: 33963.3594  mean_absolute_error: 122.8197,  val_loss: 33555.4961,  val_mean_absolute_error: 122.1726
+batch 100, time:0.296, loss: 33726.3047, mean_absolute_error: 122.9822
+batch 200, time:0.232, loss: 33547.3242, mean_absolute_error: 121.8959
+batch 300, time:0.227, loss: 33406.2031, mean_absolute_error: 121.7318
+batch 400, time:0.269, loss: 33608.9180, mean_absolute_error: 122.5186
+batch 500, time:0.277, loss: 33008.1602, mean_absolute_error: 120.2490
+batch 600, time:0.290, loss: 33599.0898, mean_absolute_error: 121.9562
+batch 700, time:0.237, loss: 33512.2773, mean_absolute_error: 121.7660
+002/100:  time: 3332.190 loss: 33484.4453  mean_absolute_error: 121.8483,  val_loss: 33438.4062,  val_mean_absolute_error: 121.6261
+batch 100, time:0.281, loss: 33567.9492, mean_absolute_error: 122.4240
+batch 200, time:0.300, loss: 33504.1055, mean_absolute_error: 122.1343
+batch 300, time:0.289, loss: 33265.1211, mean_absolute_error: 121.4455
+batch 400, time:0.278, loss: 33835.5430, mean_absolute_error: 122.6592
+batch 500, time:0.213, loss: 33278.5117, mean_absolute_error: 121.3910
+batch 600, time:0.222, loss: 33084.7383, mean_absolute_error: 120.9020
+batch 700, time:0.298, loss: 33589.2969, mean_absolute_error: 122.3482
+003/100:  time: 3293.247 loss: 33416.5898  mean_absolute_error: 121.6091,  val_loss: 33424.9219,  val_mean_absolute_error: 121.5354
+batch 100, time:0.278, loss: 33512.9727, mean_absolute_error: 122.7314
+batch 200, time:0.279, loss: 33264.2031, mean_absolute_error: 121.2064
+batch 300, time:0.282, loss: 33400.5781, mean_absolute_error: 121.8910
+batch 400, time:0.304, loss: 33598.5703, mean_absolute_error: 121.7486
+batch 500, time:0.300, loss: 33348.0391, mean_absolute_error: 120.9085
+batch 600, time:0.299, loss: 32961.1328, mean_absolute_error: 120.4108
+batch 700, time:0.317, loss: 33309.3516, mean_absolute_error: 121.6443
+004/100:  time: 3336.402 loss: 33401.4688  mean_absolute_error: 121.5676,  val_loss: 33410.7109,  val_mean_absolute_error: 121.4478
+batch 100, time:0.296, loss: 33125.0430, mean_absolute_error: 120.6063
+batch 200, time:0.278, loss: 33657.4219, mean_absolute_error: 121.6838
+batch 300, time:0.361, loss: 33295.1523, mean_absolute_error: 121.7529
+batch 400, time:0.317, loss: 34026.8594, mean_absolute_error: 123.0750
+batch 500, time:0.294, loss: 33339.4180, mean_absolute_error: 121.6864
+batch 600, time:0.280, loss: 33649.2891, mean_absolute_error: 122.4973
+batch 700, time:0.237, loss: 32852.0352, mean_absolute_error: 120.5891
+005/100:  time: 3302.485 loss: 33414.2656  mean_absolute_error: 121.6014,  val_loss: 33382.1914,  val_mean_absolute_error: 121.4741
+batch 100, time:0.238, loss: 33693.2617, mean_absolute_error: 122.1356
+batch 200, time:0.282, loss: 33179.4531, mean_absolute_error: 121.0119
+batch 300, time:0.299, loss: 33268.6914, mean_absolute_error: 121.5455
+batch 400, time:0.285, loss: 33224.1133, mean_absolute_error: 120.9226
+batch 500, time:0.229, loss: 33961.8164, mean_absolute_error: 122.7775
+batch 600, time:0.307, loss: 33099.8047, mean_absolute_error: 120.5051
+batch 700, time:0.278, loss: 33428.8555, mean_absolute_error: 121.4660
+006/100:  time: 3110.354 loss: 33397.7031  mean_absolute_error: 121.5370,  val_loss: 33449.4688,  val_mean_absolute_error: 121.7423
+batch 100, time:0.217, loss: 33167.9609, mean_absolute_error: 121.5095
+batch 200, time:0.232, loss: 33493.1133, mean_absolute_error: 121.8461
+batch 300, time:0.258, loss: 33038.3398, mean_absolute_error: 120.8663
+batch 400, time:0.272, loss: 32973.8789, mean_absolute_error: 120.1990
+batch 500, time:0.226, loss: 33476.4258, mean_absolute_error: 121.6818
+batch 600, time:0.230, loss: 32994.8750, mean_absolute_error: 119.9063
+batch 700, time:0.266, loss: 33771.2930, mean_absolute_error: 122.0593
+007/100:  time: 3213.948 loss: 33385.0742  mean_absolute_error: 121.5090,  val_loss: 33376.3047,  val_mean_absolute_error: 121.5356
+batch 100, time:0.334, loss: 33805.8320, mean_absolute_error: 123.0789
+batch 200, time:0.284, loss: 33286.3203, mean_absolute_error: 121.4145
+batch 300, time:0.320, loss: 33566.6641, mean_absolute_error: 122.1408
+batch 400, time:0.295, loss: 33489.5859, mean_absolute_error: 121.6305
+batch 500, time:0.310, loss: 33444.1562, mean_absolute_error: 121.8364
+batch 600, time:0.213, loss: 33627.2539, mean_absolute_error: 121.9170
+batch 700, time:0.262, loss: 33003.7773, mean_absolute_error: 121.1211
+008/100:  time: 3241.653 loss: 33373.5859  mean_absolute_error: 121.4753,  val_loss: 33403.2461,  val_mean_absolute_error: 121.5090
+batch 100, time:0.246, loss: 33378.2344, mean_absolute_error: 120.9329
+batch 200, time:0.221, loss: 33818.9141, mean_absolute_error: 122.1878
+batch 300, time:0.209, loss: 33322.3125, mean_absolute_error: 122.1537
+batch 400, time:0.285, loss: 33632.4102, mean_absolute_error: 123.1842
+batch 500, time:0.243, loss: 33107.9102, mean_absolute_error: 120.6682
+batch 600, time:0.244, loss: 33450.2305, mean_absolute_error: 121.6706
+batch 700, time:0.225, loss: 33540.4258, mean_absolute_error: 122.2442
+009/100:  time: 3298.197 loss: 33387.6602  mean_absolute_error: 121.5136,  val_loss: 33379.2422,  val_mean_absolute_error: 121.4695
+batch 100, time:0.302, loss: 33051.7344, mean_absolute_error: 120.2174
+batch 200, time:0.266, loss: 33684.1133, mean_absolute_error: 122.8005
+batch 300, time:0.228, loss: 33514.3164, mean_absolute_error: 122.1700
+batch 400, time:0.236, loss: 33688.3398, mean_absolute_error: 121.8316
+batch 500, time:0.271, loss: 33436.9219, mean_absolute_error: 122.1375
+batch 600, time:0.224, loss: 33442.3672, mean_absolute_error: 121.5218
+batch 700, time:0.241, loss: 33588.0547, mean_absolute_error: 122.0770
+010/100:  time: 3284.945 loss: 33394.2891  mean_absolute_error: 121.5127,  val_loss: 33392.7773,  val_mean_absolute_error: 121.4139
+batch 100, time:0.297, loss: 33286.8320, mean_absolute_error: 121.3254
+batch 200, time:0.280, loss: 33165.8398, mean_absolute_error: 120.3917
+batch 300, time:0.298, loss: 33724.6250, mean_absolute_error: 122.0294
+batch 400, time:0.292, loss: 33350.7070, mean_absolute_error: 120.9527
+batch 500, time:0.242, loss: 33199.0625, mean_absolute_error: 121.2297
+batch 600, time:0.289, loss: 33713.8828, mean_absolute_error: 122.1252
+batch 700, time:0.260, loss: 33427.8125, mean_absolute_error: 121.5543
+011/100:  time: 3311.424 loss: 33376.9648  mean_absolute_error: 121.4949,  val_loss: 33377.0742,  val_mean_absolute_error: 121.3263
+batch 100, time:0.238, loss: 33592.8320, mean_absolute_error: 121.6896
+batch 200, time:0.394, loss: 33253.7266, mean_absolute_error: 120.7987
+batch 300, time:0.202, loss: 33243.1328, mean_absolute_error: 120.5763
+batch 400, time:0.253, loss: 33223.4922, mean_absolute_error: 121.3918
+batch 500, time:0.238, loss: 33324.5938, mean_absolute_error: 120.9629
+batch 600, time:0.245, loss: 33140.8711, mean_absolute_error: 120.9212
+batch 700, time:0.328, loss: 33384.2969, mean_absolute_error: 121.6485
+012/100:  time: 3254.943 loss: 33375.0391  mean_absolute_error: 121.4728,  val_loss: 33373.6562,  val_mean_absolute_error: 121.4329
+batch 100, time:0.236, loss: 33101.7148, mean_absolute_error: 120.7731
+batch 200, time:0.243, loss: 33091.2812, mean_absolute_error: 120.8789
+batch 300, time:0.193, loss: 33241.8398, mean_absolute_error: 121.1352
+batch 400, time:0.244, loss: 33465.5625, mean_absolute_error: 121.6682
+batch 500, time:0.190, loss: 33391.9102, mean_absolute_error: 121.5571
+batch 600, time:0.197, loss: 33482.3555, mean_absolute_error: 121.9309
+batch 700, time:0.227, loss: 33358.0156, mean_absolute_error: 121.3497
+013/100:  time: 3309.712 loss: 33384.3398  mean_absolute_error: 121.4571,  val_loss: 33363.9766,  val_mean_absolute_error: 121.3421
+batch 100, time:0.253, loss: 33659.1836, mean_absolute_error: 121.7385
+batch 200, time:0.197, loss: 33658.0195, mean_absolute_error: 122.4192
+batch 300, time:0.342, loss: 32889.8906, mean_absolute_error: 120.1402
+batch 400, time:0.266, loss: 33571.5547, mean_absolute_error: 121.7242
+batch 500, time:0.241, loss: 33712.7148, mean_absolute_error: 122.3290
+batch 600, time:0.242, loss: 33267.8594, mean_absolute_error: 121.2125
+batch 700, time:0.252, loss: 33466.6758, mean_absolute_error: 121.2552
+014/100:  time: 3312.280 loss: 33356.5352  mean_absolute_error: 121.4108,  val_loss: 33387.2891,  val_mean_absolute_error: 121.4137
+batch 100, time:0.245, loss: 33217.8164, mean_absolute_error: 121.1300
+batch 200, time:0.269, loss: 33585.7812, mean_absolute_error: 121.8171
+batch 300, time:0.280, loss: 33828.6250, mean_absolute_error: 122.7355
+batch 400, time:0.214, loss: 33160.3047, mean_absolute_error: 121.2642
+batch 500, time:0.289, loss: 33216.3242, mean_absolute_error: 120.8191
+batch 600, time:0.249, loss: 32862.3281, mean_absolute_error: 120.2048
+batch 700, time:0.289, loss: 33327.2812, mean_absolute_error: 121.4465
+015/100:  time: 3252.831 loss: 33385.1211  mean_absolute_error: 121.4959,  val_loss: 33366.5156,  val_mean_absolute_error: 121.4110
+batch 100, time:0.224, loss: 33371.2891, mean_absolute_error: 121.3062
+batch 200, time:0.263, loss: 33285.7578, mean_absolute_error: 121.2942
+batch 300, time:0.214, loss: 33232.5703, mean_absolute_error: 120.9443
+batch 400, time:0.261, loss: 33320.1211, mean_absolute_error: 122.0557
+batch 500, time:0.257, loss: 33426.9297, mean_absolute_error: 121.1531
+batch 600, time:0.243, loss: 33429.0859, mean_absolute_error: 121.4366
+batch 700, time:0.205, loss: 33400.4102, mean_absolute_error: 121.2509
+016/100:  time: 3271.980 loss: 33371.8242  mean_absolute_error: 121.4480,  val_loss: 33365.1836,  val_mean_absolute_error: 121.4387
+batch 100, time:0.289, loss: 33269.0195, mean_absolute_error: 121.7666
+batch 200, time:0.306, loss: 33939.6289, mean_absolute_error: 122.9508
+batch 300, time:0.276, loss: 33636.3047, mean_absolute_error: 122.2399
+batch 400, time:0.225, loss: 33256.0078, mean_absolute_error: 120.7448
+batch 500, time:0.266, loss: 33249.8242, mean_absolute_error: 121.8215
+batch 600, time:0.348, loss: 33846.7266, mean_absolute_error: 123.0728
+batch 700, time:0.210, loss: 33060.9688, mean_absolute_error: 121.2046
+017/100:  time: 3253.774 loss: 33366.6328  mean_absolute_error: 121.4451,  val_loss: 33361.2852,  val_mean_absolute_error: 121.4140
+batch 100, time:0.262, loss: 32999.9648, mean_absolute_error: 120.6223
+batch 200, time:0.238, loss: 33392.1758, mean_absolute_error: 121.8194
+batch 300, time:0.204, loss: 33324.4609, mean_absolute_error: 121.5527
+batch 400, time:0.246, loss: 33397.2227, mean_absolute_error: 121.3652
+batch 500, time:0.258, loss: 33374.2695, mean_absolute_error: 122.0732
+batch 600, time:0.298, loss: 33218.0156, mean_absolute_error: 121.4201

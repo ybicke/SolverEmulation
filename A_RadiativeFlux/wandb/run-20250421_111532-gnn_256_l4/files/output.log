@@ -1,0 +1,79 @@
+2025-04-21 11:15:34,356 Train started...
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 649, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 614, in main
+    train_model(model, train_loader, val_loader, normalizer)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 352, in train_model
+    outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/models/gnn.py", line 83, in forward
+    x = self.processor(x, edge_index, edge_attr_encoded)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/models/gnn.py", line 192, in forward
+    node_update, edge_update = layer(x, edge_index, edge_attr)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/models/gnn.py", line 159, in forward
+    edge_update = self.edge_mlp(torch.cat([edge_attr, x_src, x_dst], dim=-1))
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.43 GiB. GPU
+[1m-------------------------------------------------------------------------------
+[1mtrain_models.py 649 <module>
+[1mmain()
+[1mtrain_models.py 614 main
+[1mtrain_model(model, train_loader, val_loader, normalizer)
+[1mtrain_models.py 352 train_model
+[1moutputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgnn.py 83 forward
+[1mx = self.processor(x, edge_index, edge_attr_encoded)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgnn.py 192 forward
+[1mnode_update, edge_update = layer(x, edge_index, edge_attr)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgnn.py 159 forward
+[1medge_update = self.edge_mlp(torch.cat([edge_attr, x_src, x_dst], dim=-1))
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mcontainer.py 217 forward
+[1minput = module(input)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mlinear.py 116 forward
+[1mreturn F.linear(input, self.weight, self.bias)
+[1mtorch.cuda.OutOfMemoryError:
+[1mCUDA out of memory. Tried to allocate 2.43 GiB. GPU 
+Trainable parameters: 1,388,548

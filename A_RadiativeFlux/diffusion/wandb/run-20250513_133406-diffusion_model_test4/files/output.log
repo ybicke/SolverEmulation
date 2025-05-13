@@ -1,0 +1,17 @@
+2025-05-13 13:34:17,870 - INFO - WandB initialized in mode: online
+2025-05-13 13:34:17,878 - WARNING - Failed to create WandbLogger: 'Namespace' object has no attribute 'wandb_project'
+2025-05-13 13:34:17,879 - INFO - Setting up trainer...
+2025-05-13 13:34:18,543 - INFO - Starting training...
+==================================================
+ DIFFUSION TRAINING
+ - Files: Train 180, Val 32
+ - Batch size: 512, Steps/epoch: ~288
+ - Learning rate: 0.0001
+==================================================
+Epoch 0 started
+  Batch     1, Loss: 76959.92, MAE: 66.4012
+  Batch    85, Loss: 21891.58, MAE: 38.8545
+  Batch   100, Loss: 17446.70, MAE: 34.7593
+  Batch   181, Loss: 14034.01, MAE: 24.0961
+  Batch   200, Loss: 13307.64, MAE: 22.1804
+  Batch   279, Loss: 12685.14, MAE: 21.1078

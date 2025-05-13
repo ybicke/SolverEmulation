@@ -1,0 +1,32 @@
+
+Trainable parameters: 17,732
+2025-05-06 12:20:41,285 Train started...
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_3d.py", line 687, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_3d.py", line 652, in main
+    train_model(model, train_loader, val_loader, normalizer)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_3d.py", line 376, in train_model
+    outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/files_3d/gnn_3d.py", line 59, in forward
+    batch_edge_index, N = get_3d_graph(
+TypeError: get_3d_graph() missing 1 required positional argument: 'total_cols'
+[1m-------------------------------------------------------------------------------
+[1mtrain_models_3d.py 687 <module>
+[1mmain()
+[1mtrain_models_3d.py 652 main
+[1mtrain_model(model, train_loader, val_loader, normalizer)
+[1mtrain_models_3d.py 376 train_model
+[1moutputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgnn_3d.py 59 forward
+[1mbatch_edge_index, N = get_3d_graph(
+[1mTypeError:
+[1mget_3d_graph() missing 1 required positional argument: 'total_cols'

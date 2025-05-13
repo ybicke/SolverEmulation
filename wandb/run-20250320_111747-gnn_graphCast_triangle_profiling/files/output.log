@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 513, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 501, in main
+    train_model(model, train_loader, val_loader)
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 231, in train_model
+    with profiler.profile(activities=[
+TypeError: __init__() got an unexpected keyword argument 'activities'
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_triangle.py 513 <module>
+[1mmain()
+[1mtrain_column_triangle.py 501 main
+[1mtrain_model(model, train_loader, val_loader)
+[1mtrain_column_triangle.py 231 train_model
+[1mwith profiler.profile(activities=[
+[1mTypeError:
+[1m__init__() got an unexpected keyword argument 'activities'

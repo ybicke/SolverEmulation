@@ -1,0 +1,107 @@
+2025-05-13 13:40:22,906 - INFO - WandB initialized in mode: online
+2025-05-13 13:40:22,913 - WARNING - Failed to create WandbLogger: 'Namespace' object has no attribute 'wandb_project'
+2025-05-13 13:40:22,913 - INFO - Setting up trainer...
+2025-05-13 13:40:23,703 - INFO - Starting training...
+==================================================
+ DIFFUSION TRAINING
+ - Files: Train 180, Val 32
+ - Batch size: 512, Steps/epoch: ~288
+ - Learning rate: 0.0001
+==================================================
+Epoch 0 started
+  Batch     1, Loss: 76959.92, MAE: 66.4012
+  Batch    89, Loss: 19354.19, MAE: 38.5613
+  Batch   100, Loss: 17446.70, MAE: 34.7593
+  Batch   186, Loss: 15802.90, MAE: 23.5218
+  Batch   200, Loss: 13307.64, MAE: 22.1804
+  Batch   289, Loss: 15391.76, MAE: 20.4442
+  Batch   300, Loss: 14014.51, MAE: 20.1321
+  Batch   385, Loss: 14441.48, MAE: 19.9706
+  Batch   400, Loss: 15653.70, MAE: 19.8680
+  Batch   482, Loss: 15321.21, MAE: 19.4383
+  Batch   500, Loss: 15601.55, MAE: 19.4463
+  Batch   576, Loss: 10687.42, MAE: 17.0957
+  Batch   600, Loss: 15025.81, MAE: 19.8077
+  Batch   679, Loss: 15228.81, MAE: 19.5246
+  Batch   700, Loss: 11499.85, MAE: 19.1198
+  Batch   782, Loss: 10244.70, MAE: 19.1054
+  Batch   800, Loss: 12691.25, MAE: 18.3769
+  Batch   889, Loss: 13350.01, MAE: 18.6811
+  Batch   900, Loss: 13145.70, MAE: 19.7620
+  Batch   990, Loss: 16519.03, MAE: 19.5144
+  Batch  1000, Loss: 13094.12, MAE: 18.6369
+  Batch  1089, Loss: 10873.01, MAE: 18.5172
+  Batch  1100, Loss: 14049.61, MAE: 19.8099
+  Batch  1189, Loss: 12902.08, MAE: 18.5158
+  Batch  1200, Loss: 13446.54, MAE: 18.3409
+  Batch  1285, Loss: 13451.49, MAE: 18.6259
+  Batch  1300, Loss: 14612.14, MAE: 18.3052
+  Batch  1387, Loss: 13506.76, MAE: 17.7576
+  Batch  1400, Loss: 16184.06, MAE: 20.0546
+  Batch  1488, Loss: 11714.44, MAE: 17.2628
+  Batch  1500, Loss: 11880.42, MAE: 18.7361
+  Batch  1587, Loss: 13336.33, MAE: 18.9055
+  Batch  1600, Loss: 13013.67, MAE: 18.3836
+  Batch  1689, Loss: 12921.44, MAE: 18.0133
+  Batch  1700, Loss: 13790.05, MAE: 18.1072
+  Batch  1789, Loss: 14159.54, MAE: 19.9403
+  Batch  1800, Loss: 13798.47, MAE: 20.0288
+  Batch  1889, Loss: 12151.27, MAE: 17.1285
+  Batch  1900, Loss: 11856.98, MAE: 17.9281
+  Batch  1983, Loss: 11582.46, MAE: 18.0265
+  Batch  2000, Loss: 12637.81, MAE: 17.8177
+  Batch  2083, Loss: 14167.10, MAE: 17.3263
+  Batch  2100, Loss: 13381.96, MAE: 18.3454
+  Batch  2176, Loss: 13861.24, MAE: 17.4636
+  Batch  2200, Loss: 13821.41, MAE: 17.3186
+  Batch  2279, Loss: 14960.51, MAE: 17.3486
+  Batch  2300, Loss: 15406.79, MAE: 18.7859
+  Batch  2376, Loss: 11574.41, MAE: 18.0232
+  Batch  2400, Loss: 13819.48, MAE: 18.4050
+  Batch  2478, Loss: 16456.82, MAE: 18.3864
+  Batch  2500, Loss: 13982.61, MAE: 18.4439
+  Batch  2582, Loss: 14329.67, MAE: 18.1745
+  Batch  2600, Loss: 13442.01, MAE: 18.3035
+  Batch  2682, Loss: 12577.25, MAE: 18.2219
+  Batch  2700, Loss: 15369.79, MAE: 18.7211
+  Batch  2781, Loss: 13111.95, MAE: 17.5704
+  Batch  2800, Loss: 12983.94, MAE: 17.6601
+Validation - Loss: 14519.7292, MAE: 15.4100
+Epoch 0 completed in 2322.61s. Loss: 14557.4986, MAE: 19.9545, Batch time: 362.9ms
+Epoch 1 started
+  Batch     1, Loss: 13704.79, MAE: 18.0462
+  Batch    90, Loss: 13517.26, MAE: 17.2875
+  Batch   100, Loss: 13086.76, MAE: 18.0047
+  Batch   190, Loss: 14230.07, MAE: 18.9569
+  Batch   200, Loss: 13214.08, MAE: 17.7603
+  Batch   289, Loss: 13343.67, MAE: 17.8207
+  Batch   300, Loss: 15317.97, MAE: 19.2318
+  Batch   389, Loss: 13711.55, MAE: 18.1171
+  Batch   400, Loss: 12930.67, MAE: 17.4799
+  Batch   489, Loss: 13608.75, MAE: 17.9253
+  Batch   500, Loss: 13254.81, MAE: 16.1792
+  Batch   589, Loss: 11393.68, MAE: 18.3253
+  Batch   600, Loss: 13749.50, MAE: 18.6527
+  Batch   689, Loss: 14172.80, MAE: 17.5112
+  Batch   700, Loss: 14639.81, MAE: 18.3662
+  Batch   789, Loss: 14399.76, MAE: 17.8210
+  Batch   800, Loss: 12277.27, MAE: 18.1232
+  Batch   889, Loss: 13720.31, MAE: 16.9153
+  Batch   900, Loss: 13508.31, MAE: 16.6208
+  Batch   989, Loss: 12572.67, MAE: 18.0049
+  Batch  1000, Loss: 12015.13, MAE: 17.3411
+  Batch  1089, Loss: 13023.63, MAE: 17.8612
+  Batch  1100, Loss: 17395.78, MAE: 18.5434
+  Batch  1189, Loss: 14277.88, MAE: 18.4863
+  Batch  1200, Loss: 14199.37, MAE: 18.0718
+  Batch  1288, Loss: 15159.88, MAE: 17.9229
+  Batch  1300, Loss: 16428.49, MAE: 18.5003
+  Batch  1389, Loss: 18577.58, MAE: 19.2391
+  Batch  1400, Loss: 15659.07, MAE: 16.1710
+  Batch  1489, Loss: 12771.46, MAE: 18.1256
+  Batch  1500, Loss: 12384.81, MAE: 17.4622
+  Batch  1588, Loss: 14283.76, MAE: 17.3079
+  Batch  1600, Loss: 14855.06, MAE: 16.1626
+  Batch  1689, Loss: 12968.12, MAE: 17.6406
+  Batch  1700, Loss: 12022.86, MAE: 17.2563
+  Batch  1790, Loss: 15484.31, MAE: 18.0594

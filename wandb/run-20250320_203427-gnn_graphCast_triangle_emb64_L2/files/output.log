@@ -1,0 +1,25 @@
+2025-03-20 20:34:30,025 Loading checkpoint: 30, /mydata/deepcloud/yves/results_git/gnn_graphCast_triangle_emb64_L2/checkpoint_epoch_30.pth
+2025-03-20 20:34:30,060 Training will continue from epoch: 30/30
+2025-03-20 20:34:30,061 Test started...
+Training time: Real time: 5.62, CPU time: 0.721880990999999
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 537, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 532, in main
+    test_model(model, test_loader)
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 396, in test_model
+    h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle.py", line 350, in calculate_heating_rates
+    pres[..., 1:] = x3d[..., pres_ecrad_in_idx]
+RuntimeError: The expanded size of the tensor (1) must match the existing size (4096) at non-singleton dimension 0.  Target sizes: [1, 70].  Tensor sizes: [4096, 70]
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_triangle.py 537 <module>
+[1mmain()
+[1mtrain_column_triangle.py 532 main
+[1mtest_model(model, test_loader)
+[1mtrain_column_triangle.py 396 test_model
+[1mh_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
+[1mtrain_column_triangle.py 350 calculate_heating_rates
+[1mpres[..., 1:] = x3d[..., pres_ecrad_in_idx]
+[1mRuntimeError:
+[1mThe expanded size of the tensor (1) must match the existing size (4096) at non-singleton dimension 0.  Target sizes: [1, 70].  Tensor sizes: [4096, 70]

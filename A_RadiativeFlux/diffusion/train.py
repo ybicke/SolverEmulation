@@ -7,9 +7,10 @@ import logging
 import pickle
 import argparse
 import glob
-from os.path import join
+from os.path import join, basename, normpath
 import re
 import random
+import warnings
 
 import torch
 import lightning as L
@@ -17,9 +18,15 @@ from lightning import Trainer
 from torch.utils.data import DataLoader
 from lightning.pytorch.callbacks import ModelCheckpoint
 
+import wandb
+from lightning.pytorch.loggers import WandbLogger
+
+
 from unet import UNetDiffusion
 from data_utils_diffusion import DataNormalizer, IconDiffusionDataset
 from edm import LightningEDM, EDM
+
+import torch.multiprocessing as mp
 
 
 def get_normalization_params(stats_file, device):
@@ -32,12 +39,25 @@ def get_normalization_params(stats_file, device):
                     torch.tensor(stats['var3d']).to(device)
 
 
+def count_parameters(model):
+    """Count trainable parameters in a model"""
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 def main():
+    # Clean up any existing wandb run at the very beginning
+    if wandb.run is not None:
+        wandb.finish()
+        
     # Set multiprocessing start method to 'spawn' for CUDA compatibility
-    import torch.multiprocessing as mp
     if mp.get_start_method(allow_none=True) != 'spawn':
         mp.set_start_method('spawn', force=True)
         
+    # Modify CUDA settings to avoid cudnn issues
+    if torch.cuda.is_available():
+        # Disable cudnn for Conv1d operations
+        torch.backends.cudnn.enabled = False
+    
     parser = argparse.ArgumentParser(description='Train diffusion model for radiation flux prediction')
     
     # General parameters
@@ -46,6 +66,7 @@ def main():
     parser.add_argument('--percent', type=float, default=1.0, help='Percent of data to train on')
     parser.add_argument('--subsample', type=float, default=None, help='Subsampling rate')
     parser.add_argument('--num-workers', type=int, default=4, help='Number of data loader workers')
+    parser.add_argument('--prefetch-factor', type=int, default=2, help='Prefetch factor for data loading')
     parser.add_argument('--batch-size', type=int, default=32, help='Batch size')
     parser.add_argument('--learning-rate', type=float, default=1e-4, help='Learning rate')
     # parser.add_argument('--max-steps', type=int, default=100000, help='Maximum training steps')
@@ -75,6 +96,9 @@ def main():
     parser.add_argument('--time-embedding-dim', type=int, default=128, 
                        help='Time embedding dimension for diffusion model')
     
+    parser.add_argument('--wandb-mode', type=str, default='disabled', 
+                      choices={'online', 'offline', 'disabled'}, help='Operating mode for W&B')
+    
     args = parser.parse_args()
     
     # Setup device
@@ -84,7 +108,8 @@ def main():
     logging.basicConfig(level=logging.INFO, 
                        format='%(asctime)s - %(levelname)s - %(message)s')
     
-    # Create save directory
+    # Setup save directory and ID
+    save_id = basename(normpath(args.save))
     log_dir = args.save
     os.makedirs(log_dir, exist_ok=True)
     
@@ -93,6 +118,9 @@ def main():
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     random.seed(seed)
+    
+    # WandB config
+    wandb_config = {'seed': seed}
     
     # Load and prepare dataset
     logging.info("Preparing dataset...")
@@ -139,7 +167,8 @@ def main():
         batch_size=args.batch_size, 
         num_workers=args.num_workers,
         pin_memory=False,
-        persistent_workers=True if args.num_workers > 0 else False
+        persistent_workers=True if args.num_workers > 0 else False,
+        prefetch_factor=args.prefetch_factor
     )
     
     val_loader = DataLoader(
@@ -147,18 +176,29 @@ def main():
         batch_size=args.batch_size, 
         num_workers=args.num_workers,
         pin_memory=False,
-        persistent_workers=True if args.num_workers > 0 else False
+        persistent_workers=True if args.num_workers > 0 else False,
+        prefetch_factor=args.prefetch_factor
     )
     
     # TODO: Configure optimizer params a bit hacky now
     # Calculate approximate steps based on dataset size and epochs
-    steps_per_epoch = len(train_files) // args.batch_size
+    # Calculate using actual columns in the dataset rather than file count
+    # For ICON grid data, each file contains a different number of columns
+    total_samples = 81920  # This is the hard-coded total samples in your dataset
+    # Adjust for subsampling and percent
+    effective_samples = total_samples
     if args.subsample:
-        steps_per_epoch = int(steps_per_epoch * args.subsample)
-    if args.percent < 1.0:
-        steps_per_epoch = int(steps_per_epoch * args.percent)
-    
+        effective_samples = int(effective_samples * args.subsample)
+            
+    steps_per_epoch = max(1, effective_samples // args.batch_size)
     max_steps = steps_per_epoch * args.max_epochs
+    
+    # Log these estimates
+    logging.info(f"Estimated files: {len(train_files)}")
+    logging.info(f"Estimated total samples: {total_samples}")
+    logging.info(f"Effective samples after subsampling: {effective_samples}")
+    logging.info(f"Steps per epoch: {steps_per_epoch}")
+    logging.info(f"Max steps: {max_steps}")
     
     optimizer_params = {
         "learning_rate": args.learning_rate,
@@ -186,6 +226,33 @@ def main():
         device=device
     )
     
+    # Get parameter count
+    num_params = count_parameters(unet)
+    logging.info(f"Model has {num_params:,} trainable parameters")
+    
+    # Initialize wandb if not disabled
+    logger = None
+    if args.wandb_mode != 'disabled':
+        # First finish any existing run
+        if wandb.run is not None:
+            wandb.finish()
+            
+        wandb.init(
+            project='deepcloud-yves', 
+            name=save_id, 
+            id=save_id, 
+            config={**wandb_config, **args.__dict__}, 
+            sync_tensorboard=True, 
+            save_code=True, 
+            resume=None,  # Don't attempt to resume, always create a new run 
+            tags=['icon grid', 'diffusion'],    
+            mode=args.wandb_mode
+        )
+        # Watch the model
+        wandb.watch(unet, log_freq=100)
+        logging.info("WandB initialized in mode: " + args.wandb_mode)
+        logger = WandbLogger(project='deepcloud-yves', log_model=True)
+    
     # Build Lightning EDM model
     model = LightningEDM(
         unet=unet,
@@ -195,7 +262,7 @@ def main():
         edm=edm
     )
     
-    # Setup checkpointing
+    # Setup callbacks
     checkpoint_callbacks = [
         ModelCheckpoint(
         dirpath=log_dir,
@@ -212,43 +279,71 @@ def main():
         save_on_train_epoch_end=False
     )
     ]
-
+    
     # Setup trainer
     logging.info("Setting up trainer...")
     torch.set_float32_matmul_precision("high")
     
-    last_ckpt = os.path.join(log_dir, 'last.ckpt') if os.path.exists(
-        os.path.join(log_dir, 'last.ckpt')) else None
+    # Check if a checkpoint exists, but don't require it
+    checkpoint_file = os.path.join(log_dir, 'last.ckpt')
+    last_ckpt = checkpoint_file if os.path.exists(checkpoint_file) else None
+    if last_ckpt:
+        logging.info(f"Found checkpoint at {last_ckpt}, will resume training")
+    else:
+        logging.info("No checkpoint found, starting training from scratch")
     
     trainer = Trainer(
         precision=32,
-        # max_steps=args.max_steps,
         max_epochs=args.max_epochs,
         accelerator='gpu' if torch.cuda.is_available() else 'cpu',
         devices=1,
         num_nodes=1,
         num_sanity_val_steps=0,
         check_val_every_n_epoch=1,
-        # log_every_n_steps=1,
-        log_every_n_steps=10,
+        log_every_n_steps=max(1, steps_per_epoch // 10),  # Log at most 10 times per epoch
         accumulate_grad_batches=1,
         strategy='auto',
         callbacks=checkpoint_callbacks,
         gradient_clip_val=1.0,
+        enable_progress_bar=False,  # Disable progress bar completely
+        enable_checkpointing=True,
+        logger=logger,
     )   
     
     # Start training
     logging.info("Starting training...")
     try:
+        print(f"\n{'='*50}")
+        print(f" DIFFUSION TRAINING")
+        print(f" - Files: Train {len(train_files)}, Val {len(val_files)}")
+        print(f" - Batch size: {args.batch_size}, Steps/epoch: ~{steps_per_epoch}")
+        print(f" - Learning rate: {args.learning_rate}")
+        print(f"{'='*50}\n")
+        
+        # Train the model
         trainer.fit(
-        model,
-        train_dataloaders=train_loader,
+            model,
+            train_dataloaders=train_loader,
             val_dataloaders=val_loader,
-        ckpt_path=last_ckpt,
-    )
+            ckpt_path=last_ckpt,
+        )
+        
         logging.info("Training completed successfully!")
+        print(f"\n{'='*50}")
+        print(f" TRAINING COMPLETE")
+        print(f"{'='*50}\n")
+        
+        # Log final metrics to wandb
+        if args.wandb_mode != 'disabled':
+            # Get the final metrics from the trainer
+            final_metrics = {"num_parameters": num_params}
+            wandb.log(final_metrics)
+            wandb.finish()
+        
     except Exception as e:
         logging.error(f"Training failed with error: {e}")
+        if args.wandb_mode != 'disabled':
+            wandb.finish()
         raise e
 
 

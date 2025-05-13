@@ -1,0 +1,6 @@
+2025-04-08 12:40:48,665 Loading checkpoint: 100, /mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_clean_checkPosemb/checkpoint_epoch_100.pth
+2025-04-08 12:40:49,130 Training will continue from epoch: 100/100
+2025-04-08 12:40:49,132 Test started...
+Training time: Real time: 7.20, CPU time: 0.7663143859999995
+Test time: 475.77 loss: 52.9719  mean_absolute_error: 2.5512
+2025-04-08 12:49:08,913 Code ended!

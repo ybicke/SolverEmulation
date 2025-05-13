@@ -1,0 +1,32 @@
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/optim/lr_scheduler.py:28: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn("The verbose parameter is deprecated. Please use get_last_lr() "
+2025-03-19 18:44:47,258 Using ReduceLROnPlateau scheduler.
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn_scheduler.py", line 643, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn_scheduler.py", line 631, in main
+    train_model(model, train_loader, val_loader)
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn_scheduler.py", line 357, in train_model
+    outputs = model(batch_x3, batch_x2)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/column_files/gnn_graphCast_hirarchical_concatBef.py", line 75, in forward
+    x3d_augmented = torch.cat([level_71, x3d], dim=1) # x3d_augmented now has L+1 height levels
+RuntimeError: Sizes of tensors must match except in dimension 1. Expected size 4 but got size 6 for tensor number 1 in the list.
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_gnn_scheduler.py 643 <module>
+[1mmain()
+[1mtrain_column_gnn_scheduler.py 631 main
+[1mtrain_model(model, train_loader, val_loader)
+[1mtrain_column_gnn_scheduler.py 357 train_model
+[1moutputs = model(batch_x3, batch_x2)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgnn_graphCast_hirarchical_concatBef.py 75 forward
+[1mx3d_augmented = torch.cat([level_71, x3d], dim=1) # x3d_augmented now has L+1 height levels
+[1mRuntimeError:
+[1mSizes of tensors must match except in dimension 1. Expected size 4 but got size 6 for tensor number 1 in the list.

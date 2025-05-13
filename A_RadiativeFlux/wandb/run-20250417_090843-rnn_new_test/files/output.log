@@ -1,0 +1,18 @@
+
+Trainable parameters: 95,148
+2025-04-17 09:08:52,551 Train started...
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/autograd/graph.py:744: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+batch 100, time:0.008, loss: 2329.5051, mean_absolute_error: 23.7447
+batch 200, time:0.019, loss: 2026.8021, mean_absolute_error: 19.6068
+batch 300, time:0.013, loss: 1953.7764, mean_absolute_error: 21.2576
+batch 400, time:0.014, loss: 2561.6846, mean_absolute_error: 22.8644
+batch 500, time:0.011, loss: 1620.1084, mean_absolute_error: 18.7185
+batch 600, time:0.032, loss: 1844.3350, mean_absolute_error: 20.5740
+batch 700, time:0.008, loss: 1150.2665, mean_absolute_error: 16.9192
+batch 800, time:0.007, loss: 871.9898, mean_absolute_error: 14.6781
+batch 900, time:0.007, loss: 1031.8635, mean_absolute_error: 16.4384
+batch 1000, time:0.008, loss: 808.6168, mean_absolute_error: 14.5062
+batch 1100, time:0.017, loss: 773.3508, mean_absolute_error: 14.0993
+batch 1200, time:0.007, loss: 677.9482, mean_absolute_error: 13.4731
+batch 1300, time:0.010, loss: 644.5527, mean_absolute_error: 13.3504

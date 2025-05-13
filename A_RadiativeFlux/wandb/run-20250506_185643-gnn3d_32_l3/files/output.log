@@ -1,0 +1,30 @@
+Trainable parameters: 17,732
+Training time: Real time: 0.08, CPU time: 0.04
+2025-05-06 18:56:45,905 Train started...
+2025-05-06 18:56:45,913 Loading checkpoint: 30, /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_32_l3/checkpoint_epoch_30.pth
+2025-05-06 18:56:45,984 Training will continue from epoch: 30/30
+2025-05-06 18:56:45,985 ---------------------------------------
+2025-05-06 18:56:45,985 Measuring inference time...
+2025-05-06 18:56:45,985 Test started...
+2025-05-06 18:56:46,011 Performing 3 warmup passes...
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_3d_time.py", line 813, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_3d_time.py", line 793, in main
+    samples_per_second, per_sample_time, earth_time, earth_batch_time = test_model(model, test_loader, normalizer)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_3d_time.py", line 556, in test_model
+    h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_3d_time.py", line 470, in calculate_heating_rates
+    pres[..., 1:] = x3d[..., pres_ecrad_in_idx]
+RuntimeError: expand(torch.cuda.FloatTensor{[2, 4096, 70]}, size=[2, 70]): the number of sizes provided (2) must be greater or equal to the number of dimensions in the tensor (3)
+[1m-------------------------------------------------------------------------------
+[1mtrain_models_3d_time.py 813 <module>
+[1mmain()
+[1mtrain_models_3d_time.py 793 main
+[1msamples_per_second, per_sample_time, earth_time, earth_batch_time = test_model(model, test_loader, normalizer)
+[1mtrain_models_3d_time.py 556 test_model
+[1mh_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
+[1mtrain_models_3d_time.py 470 calculate_heating_rates
+[1mpres[..., 1:] = x3d[..., pres_ecrad_in_idx]
+[1mRuntimeError:
+[1mexpand(torch.cuda.FloatTensor{[2, 4096, 70]}, size=[2, 70]): the number of sizes provided (2) must be greater or equal to the number of dimensions in the tensor (3)

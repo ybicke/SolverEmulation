@@ -1,0 +1,176 @@
+{
+    "os": "Linux-6.8.0-52-generic-x86_64-with-glibc2.31",
+    "python": "3.9.15",
+    "heartbeatAt": "2025-05-12T10:17:20.469563",
+    "startedAt": "2025-05-12T10:17:20.227932",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--model",
+        "gnn_3d",
+        "--dataset",
+        "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+        "--save",
+        "/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l3_indep_testing2",
+        "--percent",
+        "0.01",
+        "--num-workers",
+        "4",
+        "--prefetch-factor",
+        "2",
+        "--num-cells",
+        "81920",
+        "--height-in",
+        "71",
+        "--channel-3d",
+        "6",
+        "--channel-2d",
+        "6",
+        "--channel-out",
+        "4",
+        "--train",
+        "--test",
+        "--shuffle",
+        "--batch-size",
+        "2",
+        "--optimizer",
+        "adamw",
+        "--clip",
+        "1",
+        "--num-epoch",
+        "30",
+        "--learning-rate",
+        "0.0005",
+        "--hidden-dim",
+        "32",
+        "--layers",
+        "3",
+        "--dropout",
+        "0.0",
+        "--edge-channels-in",
+        "1",
+        "--grid-file-path",
+        "/mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc",
+        "--triangle-id",
+        "39",
+        "--triangle-division-factor",
+        "4",
+        "--fully-connected",
+        "--disable-horizontal",
+        "--wandb-mode",
+        "offline"
+    ],
+    "state": "running",
+    "program": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models_3d_time.py",
+    "codePathLocal": "train_models_3d_time.py",
+    "codePath": "train_models_3d_time.py",
+    "host": "gnn3d-1024-emb32-l3-indep-testing-0-0",
+    "username": "root",
+    "executable": "/myhome/mambaforge/envs/deepFlux/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 2999.998,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2999.998,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 1875.5519676208496,
+            "used": 1431.6889877319336
+        }
+    },
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA A100 80GB PCIe",
+            "memory_total": 85899345920
+        }
+    ],
+    "memory": {
+        "total": 125.79447555541992
+    }
+}

@@ -1,0 +1,41 @@
+
+Trainable parameters: 4,215,812
+2025-04-24 13:25:00,196 ---------------------------------------
+2025-04-24 13:25:00,196 Step 1: Measuring inference time...
+2025-04-24 13:25:00,197 Test started...
+2025-04-24 13:25:02,095 Performing 10 warmup passes...
+batch 1000 loss: 86.8396, mean_absolute_error: 2.9612,
+batch 2000 loss: 52.6083, mean_absolute_error: 2.4745,
+batch 3000 loss: 45.5841, mean_absolute_error: 2.6417,
+batch 4000 loss: 40.2991, mean_absolute_error: 2.2516,
+    ==================== INFERENCE TIMING SUMMARY ====================
+    Model: gnn
+    Hardware: NVIDIA A100 80GB PCIe
+    Parameters: 4,215,812
+    Configuration:
+    Hidden Dimension: 512
+    Layers: 3
+    Train Batch Size: 128
+    Test Batch Size: 128
+    Batch Performance:
+    Batches measured: 1000
+    Mean batch time: 230.429 ms/batch
+    Std deviation: 8.875 ms/batch
+    Min/Max batch time: 224.125/300.767 ms/batch
+    Sample Performance:
+    Per sample time: 1.800 ms/sample
+    Throughput: 555.5 samples/second
+    Earth-wide Performance (for 81,920 columns):
+    Sequential processing time: 147474.77 ms (147.474772 sec)
+    Batched processing time: 147474.77 ms (147.474772 sec)
+    Required batches: 640
+Statistical Distribution (percentiles):
+  10th percentile: 226.680 ms
+  25th percentile: 227.818 ms
+  50th percentile: 228.577 ms
+  75th percentile: 229.405 ms
+  90th percentile: 232.945 ms
+  95th percentile: 237.502 ms
+  99th percentile: 283.762 ms
+================================================================
+Test time: 1530.02 loss: 54.8892  mean_absolute_error: 2.5643

@@ -1,0 +1,16 @@
+
+Trainable parameters: 17,732
+2025-05-11 12:21:13,123 Train started...
+2025-05-11 12:21:13,131 Loading checkpoint: 22, /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l3_indep/checkpoint_epoch_22.pth
+2025-05-11 12:21:13,156 Training will continue from epoch: 22/30
+Creating new graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 10, time:0.153, loss: 12.9701, mean_absolute_error: 1.7143

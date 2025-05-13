@@ -1,0 +1,60 @@
+2025-04-23 19:50:54,074 INFO    StreamThr :52 [internal.py:wandb_internal():85] W&B internal server running at pid: 52, started at: 2025-04-23 19:50:54.068431
+2025-04-23 19:50:54,077 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status
+2025-04-23 19:50:54,079 INFO    WriterThread:52 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_195053-gnn_32_l3/run-gnn_32_l3.wandb
+2025-04-23 19:50:54,087 DEBUG   SenderThread:52 [sender.py:send():378] send: header
+2025-04-23 19:50:54,087 DEBUG   SenderThread:52 [sender.py:send():378] send: run
+2025-04-23 19:50:54,110 INFO    SenderThread:52 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/gnn_32_l3
+2025-04-23 19:50:54,559 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-23 19:50:54,559 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_32_l3 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-23 19:50:55,846 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-23 19:50:55,846 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_32_l3 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-23 19:50:58,452 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-23 19:50:58,452 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_32_l3 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-23 19:50:58,452 INFO    SenderThread:52 [retry.py:__call__():172] Retry attempt failed:
+Traceback (most recent call last):
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/lib/retry.py", line 131, in __call__
+    result = self._call_fn(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/internal/internal_api.py", line 340, in execute
+    return self.client.execute(*args, **kwargs)  # type: ignore
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/lib/gql_request.py", line 59, in execute
+    request.raise_for_status()
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/requests/models.py", line 1021, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 409 Client Error: Conflict for url: https://api.wandb.ai/graphql
+2025-04-23 19:50:59,078 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:02,782 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-23 19:51:02,782 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_32_l3 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-23 19:51:04,080 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:09,082 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:12,030 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-23 19:51:12,030 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_32_l3 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-23 19:51:14,084 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:19,086 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:24,088 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:29,089 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:30,317 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-23 19:51:30,317 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_32_l3 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-23 19:51:34,091 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:39,093 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:44,095 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:49,097 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:54,099 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:51:59,101 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:52:04,103 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:52:09,105 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:52:09,113 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-04-23 19:52:09,113 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run gnn_32_l3 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-04-23 19:52:14,108 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:52:19,110 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-23 19:52:24,116 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: cancel
+2025-04-23 19:52:24,116 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: cancel
+2025-04-23 19:52:24,116 DEBUG   SenderThread:52 [sender.py:send():387] Record cancelled: run
+2025-04-23 19:52:24,117 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 19:52:24,193 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: shutdown
+2025-04-23 19:52:24,193 INFO    HandlerThread:52 [handler.py:finish():882] shutting down handler
+2025-04-23 19:52:25,117 INFO    SenderThread:52 [sender.py:finish():1545] shutting down sender
+2025-04-23 19:52:25,117 INFO    WriterThread:52 [datastore.py:close():296] close: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_195053-gnn_32_l3/run-gnn_32_l3.wandb

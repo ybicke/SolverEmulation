@@ -1,0 +1,128 @@
+Trainable parameters: 17,732
+Creating new graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+2025-05-11 12:25:44,376 Train started...
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 10, time:0.149, loss: 2852.8723, mean_absolute_error: 30.3869
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 20, time:0.149, loss: 9584.0898, mean_absolute_error: 66.6723
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 30, time:0.151, loss: 826.8635, mean_absolute_error: 14.8685
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 40, time:0.154, loss: 3008.8694, mean_absolute_error: 31.6622
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 50, time:0.153, loss: 526.1013, mean_absolute_error: 12.4992
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 60, time:0.153, loss: 1199.1659, mean_absolute_error: 20.4692
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 70, time:0.149, loss: 488.3836, mean_absolute_error: 13.4252
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 80, time:0.154, loss: 367.6129, mean_absolute_error: 10.3030
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 90, time:0.152, loss: 1568.2148, mean_absolute_error: 27.5743
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 100, time:0.154, loss: 623.9198, mean_absolute_error: 15.4034
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+batch 110, time:0.151, loss: 855.8992, mean_absolute_error: 15.6962
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True
+Using cached graph with key: /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc_39_71_4_cuda_True_True

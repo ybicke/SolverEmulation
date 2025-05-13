@@ -1,0 +1,119 @@
+2025-04-23 17:40:03,429 INFO    StreamThr :51 [internal.py:wandb_internal():85] W&B internal server running at pid: 51, started at: 2025-04-23 17:40:03.423997
+2025-04-23 17:40:03,432 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status
+2025-04-23 17:40:03,434 INFO    WriterThread:51 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/run-rnn_medium.wandb
+2025-04-23 17:40:03,442 DEBUG   SenderThread:51 [sender.py:send():378] send: header
+2025-04-23 17:40:03,443 DEBUG   SenderThread:51 [sender.py:send():378] send: run
+2025-04-23 17:40:03,463 INFO    SenderThread:51 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/rnn_medium
+2025-04-23 17:40:03,724 INFO    SenderThread:51 [sender.py:_setup_resume():826] configured resuming with: ResumeState(resumed=True,step=82,history=82,events=3032,output=2416,runtime=93468.838053,wandb_runtime=70703,summary={'_runtime': 93468.80824398994, '_step': 81, '_timestamp': 1745429661.761294, '_wandb': {'runtime': 70703}, 'epoch': 80, 'gradients/bi_lstms.0.bias_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.0.bias_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.0.bias_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.0.bias_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.0.weight_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.0.weight_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.0.weight_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.0.weight_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.1.bias_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.1.bias_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.1.bias_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.1.bias_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.1.weight_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.1.weight_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.1.weight_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.1.weight_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.2.bias_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.2.bias_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.2.bias_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.2.bias_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.2.weight_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.2.weight_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.2.weight_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.2.weight_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.3.bias_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.3.bias_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.3.bias_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.3.bias_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.3.weight_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.3.weight_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.3.weight_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.3.weight_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.4.bias_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.4.bias_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.4.bias_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.4.bias_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.4.weight_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.4.weight_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.4.weight_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.4.weight_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.5.bias_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.5.bias_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.5.bias_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.5.bias_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.5.weight_hh_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.5.weight_hh_l0_reverse': {'_type': 'histogram'}, 'gradients/bi_lstms.5.weight_ih_l0': {'_type': 'histogram'}, 'gradients/bi_lstms.5.weight_ih_l0_reverse': {'_type': 'histogram'}, 'gradients/p_layer1.players.0.bias': {'_type': 'histogram'}, 'gradients/p_layer1.players.0.weight': {'_type': 'histogram'}, 'gradients/p_layer1.players.1.bias': {'_type': 'histogram'}, 'gradients/p_layer1.players.1.weight': {'_type': 'histogram'}, 'gradients/p_layer2.players.0.bias': {'_type': 'histogram'}, 'gradients/p_layer2.players.0.weight': {'_type': 'histogram'}, 'loss': 53.130733489990234, 'mean_absolute_error': 2.5195889472961426, 'num_parameters': 4283228, 'per_sample_time': 2.7072021111962385e-05, 'samples_per_second': 36938.50547265299, 'test_cpu_time': 2542.403157148976, 'test_real_time': 793.5913278418593, 'train_cpu_time': 506438.954459363, 'train_real_time': 69900.99704556307, 'val_loss': 54.28059005737305, 'val_mean_absolute_error': 2.5534937381744385},config={'clip': {'desc': None, 'value': 1}, 'save': {'desc': None, 'value': '/mydata/deepcloud/yves/A_RadiativeFlux/results/rnn_medium'}, 'seed': {'desc': None, 'value': 42}, 'test': {'desc': None, 'value': True}, 'heads': {'desc': None, 'value': 6}, 'model': {'desc': None, 'value': 'rnn'}, 'train': {'desc': None, 'value': False}, '_wandb': {'desc': None, 'value': {'t': {'1': [1, 55], '2': [1, 55], '3': [1, 2, 5, 13, 14, 15, 16, 23, 35, 62], '4': '3.9.15', '5': '0.17.0', '8': [5], '13': 'linux-x86_64'}, 'code_path': 'code/train_models.py', 'framework': 'torch', 'start_time': 1745429652, 'cli_version': '0.17.0', 'is_jupyter_run': False, 'python_version': '3.9.15', 'is_kaggle_kernel': False}}, 'layers': {'desc': None, 'value': 4}, 'dataset': {'desc': None, 'value': '/mydata/deepcloud/salman/dataset/h5_data_all_chuncked'}, 'dropout': {'desc': None, 'value': 0}, 'percent': {'desc': None, 'value': 0.1}, 'shuffle': {'desc': None, 'value': True}, 'dim_head': {'desc': None, 'value': 64}, 'max_skip': {'desc': None, 'value': 3}, 'height_in': {'desc': None, 'value': 70}, 'mlp_ratio': {'desc': None, 'value': 4}, 'mlp_units': {'desc': None, 'value': [64, 128]}, 'num_cells': {'desc': None, 'value': 81920}, 'num_epoch': {'desc': None, 'value': 80}, 'optimizer': {'desc': None, 'value': 'adamw'}, 'subsample': {'desc': None, 'value': 0.1}, 'batch_size': {'desc': None, 'value': 512}, 'channel_2d': {'desc': None, 'value': 6}, 'channel_3d': {'desc': None, 'value': 6}, 'fno_blocks': {'desc': None, 'value': 8}, 'hidden_dim': {'desc': None, 'value': 256}, 'lstm_units': {'desc': None, 'value': [64, 64, 128, 128, 256, 256]}, 'patch_size': {'desc': None, 'value': 2}, 'wandb_mode': {'desc': None, 'value': 'online'}, 'channel_out': {'desc': None, 'value': 4}, 'double_skip': {'desc': None, 'value': True}, 'emb_dropout': {'desc': None, 'value': 0}, 'num_workers': {'desc': None, 'value': 4}, 'timing_runs': {'desc': None, 'value': 1}, 'heights_file': {'desc': None, 'value': None}, 'scale_output': {'desc': None, 'value': True}, 'learning_rate': {'desc': None, 'value': 0.0005}, 'lstm_droprate': {'desc': None, 'value': 0}, 'fully_connected': {'desc': None, 'value': False}, 'prefetch_factor': {'desc': None, 'value': 2}, 'cutoff_frequency': {'desc': None, 'value': 0.1}, 'edge_channels_in': {'desc': None, 'value': 1}, 'zero_freq_indices': {'desc': None, 'value': None}, 'hidden_size_factor': {'desc': None, 'value': 1}, 'afno_sparsity_threshold': {'desc': None, 'value': 0.01}, 'hard_thresholding_fraction': {'desc': None, 'value': 1}},tags=['icon grid'])
+2025-04-23 17:40:04,071 INFO    SenderThread:51 [dir_watcher.py:__init__():211] watching files in: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files
+2025-04-23 17:40:04,072 INFO    SenderThread:51 [sender.py:_start_run_threads():1123] run started: rnn_medium with start time 1745336534.591928
+2025-04-23 17:40:04,072 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: summary_record
+2025-04-23 17:40:04,081 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: check_version
+2025-04-23 17:40:04,084 INFO    SenderThread:51 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-23 17:40:04,085 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: check_version
+2025-04-23 17:40:04,222 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: run_start
+2025-04-23 17:40:04,238 DEBUG   HandlerThread:51 [system_info.py:__init__():26] System info init
+2025-04-23 17:40:04,238 DEBUG   HandlerThread:51 [system_info.py:__init__():41] System info init done
+2025-04-23 17:40:04,238 INFO    HandlerThread:51 [system_monitor.py:start():194] Starting system monitor
+2025-04-23 17:40:04,238 INFO    SystemMonitor:51 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2025-04-23 17:40:04,240 INFO    SystemMonitor:51 [interfaces.py:start():188] Started cpu monitoring
+2025-04-23 17:40:04,241 INFO    SystemMonitor:51 [interfaces.py:start():188] Started disk monitoring
+2025-04-23 17:40:04,242 INFO    SystemMonitor:51 [interfaces.py:start():188] Started gpu monitoring
+2025-04-23 17:40:04,245 INFO    SystemMonitor:51 [interfaces.py:start():188] Started memory monitoring
+2025-04-23 17:40:04,246 INFO    SystemMonitor:51 [interfaces.py:start():188] Started network monitoring
+2025-04-23 17:40:04,893 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: python_packages
+2025-04-23 17:40:04,893 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: python_packages
+2025-04-23 17:40:04,894 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:40:04,907 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:40:05,071 DEBUG   SenderThread:51 [sender.py:send():378] send: telemetry
+2025-04-23 17:40:05,072 DEBUG   SenderThread:51 [sender.py:send():378] send: telemetry
+2025-04-23 17:40:05,082 INFO    Thread-12 :51 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/wandb-summary.json
+2025-04-23 17:40:05,082 INFO    Thread-12 :51 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:05,083 INFO    Thread-12 :51 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/requirements.txt
+2025-04-23 17:40:08,118 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:09,100 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:14,106 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:17,311 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:19,209 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:19,318 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:19,896 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:40:19,896 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:40:21,401 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:23,422 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:24,297 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:25,576 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:29,691 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:30,103 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:31,795 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:34,894 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:40:34,895 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:40:36,053 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:36,807 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/config.yaml
+2025-04-23 17:40:39,815 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:41,622 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:41,856 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:46,623 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:49,903 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:40:49,903 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:40:49,907 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:51,926 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:40:52,607 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:57,608 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:40:59,996 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:02,007 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:02,993 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:04,246 DEBUG   SystemMonitor:51 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2025-04-23 17:41:04,249 DEBUG   SenderThread:51 [sender.py:send():378] send: stats
+2025-04-23 17:41:04,895 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:41:04,896 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:41:08,058 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:12,200 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:13,498 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:14,209 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:18,499 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:19,898 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:41:19,899 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:41:22,255 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:23,901 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:28,303 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:29,892 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:30,349 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:34,256 DEBUG   SenderThread:51 [sender.py:send():378] send: stats
+2025-04-23 17:41:34,898 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:41:34,899 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:41:35,144 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:38,399 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:40,452 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:40,793 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:45,794 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:49,901 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:41:49,902 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:41:50,797 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:41:51,757 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:52,793 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:41:55,802 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:42:00,823 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:01,695 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:42:02,834 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:04,255 DEBUG   SenderThread:51 [sender.py:send():378] send: stats
+2025-04-23 17:42:04,902 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:42:04,902 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:42:07,056 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:42:12,089 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:42:12,958 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:14,982 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:17,090 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:42:19,903 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:42:19,904 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:42:21,006 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:23,016 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:42:23,059 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:28,017 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:42:31,115 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:33,272 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:33,601 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report
+2025-04-23 17:42:34,253 DEBUG   SenderThread:51 [sender.py:send():378] send: stats
+2025-04-23 17:42:34,904 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-23 17:42:34,904 DEBUG   SenderThread:51 [sender.py:send_request():405] send_request: stop_status
+2025-04-23 17:42:35,353 INFO    Thread-12 :51 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250423_174003-rnn_medium/files/output.log
+2025-04-23 17:42:39,119 DEBUG   HandlerThread:51 [handler.py:handle_request():158] handle_request: status_report

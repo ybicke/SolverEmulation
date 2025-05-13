@@ -1,0 +1,10 @@
+
+Trainable parameters: 17,732
+2025-05-09 11:06:19,447 Train started...
+2025-05-09 11:06:19,456 Loading checkpoint: 9, /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l3_indep/checkpoint_epoch_9.pth
+2025-05-09 11:06:19,557 Training will continue from epoch: 9/30
+Created graph with disable_horizontal=True
+Vertical edges: 5089280, Horizontal edges: 0
+VERIFICATION PASSED: All columns are independent
+batch 10, time:0.154, loss: 22.6256, mean_absolute_error: 2.1976
+batch 20, time:0.151, loss: 387.9293, mean_absolute_error: 10.3525

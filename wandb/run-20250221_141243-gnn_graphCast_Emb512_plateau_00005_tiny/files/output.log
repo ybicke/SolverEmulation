@@ -1,0 +1,44 @@
+
+2025-02-21 14:12:47,479 Using ReduceLROnPlateau scheduler.
+total_optimization_steps: 300
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn.py", line 650, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn.py", line 638, in main
+    train_model(model, train_loader, val_loader, steps_per_epoch)
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn.py", line 327, in train_model
+    outputs = model(batch_x3, batch_x2)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/column_files/gnn_graphCast.py", line 105, in forward
+    x = self.decoder(x)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 351, in _forward_unimplemented
+    raise NotImplementedError(f"Module [{type(self).__name__}] is missing the required \"forward\" function")
+NotImplementedError: Module [Decoder] is missing the required "forward" function
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_gnn.py 650 <module>
+[1mmain()
+[1mtrain_column_gnn.py 638 main
+[1mtrain_model(model, train_loader, val_loader, steps_per_epoch)
+[1mtrain_column_gnn.py 327 train_model
+[1moutputs = model(batch_x3, batch_x2)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgnn_graphCast.py 105 forward
+[1mx = self.decoder(x)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mmodule.py 351 _forward_unimplemented
+[1mraise NotImplementedError(f"Module [{type(self).__name__}] is missing the required \"forward\" function")
+[1mNotImplementedError:
+[1mModule [Decoder] is missing the required "forward" function

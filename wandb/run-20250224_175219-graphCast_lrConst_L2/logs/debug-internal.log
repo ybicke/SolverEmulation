@@ -1,0 +1,60 @@
+2025-02-24 17:52:20,318 INFO    StreamThr :52 [internal.py:wandb_internal():85] W&B internal server running at pid: 52, started at: 2025-02-24 17:52:20.296462
+2025-02-24 17:52:20,328 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status
+2025-02-24 17:52:20,338 INFO    WriterThread:52 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250224_175219-graphCast_lrConst_L2/run-graphCast_lrConst_L2.wandb
+2025-02-24 17:52:20,367 DEBUG   SenderThread:52 [sender.py:send():378] send: header
+2025-02-24 17:52:20,367 DEBUG   SenderThread:52 [sender.py:send():378] send: run
+2025-02-24 17:52:20,431 INFO    SenderThread:52 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/graphCast_lrConst_L2
+2025-02-24 17:52:20,915 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-24 17:52:20,915 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run graphCast_lrConst_L2 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-24 17:52:22,185 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-24 17:52:22,186 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run graphCast_lrConst_L2 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-24 17:52:24,753 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-24 17:52:24,754 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run graphCast_lrConst_L2 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-24 17:52:24,754 INFO    SenderThread:52 [retry.py:__call__():172] Retry attempt failed:
+Traceback (most recent call last):
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/lib/retry.py", line 131, in __call__
+    result = self._call_fn(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/internal/internal_api.py", line 340, in execute
+    return self.client.execute(*args, **kwargs)  # type: ignore
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/wandb/sdk/lib/gql_request.py", line 59, in execute
+    request.raise_for_status()
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/requests/models.py", line 1021, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 409 Client Error: Conflict for url: https://api.wandb.ai/graphql
+2025-02-24 17:52:25,318 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:52:29,133 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-24 17:52:29,133 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run graphCast_lrConst_L2 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-24 17:52:30,319 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:52:35,321 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:52:38,675 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-24 17:52:38,675 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run graphCast_lrConst_L2 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-24 17:52:40,323 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:52:45,325 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:52:50,326 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:52:55,328 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:52:58,335 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-24 17:52:58,335 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run graphCast_lrConst_L2 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-24 17:53:00,330 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:05,332 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:10,335 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:15,337 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:20,339 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:25,340 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:30,343 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:30,682 ERROR   SenderThread:52 [internal_api.py:execute():344] 409 response executing GraphQL.
+2025-02-24 17:53:30,682 ERROR   SenderThread:52 [internal_api.py:execute():345] {"errors":[{"message":"run graphCast_lrConst_L2 was previously created and deleted; try a new run name","path":["upsertBucket"]}],"data":{"upsertBucket":null}}
+2025-02-24 17:53:35,345 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:40,347 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:45,349 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: keepalive
+2025-02-24 17:53:50,351 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: cancel
+2025-02-24 17:53:50,351 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: cancel
+2025-02-24 17:53:50,352 DEBUG   SenderThread:52 [sender.py:send():387] Record cancelled: run
+2025-02-24 17:53:50,352 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-02-24 17:53:50,626 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: shutdown
+2025-02-24 17:53:50,627 INFO    HandlerThread:52 [handler.py:finish():882] shutting down handler
+2025-02-24 17:53:51,352 INFO    SenderThread:52 [sender.py:finish():1545] shutting down sender
+2025-02-24 17:53:51,353 INFO    WriterThread:52 [datastore.py:close():296] close: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250224_175219-graphCast_lrConst_L2/run-graphCast_lrConst_L2.wandb

@@ -1,0 +1,171 @@
+2025-04-29 07:50:25,198 INFO    StreamThr :36 [internal.py:wandb_internal():85] W&B internal server running at pid: 36, started at: 2025-04-29 07:50:25.188643
+2025-04-29 07:50:25,201 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status
+2025-04-29 07:50:25,203 INFO    WriterThread:36 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/run-gnn_128_l3_optimized1.wandb
+2025-04-29 07:50:25,215 DEBUG   SenderThread:36 [sender.py:send():378] send: header
+2025-04-29 07:50:25,216 DEBUG   SenderThread:36 [sender.py:send():378] send: run
+2025-04-29 07:50:25,241 INFO    SenderThread:36 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/gnn_128_l3_optimized1
+2025-04-29 07:50:25,685 INFO    SenderThread:36 [sender.py:_setup_resume():826] configured resuming with: ResumeState(resumed=True,step=0,history=0,events=1,output=42,runtime=2.229221,wandb_runtime=16,summary={'_wandb': {'runtime': 16}},config={'clip': {'desc': None, 'value': 1}, 'save': {'desc': None, 'value': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_128_l3_optimized1'}, 'seed': {'desc': None, 'value': 42}, 'test': {'desc': None, 'value': True}, 'heads': {'desc': None, 'value': 6}, 'model': {'desc': None, 'value': 'gnn_optimized1'}, 'train': {'desc': None, 'value': False}, '_wandb': {'desc': None, 'value': {'t': {'1': [1, 55, 77], '2': [1, 55, 77], '3': [1, 5, 13, 14, 15, 16, 23, 35, 62], '4': '3.9.15', '5': '0.17.0', '8': [5], '13': 'linux-x86_64'}, 'code_path': 'code/train_models.py', 'framework': 'torch', 'start_time': 1745912897, 'cli_version': '0.17.0', 'is_jupyter_run': False, 'python_version': '3.9.15', 'is_kaggle_kernel': False}}, 'layers': {'desc': None, 'value': 3}, 'dataset': {'desc': None, 'value': '/mydata/deepcloud/salman/dataset/h5_data_all_chuncked'}, 'dropout': {'desc': None, 'value': 0}, 'percent': {'desc': None, 'value': 0.1}, 'shuffle': {'desc': None, 'value': True}, 'dim_head': {'desc': None, 'value': 64}, 'max_skip': {'desc': None, 'value': 3}, 'height_in': {'desc': None, 'value': 70}, 'mlp_ratio': {'desc': None, 'value': 4}, 'mlp_units': {'desc': None, 'value': [256, 256]}, 'num_cells': {'desc': None, 'value': 81920}, 'num_epoch': {'desc': None, 'value': 60}, 'optimizer': {'desc': None, 'value': 'adamw'}, 'subsample': {'desc': None, 'value': 0.1}, 'batch_size': {'desc': None, 'value': 512}, 'channel_2d': {'desc': None, 'value': 6}, 'channel_3d': {'desc': None, 'value': 6}, 'fno_blocks': {'desc': None, 'value': 8}, 'hidden_dim': {'desc': None, 'value': 128}, 'lstm_units': {'desc': None, 'value': [256, 512]}, 'patch_size': {'desc': None, 'value': 2}, 'wandb_mode': {'desc': None, 'value': 'online'}, 'channel_out': {'desc': None, 'value': 4}, 'double_skip': {'desc': None, 'value': True}, 'emb_dropout': {'desc': None, 'value': 0}, 'num_workers': {'desc': None, 'value': 4}, 'heights_file': {'desc': None, 'value': None}, 'scale_output': {'desc': None, 'value': True}, 'learning_rate': {'desc': None, 'value': 0.0005}, 'lstm_droprate': {'desc': None, 'value': 0}, 'fully_connected': {'desc': None, 'value': True}, 'prefetch_factor': {'desc': None, 'value': 2}, 'cutoff_frequency': {'desc': None, 'value': 0.1}, 'edge_channels_in': {'desc': None, 'value': 1}, 'zero_freq_indices': {'desc': None, 'value': None}, 'hidden_size_factor': {'desc': None, 'value': 1}, 'afno_sparsity_threshold': {'desc': None, 'value': 0.01}, 'hard_thresholding_fraction': {'desc': None, 'value': 1}},tags=['icon grid'])
+2025-04-29 07:50:26,045 INFO    SenderThread:36 [dir_watcher.py:__init__():211] watching files in: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/files
+2025-04-29 07:50:26,045 INFO    SenderThread:36 [sender.py:_start_run_threads():1123] run started: gnn_128_l3_optimized1 with start time 1745913022.960112
+2025-04-29 07:50:26,045 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: summary_record
+2025-04-29 07:50:26,050 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: check_version
+2025-04-29 07:50:26,061 INFO    SenderThread:36 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-29 07:50:26,062 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: check_version
+2025-04-29 07:50:26,180 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: run_start
+2025-04-29 07:50:26,198 DEBUG   HandlerThread:36 [system_info.py:__init__():26] System info init
+2025-04-29 07:50:26,198 DEBUG   HandlerThread:36 [system_info.py:__init__():41] System info init done
+2025-04-29 07:50:26,198 INFO    HandlerThread:36 [system_monitor.py:start():194] Starting system monitor
+2025-04-29 07:50:26,198 INFO    SystemMonitor:36 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2025-04-29 07:50:26,199 INFO    SystemMonitor:36 [interfaces.py:start():188] Started cpu monitoring
+2025-04-29 07:50:26,200 INFO    SystemMonitor:36 [interfaces.py:start():188] Started disk monitoring
+2025-04-29 07:50:26,202 INFO    SystemMonitor:36 [interfaces.py:start():188] Started gpu monitoring
+2025-04-29 07:50:26,204 INFO    SystemMonitor:36 [interfaces.py:start():188] Started memory monitoring
+2025-04-29 07:50:26,206 INFO    SystemMonitor:36 [interfaces.py:start():188] Started network monitoring
+2025-04-29 07:50:27,051 INFO    Thread-12 :36 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/files/wandb-summary.json
+2025-04-29 07:50:27,092 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: python_packages
+2025-04-29 07:50:27,092 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: python_packages
+2025-04-29 07:50:27,096 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:50:27,108 DEBUG   SenderThread:36 [sender.py:send():378] send: telemetry
+2025-04-29 07:50:27,108 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:50:27,335 DEBUG   SenderThread:36 [sender.py:send():378] send: telemetry
+2025-04-29 07:50:28,051 INFO    Thread-12 :36 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/files/output.log
+2025-04-29 07:50:28,052 INFO    Thread-12 :36 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/files/requirements.txt
+2025-04-29 07:50:30,140 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/files/output.log
+2025-04-29 07:50:30,345 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:50:35,346 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:50:40,347 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:50:42,093 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:50:42,093 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:50:46,339 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:50:51,340 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:50:56,348 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:50:57,093 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:50:57,094 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:50:57,208 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/files/config.yaml
+2025-04-29 07:51:02,273 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:07,276 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:12,093 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:51:12,094 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:51:13,261 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:18,262 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:23,262 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:26,207 DEBUG   SystemMonitor:36 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2025-04-29 07:51:26,209 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-04-29 07:51:27,093 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:51:27,094 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:51:28,268 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:33,270 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:38,270 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:42,093 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:51:42,094 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:51:44,264 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:49,265 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:54,266 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:51:56,210 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-04-29 07:51:57,093 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:51:57,094 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:51:59,287 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:02,338 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/files/output.log
+2025-04-29 07:52:04,291 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,292 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,293 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,294 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,295 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,296 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,297 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,298 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,319 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,319 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,350 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,350 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,358 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,359 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,360 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,360 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,384 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,385 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,416 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,417 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,427 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,428 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,428 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,429 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,453 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,453 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,484 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,485 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,493 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,493 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,494 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,495 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:52:04,673 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:09,674 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:12,094 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:52:12,094 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:52:15,322 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:20,323 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:25,324 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:26,211 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-04-29 07:52:27,093 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:52:27,094 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:52:31,287 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:36,288 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:41,289 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:42,094 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:52:42,095 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:52:46,312 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:51,313 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:52:56,212 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-04-29 07:52:57,094 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:52:57,095 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:52:57,269 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:02,270 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:07,271 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:12,095 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:53:12,096 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:53:12,312 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:17,315 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:20,933 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,934 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,935 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,937 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,938 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,939 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,941 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,941 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,963 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,963 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,994 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:20,995 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,003 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,003 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,004 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,005 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,030 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,030 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,061 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,062 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,072 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,073 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,073 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,074 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,097 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,098 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,129 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,129 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,137 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,138 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,138 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:21,139 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-04-29 07:53:22,521 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250429_075025-gnn_128_l3_optimized1/files/output.log
+2025-04-29 07:53:22,815 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:26,214 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-04-29 07:53:27,094 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:53:27,095 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:53:28,354 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:33,355 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:38,356 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:42,094 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-29 07:53:42,095 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-04-29 07:53:44,282 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-29 07:53:49,283 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report

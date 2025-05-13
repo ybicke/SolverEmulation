@@ -1,0 +1,53 @@
+
+Trainable parameters: 4,283,228
+2025-04-23 19:07:44,363 ---------------------------------------
+2025-04-23 19:07:44,364 Step 1: Measuring inference time...
+2025-04-23 19:07:44,364 Test started...
+2025-04-23 19:07:44,434 Performing 10 warmup passes...
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+batch 1000 loss: 43.8318, mean_absolute_error: 2.4284,
+    ==================== INFERENCE TIMING SUMMARY ====================
+    Model: rnn
+    Hardware: NVIDIA A100 80GB PCIe
+    Parameters: 4,283,228
+    Configuration:
+    Hidden Dimension: 256
+    Layers: 4
+    Train Batch Size: 512
+    Test Batch Size: 512
+    Batch Performance:
+    Batches measured: 1000
+    Mean batch time: 37.816 ms/batch
+    Std deviation: 32.110 ms/batch
+    Min/Max batch time: 12.071/92.095 ms/batch
+    Sample Performance:
+    Per sample time: 0.074 ms/sample
+    Throughput: 13539.2 samples/second
+    Earth-wide Performance (for 81,920 columns):
+    Sequential processing time: 6050.57 ms (6.050572 sec)
+    Batched processing time: 6050.57 ms (6.050572 sec)
+    Required batches: 160
+Statistical Distribution (percentiles):
+  10th percentile: 12.261 ms
+  25th percentile: 12.436 ms
+  50th percentile: 13.549 ms
+  75th percentile: 78.500 ms
+  90th percentile: 82.535 ms
+  95th percentile: 84.033 ms
+  99th percentile: 87.689 ms
+================================================================
+Test time: 154.69 loss: 53.1528  mean_absolute_error: 2.5372
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 791, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 765, in main
+    samples_per_second, per_sample_time = test_model(model, test_loader, normalizer)
+ValueError: too many values to unpack (expected 2)
+[1m-------------------------------------------------------------------------------
+[1mtrain_models.py 791 <module>
+[1mmain()
+[1mtrain_models.py 765 main
+[1msamples_per_second, per_sample_time = test_model(model, test_loader, normalizer)
+[1mValueError:
+[1mtoo many values to unpack (expected 2)

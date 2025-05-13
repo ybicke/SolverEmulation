@@ -112,5 +112,5 @@ class IconDiffusionDataset(IterableDataset):
             
             yield batch
     
-    def __len__(self):
-        return len(self.icon_dataset) 
+    # Removing __len__ to avoid warnings and confusion with multi-worker dataloaders
+    # When using IterableDataset with multiple workers, __len__ can be misleading 

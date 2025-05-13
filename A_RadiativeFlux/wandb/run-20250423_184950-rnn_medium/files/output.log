@@ -1,0 +1,29 @@
+2025-04-23 18:49:52,160 ---------------------------------------
+2025-04-23 18:49:52,160 Step 1: Measuring inference time...
+2025-04-23 18:49:52,160 Test started...
+2025-04-23 18:49:52,233 Performing 10 warmup passes...
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+Trainable parameters: 4,283,228
+batch 1000 loss: 43.8318, mean_absolute_error: 2.4284,
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 790, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 764, in main
+    samples_per_second, per_sample_time = test_model(model, test_loader, normalizer)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 627, in test_model
+    samples_per_second, per_sample_time, earth_time, earth_batch_time = process_timing_statistics(
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 468, in process_timing_statistics
+    batch_size = args.test_batch_size if args.test_batch_size is not None else args.batch_size
+AttributeError: 'Namespace' object has no attribute 'test_batch_size'
+[1m-------------------------------------------------------------------------------
+[1mtrain_models.py 790 <module>
+[1mmain()
+[1mtrain_models.py 764 main
+[1msamples_per_second, per_sample_time = test_model(model, test_loader, normalizer)
+[1mtrain_models.py 627 test_model
+[1msamples_per_second, per_sample_time, earth_time, earth_batch_time = process_timing_statistics(
+[1mtrain_models.py 468 process_timing_statistics
+[1mbatch_size = args.test_batch_size if args.test_batch_size is not None else args.batch_size
+[1mAttributeError:
+[1m'Namespace' object has no attribute 'test_batch_size'

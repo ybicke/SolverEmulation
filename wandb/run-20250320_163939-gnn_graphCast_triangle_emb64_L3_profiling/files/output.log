@@ -1,0 +1,119 @@
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle_profiling.py", line 537, in main
+    train_model(model, train_loader, val_loader) # Profile training
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle_profiling.py", line 258, in train_model
+    outputs = model(batch_x3, batch_x2)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 124, in forward
+    x = self.processor(x, graph_data.edge_index) # Access edge_index as graph_data.edge_index
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 234, in forward
+    x = x + self.layer_norm(layer(x, edge_index))
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 272, in forward
+    return self.propagate(edge_index, x=x)
+  File "/tmp/triangle_files.graphCast_triangle_TriangleGNNLayer_propagate_nnyy2oim.py", line 170, in propagate
+    out = self.message(
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 276, in message
+    return self.edge_mlp(x_j)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/activation.py", line 396, in forward
+    return F.silu(input, inplace=self.inplace)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/functional.py", line 2102, in silu
+    return torch._C._nn.silu(input)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 4.31 GiB. GPU
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle_profiling.py", line 553, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_triangle_profiling.py", line 537, in main
+    train_model(model, train_loader, val_loader) # Profile training
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/profiler/profiler.py", line 699, in __exit__
+    self.stop()
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/profiler/profiler.py", line 715, in stop
+    self._transit_action(self.current_action, None)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/profiler/profiler.py", line 744, in _transit_action
+    action()
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/profiler/profiler.py", line 199, in stop_trace
+    self.profiler.__exit__(None, None, None)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/autograd/profiler.py", line 296, in __exit__
+    self.kineto_results = _disable_profiler()
+RuntimeError: Can't disable Kineto profiler when it's not running
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_triangle_profiling.py 537 main
+[1mtrain_model(model, train_loader, val_loader) # Profile training
+[1mtrain_column_triangle_profiling.py 258 train_model
+[1moutputs = model(batch_x3, batch_x2)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgraphCast_triangle.py 124 forward
+[1mx = self.processor(x, graph_data.edge_index) # Access edge_index as graph_data.edge_index
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgraphCast_triangle.py 234 forward
+[1mx = x + self.layer_norm(layer(x, edge_index))
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgraphCast_triangle.py 272 forward
+[1mreturn self.propagate(edge_index, x=x)
+[1mtriangle_files.graphCast_triangle_TriangleGNNLayer_propagate_nnyy2oim.py 170 propagate
+[1mout = self.message(
+[1mgraphCast_triangle.py 276 message
+[1mreturn self.edge_mlp(x_j)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mcontainer.py 217 forward
+[1minput = module(input)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mactivation.py 396 forward
+[1mreturn F.silu(input, inplace=self.inplace)
+[1mfunctional.py 2102 silu
+[1mreturn torch._C._nn.silu(input)
+[1mtorch.cuda.OutOfMemoryError:
+[1mCUDA out of memory. Tried to allocate 4.31 GiB. GPU 
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_triangle_profiling.py 553 <module>
+[1mmain()
+[1mtrain_column_triangle_profiling.py 537 main
+[1mtrain_model(model, train_loader, val_loader) # Profile training
+[1mprofiler.py 699 __exit__
+[1mself.stop()
+[1mprofiler.py 715 stop
+[1mself._transit_action(self.current_action, None)
+[1mprofiler.py 744 _transit_action
+[1maction()
+[1mprofiler.py 199 stop_trace
+[1mself.profiler.__exit__(None, None, None)
+[1mprofiler.py 296 __exit__
+[1mself.kineto_results = _disable_profiler()
+[1mRuntimeError:
+[1mCan't disable Kineto profiler when it's not running

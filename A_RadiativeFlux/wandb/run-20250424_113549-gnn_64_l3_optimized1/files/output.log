@@ -1,0 +1,30 @@
+
+Trainable parameters: 68,228
+2025-04-24 11:35:51,916 ---------------------------------------
+2025-04-24 11:35:51,916 Step 1: Measuring inference time...
+2025-04-24 11:35:51,917 Test started...
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 826, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 800, in main
+    samples_per_second, per_sample_time, earth_time, earth_batch_time = test_model(model, test_loader, normalizer)
+  File "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py", line 577, in test_model
+    model.load_state_dict(new_state_dict)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 2189, in load_state_dict
+    raise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+RuntimeError: Error(s) in loading state_dict for AtmosphericColumnGNN:
+	Missing key(s) in state_dict: "encoder.node_mlp.0.weight", "encoder.node_mlp.0.bias", "encoder.node_mlp.3.weight", "encoder.node_mlp.3.bias", "encoder.edge_mlp.0.weight", "encoder.edge_mlp.0.bias", "encoder.edge_mlp.3.weight", "encoder.edge_mlp.3.bias", "decoder.mlp.0.weight", "decoder.mlp.0.bias", "decoder.mlp.3.weight", "decoder.mlp.3.bias".
+	Unexpected key(s) in state_dict: "encoder.node_mlp._orig_mod.0.weight", "encoder.node_mlp._orig_mod.0.bias", "encoder.node_mlp._orig_mod.3.weight", "encoder.node_mlp._orig_mod.3.bias", "decoder.mlp._orig_mod.0.weight", "decoder.mlp._orig_mod.0.bias", "decoder.mlp._orig_mod.3.weight", "decoder.mlp._orig_mod.3.bias".
+[1m-------------------------------------------------------------------------------
+[1mtrain_models.py 826 <module>
+[1mmain()
+[1mtrain_models.py 800 main
+[1msamples_per_second, per_sample_time, earth_time, earth_batch_time = test_model(model, test_loader, normalizer)
+[1mtrain_models.py 577 test_model
+[1mmodel.load_state_dict(new_state_dict)
+[1mmodule.py 2189 load_state_dict
+[1mraise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+[1mRuntimeError:
+[1mError(s) in loading state_dict for AtmosphericColumnGNN:
+[1m	Missing key(s) in state_dict: "encoder.node_mlp.0.weight", "encoder.node_mlp.0.bias", "encoder.node_mlp.3.weight", "encoder.node_mlp.3.bias", "encoder.edge_mlp.0.weight", "encoder.edge_mlp.0.bias", "encoder.edge_mlp.3.weight", "encoder.edge_mlp.3.bias", "decoder.mlp.0.weight", "decoder.mlp.0.bias", "decoder.mlp.3.weight", "decoder.mlp.3.bias". 
+[1m	Unexpected key(s) in state_dict: "encoder.node_mlp._orig_mod.0.weight", "encoder.node_mlp._orig_mod.0.bias", "encoder.node_mlp._orig_mod.3.weight", "encoder.node_mlp._orig_mod.3.bias", "decoder.mlp._orig_mod.0.weight", "decoder.mlp._orig_mod.0.bias", "decoder.mlp._orig_mod.3.weight", "decoder.mlp._orig_mod.3.bias". 

@@ -1,0 +1,27 @@
+
+2025-03-20 10:54:53,548 No scheduler. Using constant LR = args.learning_rate
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn_scheduler.py", line 663, in <module>
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn_scheduler.py", line 651, in main
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn_scheduler.py", line 377, in train_model
+    model.eval()
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/triangle_files/graphCast_triangle.py", line 103, in forward
+    x_concat = torch.cat([x3d, x2d_expanded], dim=3) # Concatenate along feature dimension (dim=3)
+IndexError: Dimension out of range (expected to be in range of [-3, 2], but got 3)
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_gnn_scheduler.py 663 <module>
+[1mtrain_column_gnn_scheduler.py 651 main
+[1mtrain_column_gnn_scheduler.py 377 train_model
+[1mmodel.eval()
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgraphCast_triangle.py 103 forward
+[1mx_concat = torch.cat([x3d, x2d_expanded], dim=3) # Concatenate along feature dimension (dim=3)
+[1mIndexError:
+[1mDimension out of range (expected to be in range of [-3, 2], but got 3)

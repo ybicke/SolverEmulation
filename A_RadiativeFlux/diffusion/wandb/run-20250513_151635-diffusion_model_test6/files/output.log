@@ -1,0 +1,49 @@
+2025-05-13 15:16:37,508 - INFO - WandB initialized in mode: online
+2025-05-13 15:16:37,571 - INFO - Setting up trainer...
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+HPU available: False, using: 0 HPUs
+2025-05-13 15:16:38,189 - INFO - Starting training...
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/lightning/pytorch/loggers/wandb.py:397: There is a wandb run already in progress and newly created instances of `WandbLogger` will reuse this run. If this is not desired, call `wandb.finish()` before instantiating `WandbLogger`.
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/lightning/pytorch/callbacks/model_checkpoint.py:654: Checkpoint directory /mydata/deepcloud/yves/A_RadiativeFlux/diffusion_model_test6 exists and is not empty.
+Restoring states from the checkpoint path at /mydata/deepcloud/yves/A_RadiativeFlux/diffusion_model_test6/last.ckpt
+==================================================
+ DIFFUSION TRAINING
+ - Files: Train 180, Val 32
+ - Batch size: 512, Steps/epoch: ~1
+ - Learning rate: 0.0001
+==================================================
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+  | Name | Type          | Params | Mode
+-----------------------------------------------
+0 | unet | UNetDiffusion | 10.9 M | train
+-----------------------------------------------
+10.9 M    Trainable params
+0         Non-trainable params
+10.9 M    Total params
+43.552    Total estimated model params size (MB)
+87        Modules in train mode
+0         Modules in eval mode
+Restored all states from the checkpoint at /mydata/deepcloud/yves/A_RadiativeFlux/diffusion_model_test6/last.ckpt
+Epoch 5 started
+  Batch     1, Loss: 61708.45, MAE: 46.9936
+  Batch   100, Loss: 29016.54, MAE: 32.6512
+  Batch   192, Loss: 13979.40, MAE: 20.1486
+  Batch   200, Loss: 15708.32, MAE: 22.1984
+  Batch   300, Loss: 12574.99, MAE: 16.9630
+  Batch   396, Loss: 15576.49, MAE: 18.0223
+  Batch   400, Loss: 13728.41, MAE: 16.7884
+  Batch   500, Loss: 18233.67, MAE: 20.9114
+  Batch   592, Loss: 16433.15, MAE: 18.4955
+  Batch   600, Loss: 17068.23, MAE: 19.3803
+  Batch   700, Loss: 13376.53, MAE: 16.0416
+  Batch   795, Loss: 10860.21, MAE: 14.2888
+  Batch   800, Loss: 12716.63, MAE: 15.2262
+  Batch   896, Loss: 11704.85, MAE: 15.0172
+  Batch   900, Loss: 12096.14, MAE: 15.5606
+  Batch  1000, Loss: 15172.12, MAE: 16.7932
+  Batch  1099, Loss: 13306.52, MAE: 15.9458
+  Batch  1100, Loss: 15190.06, MAE: 16.7784
+  Batch  1200, Loss: 13628.63, MAE: 16.5806
+  Batch  1295, Loss: 12672.52, MAE: 14.8019
+  Batch  1300, Loss: 10937.86, MAE: 13.6796

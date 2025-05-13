@@ -1,0 +1,29 @@
+2025-05-13 15:00:47,742 - INFO - WandB initialized in mode: online
+2025-05-13 15:00:47,843 - INFO - Setting up trainer...
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+HPU available: False, using: 0 HPUs
+2025-05-13 15:00:48,604 - INFO - Starting training...
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/lightning/pytorch/loggers/wandb.py:397: There is a wandb run already in progress and newly created instances of `WandbLogger` will reuse this run. If this is not desired, call `wandb.finish()` before instantiating `WandbLogger`.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+  | Name | Type          | Params | Mode
+-----------------------------------------------
+0 | unet | UNetDiffusion | 10.9 M | train
+-----------------------------------------------
+10.9 M    Trainable params
+0         Non-trainable params
+10.9 M    Total params
+43.552    Total estimated model params size (MB)
+87        Modules in train mode
+0         Modules in eval mode
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/lightning/pytorch/utilities/data.py:123: Your `IterableDataset` has `__len__` defined. In combination with multi-process data loading (when num_workers > 1), `__len__` could be inaccurate if each worker is not configured independently to avoid having duplicate data.
+/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/lightning/pytorch/loops/fit_loop.py:310: The number of training batches (1) is smaller than the logging interval Trainer(log_every_n_steps=100). Set a lower value for log_every_n_steps if you want to see logs for the training epoch.
+==================================================
+ DIFFUSION TRAINING
+ - Files: Train 180, Val 32
+ - Batch size: 512, Steps/epoch: ~0
+ - Learning rate: 0.0001
+==================================================
+Epoch 0 started
+  Batch     1, Loss: 76960.06, MAE: 52.3342
+2025-05-13 15:01:08,289 - ERROR - Training failed with error: integer division or modulo by zero

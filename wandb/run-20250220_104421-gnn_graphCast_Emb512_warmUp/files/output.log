@@ -1,0 +1,25 @@
+2025-02-20 10:44:24,584 Using GraphCast two-phase (warmup + half-cosine) scheduling.
+2025-02-20 10:44:24,602 Loading checkpoint: 15, /mydata/deepcloud/yves/results_git/gnn_graphCast_Emb512_warmUp/checkpoint_epoch_15.pth
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn.py", line 633, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn.py", line 621, in main
+    train_model(model, train_loader, val_loader, steps_per_epoch)
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column_gnn.py", line 279, in train_model
+    model.load_state_dict(checkpoint['model_state_dict'])
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 2189, in load_state_dict
+    raise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+RuntimeError: Error(s) in loading state_dict for AtmosphericColumnGNN:
+	Unexpected key(s) in state_dict: "processor.layers.8.mlp.0.weight", "processor.layers.8.mlp.0.bias", "processor.layers.8.mlp.3.weight", "processor.layers.8.mlp.3.bias", "processor.layers.8.mlp.4.weight", "processor.layers.8.mlp.4.bias", "processor.layers.9.mlp.0.weight", "processor.layers.9.mlp.0.bias", "processor.layers.9.mlp.3.weight", "processor.layers.9.mlp.3.bias", "processor.layers.9.mlp.4.weight", "processor.layers.9.mlp.4.bias", "processor.layers.10.mlp.0.weight", "processor.layers.10.mlp.0.bias", "processor.layers.10.mlp.3.weight", "processor.layers.10.mlp.3.bias", "processor.layers.10.mlp.4.weight", "processor.layers.10.mlp.4.bias", "processor.layers.11.mlp.0.weight", "processor.layers.11.mlp.0.bias", "processor.layers.11.mlp.3.weight", "processor.layers.11.mlp.3.bias", "processor.layers.11.mlp.4.weight", "processor.layers.11.mlp.4.bias", "processor.layers.12.mlp.0.weight", "processor.layers.12.mlp.0.bias", "processor.layers.12.mlp.3.weight", "processor.layers.12.mlp.3.bias", "processor.layers.12.mlp.4.weight", "processor.layers.12.mlp.4.bias", "processor.layers.13.mlp.0.weight", "processor.layers.13.mlp.0.bias", "processor.layers.13.mlp.3.weight", "processor.layers.13.mlp.3.bias", "processor.layers.13.mlp.4.weight", "processor.layers.13.mlp.4.bias", "processor.layers.14.mlp.0.weight", "processor.layers.14.mlp.0.bias", "processor.layers.14.mlp.3.weight", "processor.layers.14.mlp.3.bias", "processor.layers.14.mlp.4.weight", "processor.layers.14.mlp.4.bias", "processor.layers.15.mlp.0.weight", "processor.layers.15.mlp.0.bias", "processor.layers.15.mlp.3.weight", "processor.layers.15.mlp.3.bias", "processor.layers.15.mlp.4.weight", "processor.layers.15.mlp.4.bias".
+[1m-------------------------------------------------------------------------------
+[1mtrain_column_gnn.py 633 <module>
+[1mmain()
+[1mtrain_column_gnn.py 621 main
+[1mtrain_model(model, train_loader, val_loader, steps_per_epoch)
+[1mtrain_column_gnn.py 279 train_model
+[1mmodel.load_state_dict(checkpoint['model_state_dict'])
+[1mmodule.py 2189 load_state_dict
+[1mraise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+[1mRuntimeError:
+[1mError(s) in loading state_dict for AtmosphericColumnGNN:
+[1m	Unexpected key(s) in state_dict: "processor.layers.8.mlp.0.weight", "processor.layers.8.mlp.0.bias", "processor.layers.8.mlp.3.weight", "processor.layers.8.mlp.3.bias", "processor.layers.8.mlp.4.weight", "processor.layers.8.mlp.4.bias", "processor.layers.9.mlp.0.weight", "processor.layers.9.mlp.0.bias", "processor.layers.9.mlp.3.weight", "processor.layers.9.mlp.3.bias", "processor.layers.9.mlp.4.weight", "processor.layers.9.mlp.4.bias", "processor.layers.10.mlp.0.weight", "processor.layers.10.mlp.0.bias", "processor.layers.10.mlp.3.weight", "processor.layers.10.mlp.3.bias", "processor.layers.10.mlp.4.weight", "processor.layers.10.mlp.4.bias", "processor.layers.11.mlp.0.weight", "processor.layers.11.mlp.0.bias", "processor.layers.11.mlp.3.weight", "processor.layers.11.mlp.3.bias", "processor.layers.11.mlp.4.weight", "processor.layers.11.mlp.4.bias", "processor.layers.12.mlp.0.weight", "processor.layers.12.mlp.0.bias", "processor.layers.12.mlp.3.weight", "processor.layers.12.mlp.3.bias", "processor.layers.12.mlp.4.weight", "processor.layers.12.mlp.4.bias", "processor.layers.13.mlp.0.weight", "processor.layers.13.mlp.0.bias", "processor.layers.13.mlp.3.weight", "processor.layers.13.mlp.3.bias", "processor.layers.13.mlp.4.weight", "processor.layers.13.mlp.4.bias", "processor.layers.14.mlp.0.weight", "processor.layers.14.mlp.0.bias", "processor.layers.14.mlp.3.weight", "processor.layers.14.mlp.3.bias", "processor.layers.14.mlp.4.weight", "processor.layers.14.mlp.4.bias", "processor.layers.15.mlp.0.weight", "processor.layers.15.mlp.0.bias", "processor.layers.15.mlp.3.weight", "processor.layers.15.mlp.3.bias", "processor.layers.15.mlp.4.weight", "processor.layers.15.mlp.4.bias". 

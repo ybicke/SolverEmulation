@@ -1,0 +1,4 @@
+
+2025-04-21 11:01:57,901 Train started...
+Trainable parameters: 4,215,812
+2025-04-21 11:02:25,625 Loading checkpoint: 4, /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_medium/checkpoint_epoch_4.pth

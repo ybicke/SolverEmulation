@@ -1,0 +1,167 @@
+2025-04-10 18:25:22,879 INFO    StreamThr :52 [internal.py:wandb_internal():85] W&B internal server running at pid: 52, started at: 2025-04-10 18:25:22.874478
+2025-04-10 18:25:22,882 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status
+2025-04-10 18:25:22,883 INFO    WriterThread:52 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/run-graphCast_multiMesh_00001_L4_H70_Emb256_new.wandb
+2025-04-10 18:25:22,891 DEBUG   SenderThread:52 [sender.py:send():378] send: header
+2025-04-10 18:25:22,892 DEBUG   SenderThread:52 [sender.py:send():378] send: run
+2025-04-10 18:25:22,916 INFO    SenderThread:52 [sender.py:_setup_resume():748] checking resume status for None/deepcloud-yves/graphCast_multiMesh_00001_L4_H70_Emb256_new
+2025-04-10 18:25:23,227 INFO    SenderThread:52 [sender.py:_setup_resume():826] configured resuming with: ResumeState(resumed=True,step=0,history=0,events=2,output=84,runtime=14.173532,wandb_runtime=11,summary={'_wandb': {'runtime': 11}},config={'clip': {'desc': None, 'value': 1}, 'save': {'desc': None, 'value': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L4_H70_Emb256_new'}, 'seed': {'desc': None, 'value': 42}, 'test': {'desc': None, 'value': True}, 'heads': {'desc': None, 'value': 6}, 'model': {'desc': None, 'value': 'gnn_graphCast_multiMesh'}, 'train': {'desc': None, 'value': True}, '_wandb': {'desc': None, 'value': {'t': {'1': [1, 55, 77], '2': [1, 55, 77], '3': [1, 5, 13, 14, 15, 16, 23, 35, 62], '4': '3.9.15', '5': '0.17.0', '8': [5], '13': 'linux-x86_64'}, 'code_path': 'code/train_column_gnn_scheduler.py', 'framework': 'torch', 'start_time': 1744309485, 'cli_version': '0.17.0', 'is_jupyter_run': False, 'python_version': '3.9.15', 'is_kaggle_kernel': False}}, 'layers': {'desc': None, 'value': 4}, 'dataset': {'desc': None, 'value': '/mydata/deepcloud/salman/dataset/h5_data_all_chuncked'}, 'dropout': {'desc': None, 'value': 0}, 'percent': {'desc': None, 'value': 0.1}, 'shuffle': {'desc': None, 'value': True}, 'max_skip': {'desc': None, 'value': 5}, 'num_cells': {'desc': None, 'value': 81920}, 'num_epoch': {'desc': None, 'value': 30}, 'optimizer': {'desc': None, 'value': 'adamw'}, 'subsample': {'desc': None, 'value': 0.1}, 'batch_size': {'desc': None, 'value': 512}, 'hidden_dim': {'desc': None, 'value': 256}, 'patch_size': {'desc': None, 'value': 2}, 'wandb_mode': {'desc': None, 'value': 'online'}, 'num_workers': {'desc': None, 'value': 4}, 'heights_file': {'desc': None, 'value': 'None'}, 'learning_rate': {'desc': None, 'value': 0.0005}, 'fully_connected': {'desc': None, 'value': True}, 'prefetch_factor': {'desc': None, 'value': 2}, 'edge_channels_in': {'desc': None, 'value': 0}, 'lr_schedule_type': {'desc': None, 'value': 'none'}},tags=['icon grid'])
+2025-04-10 18:25:23,718 INFO    SenderThread:52 [dir_watcher.py:__init__():211] watching files in: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files
+2025-04-10 18:25:23,718 INFO    SenderThread:52 [sender.py:_start_run_threads():1123] run started: graphCast_multiMesh_00001_L4_H70_Emb256_new with start time 1744309508.700633
+2025-04-10 18:25:23,718 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: summary_record
+2025-04-10 18:25:23,727 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: check_version
+2025-04-10 18:25:23,730 INFO    SenderThread:52 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-10 18:25:23,730 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: check_version
+2025-04-10 18:25:23,871 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: run_start
+2025-04-10 18:25:23,886 DEBUG   HandlerThread:52 [system_info.py:__init__():26] System info init
+2025-04-10 18:25:23,887 DEBUG   HandlerThread:52 [system_info.py:__init__():41] System info init done
+2025-04-10 18:25:23,887 INFO    HandlerThread:52 [system_monitor.py:start():194] Starting system monitor
+2025-04-10 18:25:23,887 INFO    SystemMonitor:52 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2025-04-10 18:25:23,888 INFO    SystemMonitor:52 [interfaces.py:start():188] Started cpu monitoring
+2025-04-10 18:25:23,889 INFO    SystemMonitor:52 [interfaces.py:start():188] Started disk monitoring
+2025-04-10 18:25:23,891 INFO    SystemMonitor:52 [interfaces.py:start():188] Started gpu monitoring
+2025-04-10 18:25:23,892 INFO    SystemMonitor:52 [interfaces.py:start():188] Started memory monitoring
+2025-04-10 18:25:23,892 INFO    SystemMonitor:52 [interfaces.py:start():188] Started network monitoring
+2025-04-10 18:25:24,723 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/wandb-summary.json
+2025-04-10 18:25:24,880 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: python_packages
+2025-04-10 18:25:24,881 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: python_packages
+2025-04-10 18:25:24,921 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: stop_status
+2025-04-10 18:25:24,922 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: stop_status
+2025-04-10 18:25:25,163 DEBUG   SenderThread:52 [sender.py:send():378] send: telemetry
+2025-04-10 18:25:25,164 DEBUG   SenderThread:52 [sender.py:send():378] send: telemetry
+2025-04-10 18:25:25,762 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/requirements.txt
+2025-04-10 18:25:25,762 INFO    Thread-12 :52 [dir_watcher.py:_on_file_created():271] file/dir created: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/output.log
+2025-04-10 18:25:26,096 DEBUG   SenderThread:52 [sender.py:send():378] send: exit
+2025-04-10 18:25:26,096 INFO    SenderThread:52 [sender.py:send_exit():585] handling exit code: 1
+2025-04-10 18:25:26,096 INFO    SenderThread:52 [sender.py:send_exit():587] handling runtime: 13
+2025-04-10 18:25:26,109 INFO    SenderThread:52 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-10 18:25:26,110 INFO    SenderThread:52 [sender.py:send_exit():593] send defer
+2025-04-10 18:25:26,110 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:26,110 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 0
+2025-04-10 18:25:26,110 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:26,110 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 0
+2025-04-10 18:25:26,110 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 1
+2025-04-10 18:25:26,111 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:26,111 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 1
+2025-04-10 18:25:26,111 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:26,111 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 1
+2025-04-10 18:25:26,111 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 2
+2025-04-10 18:25:26,111 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:26,111 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 2
+2025-04-10 18:25:26,112 INFO    HandlerThread:52 [system_monitor.py:finish():203] Stopping system monitor
+2025-04-10 18:25:26,112 DEBUG   SystemMonitor:52 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2025-04-10 18:25:26,113 DEBUG   SystemMonitor:52 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2025-04-10 18:25:26,113 DEBUG   SystemMonitor:52 [system_monitor.py:_start():183] Publishing last batch of metrics
+2025-04-10 18:25:26,113 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined cpu monitor
+2025-04-10 18:25:26,115 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined disk monitor
+2025-04-10 18:25:26,123 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined gpu monitor
+2025-04-10 18:25:26,123 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined memory monitor
+2025-04-10 18:25:26,123 INFO    HandlerThread:52 [interfaces.py:finish():200] Joined network monitor
+2025-04-10 18:25:26,124 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:26,124 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 2
+2025-04-10 18:25:26,124 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 3
+2025-04-10 18:25:26,124 DEBUG   SenderThread:52 [sender.py:send():378] send: stats
+2025-04-10 18:25:26,125 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:26,125 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 3
+2025-04-10 18:25:26,125 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:26,125 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 3
+2025-04-10 18:25:26,125 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 4
+2025-04-10 18:25:26,125 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:26,125 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 4
+2025-04-10 18:25:26,126 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:26,126 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 4
+2025-04-10 18:25:26,126 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 5
+2025-04-10 18:25:26,126 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:26,126 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 5
+2025-04-10 18:25:26,126 DEBUG   SenderThread:52 [sender.py:send():378] send: summary
+2025-04-10 18:25:26,137 INFO    SenderThread:52 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-10 18:25:26,137 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:26,137 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 5
+2025-04-10 18:25:26,137 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 6
+2025-04-10 18:25:26,138 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:26,138 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 6
+2025-04-10 18:25:26,138 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:26,138 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 6
+2025-04-10 18:25:26,143 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: status_report
+2025-04-10 18:25:26,351 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 7
+2025-04-10 18:25:26,351 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:26,351 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 7
+2025-04-10 18:25:26,352 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:26,352 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 7
+2025-04-10 18:25:26,763 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/wandb-summary.json
+2025-04-10 18:25:26,764 INFO    Thread-12 :52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/config.yaml
+2025-04-10 18:25:27,097 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-10 18:25:27,190 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 8
+2025-04-10 18:25:27,191 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: poll_exit
+2025-04-10 18:25:27,191 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:27,191 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 8
+2025-04-10 18:25:27,192 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:27,192 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 8
+2025-04-10 18:25:27,192 INFO    SenderThread:52 [job_builder.py:build():432] Attempting to build job artifact
+2025-04-10 18:25:27,193 WARNING SenderThread:52 [job_builder.py:_log_if_verbose():267] Ensure read and write access to run files dir: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files, control this via the WANDB_DIR env var. See https://docs.wandb.ai/guides/track/environment-variables
+2025-04-10 18:25:27,193 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 9
+2025-04-10 18:25:27,193 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:27,193 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 9
+2025-04-10 18:25:27,194 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:27,194 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 9
+2025-04-10 18:25:27,194 INFO    SenderThread:52 [dir_watcher.py:finish():358] shutting down directory watcher
+2025-04-10 18:25:27,767 INFO    SenderThread:52 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/output.log
+2025-04-10 18:25:27,768 INFO    SenderThread:52 [dir_watcher.py:finish():388] scan: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files
+2025-04-10 18:25:27,769 INFO    SenderThread:52 [dir_watcher.py:finish():402] scan save: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/wandb-summary.json wandb-summary.json
+2025-04-10 18:25:27,769 INFO    SenderThread:52 [dir_watcher.py:finish():402] scan save: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/config.yaml config.yaml
+2025-04-10 18:25:27,773 INFO    SenderThread:52 [dir_watcher.py:finish():402] scan save: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/requirements.txt requirements.txt
+2025-04-10 18:25:27,773 INFO    SenderThread:52 [dir_watcher.py:finish():402] scan save: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/output.log output.log
+2025-04-10 18:25:27,774 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 10
+2025-04-10 18:25:27,775 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:27,775 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 10
+2025-04-10 18:25:27,779 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:27,779 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 10
+2025-04-10 18:25:27,779 INFO    SenderThread:52 [file_pusher.py:finish():169] shutting down file pusher
+2025-04-10 18:25:28,098 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-10 18:25:28,099 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: poll_exit
+2025-04-10 18:25:28,411 INFO    wandb-upload_0:52 [upload_job.py:push():130] Uploaded file /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/wandb-summary.json
+2025-04-10 18:25:28,416 INFO    wandb-upload_3:52 [upload_job.py:push():130] Uploaded file /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/output.log
+2025-04-10 18:25:28,442 INFO    wandb-upload_2:52 [upload_job.py:push():130] Uploaded file /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/requirements.txt
+2025-04-10 18:25:28,453 INFO    wandb-upload_1:52 [upload_job.py:push():130] Uploaded file /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/files/config.yaml
+2025-04-10 18:25:28,653 INFO    Thread-11 :52 [sender.py:transition_state():613] send defer: 11
+2025-04-10 18:25:28,654 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:28,654 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 11
+2025-04-10 18:25:28,654 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:28,654 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 11
+2025-04-10 18:25:28,654 INFO    SenderThread:52 [file_pusher.py:join():175] waiting for file pusher
+2025-04-10 18:25:28,655 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 12
+2025-04-10 18:25:28,655 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:28,655 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 12
+2025-04-10 18:25:28,655 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:28,655 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 12
+2025-04-10 18:25:28,655 INFO    SenderThread:52 [file_stream.py:finish():601] file stream finish called
+2025-04-10 18:25:28,900 INFO    SenderThread:52 [file_stream.py:finish():605] file stream finish is done
+2025-04-10 18:25:28,900 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 13
+2025-04-10 18:25:28,901 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:28,901 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 13
+2025-04-10 18:25:28,901 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:28,902 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 13
+2025-04-10 18:25:28,902 INFO    SenderThread:52 [sender.py:transition_state():613] send defer: 14
+2025-04-10 18:25:28,902 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: defer
+2025-04-10 18:25:28,902 INFO    HandlerThread:52 [handler.py:handle_request_defer():184] handle defer: 14
+2025-04-10 18:25:28,903 DEBUG   SenderThread:52 [sender.py:send():378] send: final
+2025-04-10 18:25:28,903 DEBUG   SenderThread:52 [sender.py:send():378] send: footer
+2025-04-10 18:25:28,903 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: defer
+2025-04-10 18:25:28,903 INFO    SenderThread:52 [sender.py:send_request_defer():609] handle sender defer: 14
+2025-04-10 18:25:28,904 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-10 18:25:28,905 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: poll_exit
+2025-04-10 18:25:28,906 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-10 18:25:28,906 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: poll_exit
+2025-04-10 18:25:28,907 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: server_info
+2025-04-10 18:25:28,907 DEBUG   SenderThread:52 [sender.py:send_request():405] send_request: server_info
+2025-04-10 18:25:28,911 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: get_summary
+2025-04-10 18:25:28,912 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: sampled_history
+2025-04-10 18:25:28,913 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: internal_messages
+2025-04-10 18:25:29,048 INFO    MainThread:52 [wandb_run.py:_footer_history_summary_info():3994] rendering history
+2025-04-10 18:25:29,048 INFO    MainThread:52 [wandb_run.py:_footer_history_summary_info():4026] rendering summary
+2025-04-10 18:25:29,048 INFO    MainThread:52 [wandb_run.py:_footer_sync_info():3953] logging synced files
+2025-04-10 18:25:29,048 DEBUG   HandlerThread:52 [handler.py:handle_request():158] handle_request: shutdown
+2025-04-10 18:25:29,048 INFO    HandlerThread:52 [handler.py:finish():882] shutting down handler
+2025-04-10 18:25:29,907 INFO    WriterThread:52 [datastore.py:close():296] close: /mydata/deepcloud/yves/SolverEmulation/wandb/run-20250410_182522-graphCast_multiMesh_00001_L4_H70_Emb256_new/run-graphCast_multiMesh_00001_L4_H70_Emb256_new.wandb
+2025-04-10 18:25:30,044 INFO    SenderThread:52 [sender.py:finish():1545] shutting down sender
+2025-04-10 18:25:30,045 INFO    SenderThread:52 [file_pusher.py:finish():169] shutting down file pusher
+2025-04-10 18:25:30,045 INFO    SenderThread:52 [file_pusher.py:join():175] waiting for file pusher

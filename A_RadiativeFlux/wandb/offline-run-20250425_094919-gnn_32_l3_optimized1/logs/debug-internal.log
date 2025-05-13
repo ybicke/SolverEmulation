@@ -1,0 +1,134 @@
+2025-04-25 09:49:20,683 INFO    StreamThr :36 [internal.py:wandb_internal():85] W&B internal server running at pid: 36, started at: 2025-04-25 09:49:20.552558
+2025-04-25 09:49:20,685 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status
+2025-04-25 09:49:20,688 INFO    WriterThread:36 [datastore.py:open_for_write():87] open: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/offline-run-20250425_094919-gnn_32_l3_optimized1/run-gnn_32_l3_optimized1.wandb
+2025-04-25 09:49:20,700 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: run_start
+2025-04-25 09:49:20,716 DEBUG   HandlerThread:36 [system_info.py:__init__():26] System info init
+2025-04-25 09:49:20,716 DEBUG   HandlerThread:36 [system_info.py:__init__():41] System info init done
+2025-04-25 09:49:20,716 INFO    HandlerThread:36 [system_monitor.py:start():194] Starting system monitor
+2025-04-25 09:49:20,717 INFO    SystemMonitor:36 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2025-04-25 09:49:20,717 INFO    HandlerThread:36 [system_monitor.py:probe():214] Collecting system info
+2025-04-25 09:49:20,719 INFO    SystemMonitor:36 [interfaces.py:start():188] Started cpu monitoring
+2025-04-25 09:49:20,720 INFO    SystemMonitor:36 [interfaces.py:start():188] Started disk monitoring
+2025-04-25 09:49:20,721 INFO    SystemMonitor:36 [interfaces.py:start():188] Started gpu monitoring
+2025-04-25 09:49:20,722 INFO    SystemMonitor:36 [interfaces.py:start():188] Started memory monitoring
+2025-04-25 09:49:20,723 INFO    SystemMonitor:36 [interfaces.py:start():188] Started network monitoring
+2025-04-25 09:49:20,735 DEBUG   HandlerThread:36 [system_info.py:probe():150] Probing system
+2025-04-25 09:49:20,735 DEBUG   HandlerThread:36 [system_info.py:probe():198] Probing system done
+2025-04-25 09:49:20,735 DEBUG   HandlerThread:36 [system_monitor.py:probe():223] {'os': 'Linux-6.8.0-52-generic-x86_64-with-glibc2.31', 'python': '3.9.15', 'heartbeatAt': '2025-04-25T09:49:20.735501', 'startedAt': '2025-04-25T09:49:19.636760', 'docker': None, 'cuda': None, 'args': ('--model', 'gnn_optimized1', '--dataset', '/mydata/deepcloud/salman/dataset/h5_data_all_chuncked', '--save', '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_optimized1', '--percent', '0.1', '--subsample', '0.1', '--num-workers', '4', '--prefetch-factor', '2', '--num-cells', '81920', '--channel-3d', '6', '--channel-2d', '6', '--channel-out', '4', '--no-train', '--test', '--shuffle', '--batch-size', '512', '--optimizer', 'adamw', '--clip', '1', '--num-epoch', '5', '--learning-rate', '0.0005', '--hidden-dim', '32', '--layers', '3', '--dropout', '0.0', '--edge-channels-in', '1', '--fully-connected', '--wandb-mode', 'offline'), 'state': 'running', 'program': '/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_models.py', 'codePathLocal': 'train_models.py', 'codePath': 'train_models.py', 'host': 'gnn-32-l3-optimized-1-0-3', 'username': 'root', 'executable': '/myhome/mambaforge/envs/deepFlux/bin/python', 'cpu_count': 16, 'cpu_count_logical': 16, 'cpu_freq': {'current': 2999.9959999999996, 'min': 0.0, 'max': 0.0}, 'cpu_freq_per_core': [{'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}, {'current': 2999.996, 'min': 0.0, 'max': 0.0}], 'disk': {'/': {'total': 1875.5519676208496, 'used': 719.1587715148926}}, 'gpu': 'NVIDIA A100 80GB PCIe', 'gpu_count': 1, 'gpu_devices': [{'name': 'NVIDIA A100 80GB PCIe', 'memory_total': 85899345920}], 'memory': {'total': 125.79447555541992}}
+2025-04-25 09:49:20,735 INFO    HandlerThread:36 [system_monitor.py:probe():224] Finished collecting system info
+2025-04-25 09:49:20,735 INFO    HandlerThread:36 [system_monitor.py:probe():227] Publishing system info
+2025-04-25 09:49:20,735 DEBUG   HandlerThread:36 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2025-04-25 09:49:29,634 DEBUG   HandlerThread:36 [system_info.py:_save_conda():222] Saving conda packages done
+2025-04-25 09:49:29,635 DEBUG   HandlerThread:36 [system_info.py:_save_code():44] Saving code
+2025-04-25 09:49:29,797 DEBUG   HandlerThread:36 [system_info.py:_save_code():65] Saving code done
+2025-04-25 09:49:29,842 INFO    HandlerThread:36 [system_monitor.py:probe():229] Finished publishing system info
+2025-04-25 09:49:29,870 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: keepalive
+2025-04-25 09:49:29,870 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-25 09:49:29,871 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: status_report
+2025-04-25 09:49:30,603 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: python_packages
+2025-04-25 09:49:30,624 DEBUG   SenderThread:36 [sender.py:send():378] send: exit
+2025-04-25 09:49:30,624 INFO    SenderThread:36 [sender.py:send_exit():585] handling exit code: 1
+2025-04-25 09:49:30,625 INFO    SenderThread:36 [sender.py:send_exit():587] handling runtime: 9
+2025-04-25 09:49:30,653 INFO    SenderThread:36 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2025-04-25 09:49:30,653 INFO    SenderThread:36 [sender.py:send_exit():593] send defer
+2025-04-25 09:49:30,653 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,653 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 0
+2025-04-25 09:49:30,654 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,654 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 0
+2025-04-25 09:49:30,654 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 1
+2025-04-25 09:49:30,654 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,654 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 1
+2025-04-25 09:49:30,655 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,655 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 1
+2025-04-25 09:49:30,655 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 2
+2025-04-25 09:49:30,655 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,655 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 2
+2025-04-25 09:49:30,655 INFO    HandlerThread:36 [system_monitor.py:finish():203] Stopping system monitor
+2025-04-25 09:49:30,656 INFO    HandlerThread:36 [interfaces.py:finish():200] Joined cpu monitor
+2025-04-25 09:49:30,656 INFO    HandlerThread:36 [interfaces.py:finish():200] Joined disk monitor
+2025-04-25 09:49:30,657 DEBUG   SystemMonitor:36 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2025-04-25 09:49:30,657 DEBUG   SystemMonitor:36 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2025-04-25 09:49:30,657 DEBUG   SystemMonitor:36 [system_monitor.py:_start():183] Publishing last batch of metrics
+2025-04-25 09:49:30,663 INFO    HandlerThread:36 [interfaces.py:finish():200] Joined gpu monitor
+2025-04-25 09:49:30,664 INFO    HandlerThread:36 [interfaces.py:finish():200] Joined memory monitor
+2025-04-25 09:49:30,664 INFO    HandlerThread:36 [interfaces.py:finish():200] Joined network monitor
+2025-04-25 09:49:30,664 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,665 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 2
+2025-04-25 09:49:30,665 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 3
+2025-04-25 09:49:30,665 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,665 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 3
+2025-04-25 09:49:30,665 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,665 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 3
+2025-04-25 09:49:30,665 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 4
+2025-04-25 09:49:30,666 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,666 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 4
+2025-04-25 09:49:30,666 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,666 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 4
+2025-04-25 09:49:30,666 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 5
+2025-04-25 09:49:30,666 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,666 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 5
+2025-04-25 09:49:30,667 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,667 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 5
+2025-04-25 09:49:30,667 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 6
+2025-04-25 09:49:30,667 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,667 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 6
+2025-04-25 09:49:30,667 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,667 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 6
+2025-04-25 09:49:30,667 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 7
+2025-04-25 09:49:30,668 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-04-25 09:49:30,668 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,668 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 7
+2025-04-25 09:49:30,668 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: status_report
+2025-04-25 09:49:30,669 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,669 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 7
+2025-04-25 09:49:30,669 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 8
+2025-04-25 09:49:30,669 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,669 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 8
+2025-04-25 09:49:30,669 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,670 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 8
+2025-04-25 09:49:30,670 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 9
+2025-04-25 09:49:30,670 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,670 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 9
+2025-04-25 09:49:30,670 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,670 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 9
+2025-04-25 09:49:30,670 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 10
+2025-04-25 09:49:30,671 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,671 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 10
+2025-04-25 09:49:30,671 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,671 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 10
+2025-04-25 09:49:30,671 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 11
+2025-04-25 09:49:30,672 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,672 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 11
+2025-04-25 09:49:30,672 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,673 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 11
+2025-04-25 09:49:30,673 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 12
+2025-04-25 09:49:30,673 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,673 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 12
+2025-04-25 09:49:30,673 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,673 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 12
+2025-04-25 09:49:30,673 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 13
+2025-04-25 09:49:30,673 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,673 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 13
+2025-04-25 09:49:30,674 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,674 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 13
+2025-04-25 09:49:30,674 INFO    SenderThread:36 [sender.py:transition_state():613] send defer: 14
+2025-04-25 09:49:30,674 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: defer
+2025-04-25 09:49:30,674 INFO    HandlerThread:36 [handler.py:handle_request_defer():184] handle defer: 14
+2025-04-25 09:49:30,675 DEBUG   SenderThread:36 [sender.py:send():378] send: final
+2025-04-25 09:49:30,675 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: defer
+2025-04-25 09:49:30,675 INFO    SenderThread:36 [sender.py:send_request_defer():609] handle sender defer: 14
+2025-04-25 09:49:30,676 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-25 09:49:30,676 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: poll_exit
+2025-04-25 09:49:30,677 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: poll_exit
+2025-04-25 09:49:30,677 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: poll_exit
+2025-04-25 09:49:30,678 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: server_info
+2025-04-25 09:49:30,678 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: server_info
+2025-04-25 09:49:30,680 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: get_summary
+2025-04-25 09:49:30,681 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: sampled_history
+2025-04-25 09:49:30,681 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: internal_messages
+2025-04-25 09:49:30,682 INFO    MainThread:36 [wandb_run.py:_footer_history_summary_info():3994] rendering history
+2025-04-25 09:49:30,682 INFO    MainThread:36 [wandb_run.py:_footer_history_summary_info():4026] rendering summary
+2025-04-25 09:49:30,682 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: shutdown
+2025-04-25 09:49:30,683 INFO    HandlerThread:36 [handler.py:finish():882] shutting down handler
+2025-04-25 09:49:31,678 INFO    WriterThread:36 [datastore.py:close():296] close: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/offline-run-20250425_094919-gnn_32_l3_optimized1/run-gnn_32_l3_optimized1.wandb
+2025-04-25 09:49:31,679 INFO    SenderThread:36 [sender.py:finish():1545] shutting down sender

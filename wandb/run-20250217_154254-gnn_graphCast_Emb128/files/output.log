@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column.py", line 1081, in <module>
+    main()
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column.py", line 1069, in main
+    train_model(model, train_loader, val_loader)
+  File "/mydata/deepcloud/yves/SolverEmulation/train_column.py", line 810, in train_model
+    outputs = model(batch_x3, batch_x2)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/mydata/deepcloud/yves/SolverEmulation/column_files/gnn_graphCast.py", line 100, in forward
+    edge_index = self.create_edge_index(L+1, B, x.device)
+  File "/mydata/deepcloud/yves/SolverEmulation/column_files/gnn_graphCast.py", line 83, in create_edge_index
+    edge_index += batch_offset.view(1, -1)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!
+[1m-------------------------------------------------------------------------------
+[1mtrain_column.py 1081 <module>
+[1mmain()
+[1mtrain_column.py 1069 main
+[1mtrain_model(model, train_loader, val_loader)
+[1mtrain_column.py 810 train_model
+[1moutputs = model(batch_x3, batch_x2)
+[1mmodule.py 1532 _wrapped_call_impl
+[1mreturn self._call_impl(*args, **kwargs)
+[1mmodule.py 1541 _call_impl
+[1mreturn forward_call(*args, **kwargs)
+[1mgnn_graphCast.py 100 forward
+[1medge_index = self.create_edge_index(L+1, B, x.device)
+[1mgnn_graphCast.py 83 create_edge_index
+[1medge_index += batch_offset.view(1, -1)
+[1mRuntimeError:
+[1mExpected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!
