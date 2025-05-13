@@ -1,8 +1,0 @@
-
-Trainable parameters: 68,228
-2025-04-24 11:36:37,586 Train started...
-2025-04-24 11:36:37,596 Loading checkpoint: 1, /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l3_optimized1/checkpoint_epoch_1.pth
-2025-04-24 11:36:37,639 Training will continue from epoch: 1/30
-batch 100, time:0.152, loss: 124.9579, mean_absolute_error: 4.7486
-batch 200, time:0.151, loss: 106.5469, mean_absolute_error: 4.4604
-batch 300, time:0.149, loss: 131.7022, mean_absolute_error: 5.0950

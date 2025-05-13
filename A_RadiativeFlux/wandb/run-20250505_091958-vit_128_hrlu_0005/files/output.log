@@ -1,5 +1,0 @@
-
-Trainable parameters: 933,026
-2025-05-05 09:20:09,938 Train started...
-2025-05-05 09:20:09,943 Using heating rate smoothness loss with weight=0.0005, applied to top 30 levels
-batch 100, time:0.098, loss: 368.2821, mse: 351.2335, smoothness: 17.0486, mean_absolute_error: 9.9542

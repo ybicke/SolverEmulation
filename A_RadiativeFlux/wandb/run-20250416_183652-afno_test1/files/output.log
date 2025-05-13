@@ -1,7 +1,0 @@
-
-Trainable parameters: 575,522
-2025-04-16 18:37:03,050 Train started...
-batch 100, time:0.527, loss: 1101.8569, mean_absolute_error: 15.8317
-batch 200, time:0.516, loss: 484.6535, mean_absolute_error: 10.0730
-batch 300, time:0.531, loss: 408.8216, mean_absolute_error: 9.4429
-batch 400, time:0.523, loss: 277.1270, mean_absolute_error: 8.0828

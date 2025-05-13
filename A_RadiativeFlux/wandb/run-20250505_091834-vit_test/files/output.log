@@ -1,5 +1,0 @@
-
-Trainable parameters: 933,026
-2025-05-05 09:18:35,402 Train started...
-2025-05-05 09:18:35,406 Using heating rate smoothness loss with weight=0.0005, applied to top 30 levels
-2025-05-05 09:18:35,408 Loading checkpoint: 3, /mydata/deepcloud/yves/A_RadiativeFlux/results/vit_test/checkpoint_epoch_3.pth

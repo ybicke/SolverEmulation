@@ -1,3 +1,6 @@
-# Renku
 wandb/
+*/wandb/
+**/wandb/
 lightning_logs/
+*/lightning_logs/
+**/lightning_logs/
