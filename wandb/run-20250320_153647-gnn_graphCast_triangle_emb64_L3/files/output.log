@@ -1,4 +1,0 @@
-
-batch 10, time:0.026, loss: 11705.2744, mean_absolute_error: 56.3999
-batch 20, time:0.019, loss: 1790.2766, mean_absolute_error: 18.6110
-batch 30, time:0.026, loss: 11151.1201, mean_absolute_error: 44.7943

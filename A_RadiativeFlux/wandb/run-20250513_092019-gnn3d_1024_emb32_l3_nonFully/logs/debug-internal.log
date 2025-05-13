@@ -10240,3 +10240,522 @@
 2025-05-13 15:47:40,546 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
 2025-05-13 15:47:45,083 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
 2025-05-13 15:47:45,307 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:47:50,084 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:47:53,145 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:47:53,324 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:47:55,148 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:47:55,568 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:47:55,572 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:48:00,651 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:03,354 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:48:05,657 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:10,572 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:48:10,572 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:48:10,748 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:13,429 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:48:15,753 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:20,972 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:21,464 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:48:23,146 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:48:25,570 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:48:25,571 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:48:26,780 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:31,494 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:48:32,097 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:37,098 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:40,527 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:48:40,571 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:48:40,571 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:48:42,752 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:48,600 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:48,692 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:48:53,151 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:48:54,152 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:48:55,571 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:48:55,571 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:48:58,743 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:48:59,251 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:04,257 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:06,798 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:49:10,050 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:10,576 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:49:10,576 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:49:15,277 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:16,888 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:49:20,333 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:23,148 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:49:25,597 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:49:25,600 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:49:25,823 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:26,955 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:49:30,822 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:36,498 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:36,996 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:49:40,588 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:49:40,588 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:49:41,801 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:45,022 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:49:46,897 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:51,898 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:49:53,152 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:49:55,050 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:49:55,588 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:49:55,589 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:49:57,869 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:03,075 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:03,082 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:50:08,076 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:10,588 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:50:10,589 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:50:13,135 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:50:13,933 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:18,934 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:21,168 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:50:23,150 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:50:24,151 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:25,588 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:50:25,589 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:50:29,708 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:31,199 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:50:34,710 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:39,251 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:50:39,891 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:40,588 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:50:40,589 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:50:45,844 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:49,403 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:50:51,213 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:53,156 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:50:55,589 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:50:55,594 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:50:56,826 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:50:57,418 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:51:01,828 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:05,489 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:51:07,190 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:10,590 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:51:10,590 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:51:12,613 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:15,526 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:51:17,620 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:22,760 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:23,156 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:51:23,545 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:51:25,590 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:51:25,591 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:51:27,856 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:33,010 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:33,571 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:51:38,013 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:40,590 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:51:40,591 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:51:41,600 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:51:43,848 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:49,344 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:49,634 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:51:53,155 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:51:55,159 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:51:55,590 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:51:55,590 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:52:00,217 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:01,693 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:52:05,221 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:10,591 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:52:10,591 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:52:10,760 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:11,749 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:52:15,761 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:19,773 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:52:21,349 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:23,163 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:52:25,590 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:52:25,591 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:52:26,828 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:29,794 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:52:32,754 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:38,385 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:39,829 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:52:40,591 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:52:40,591 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:52:43,752 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:46,919 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:52:48,864 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:53,174 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:52:54,176 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:52:55,591 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:52:55,592 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:52:57,073 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:52:59,746 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:04,882 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:05,337 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:53:09,882 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:10,591 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:53:10,592 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:53:14,935 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:15,366 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:53:19,943 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:23,166 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:53:23,419 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:53:25,168 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:25,592 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:53:25,592 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:53:30,281 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:31,698 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:53:35,286 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:40,398 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:40,592 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:53:40,592 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:53:41,722 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:53:45,763 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:51,670 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:53:51,744 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:53:53,172 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:53:55,592 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:53:55,593 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:53:56,801 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:01,772 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:54:02,079 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:07,080 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:09,843 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:54:10,592 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:54:10,592 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:54:12,774 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:17,779 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:19,890 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:54:23,139 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:23,168 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:54:25,592 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:54:25,593 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:54:29,079 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:29,927 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:54:34,084 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:37,952 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:54:39,819 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:40,592 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:54:40,593 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:54:45,492 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:46,038 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:54:50,496 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:54:53,102 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:54:53,169 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:54:55,592 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:54:55,593 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:54:55,756 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:00,753 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:03,133 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:55:06,156 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:10,602 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:55:10,602 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:55:11,159 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:55:11,815 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:16,816 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:21,192 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:55:22,604 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:23,169 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:55:25,602 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:55:25,603 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:55:27,814 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:29,274 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:55:33,479 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:37,270 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,271 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,275 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,276 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,279 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,282 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,283 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,283 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,296 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,297 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,300 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,300 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,304 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,306 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,311 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,311 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,318 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,319 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,321 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,322 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,326 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,326 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,327 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,328 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,338 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,338 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,340 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,341 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,345 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,347 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,348 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:37,349 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: partial_history
+2025-05-13 15:55:39,271 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:39,468 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:55:40,602 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:55:40,602 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:55:44,817 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:49,499 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:55:50,080 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:53,171 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:55:55,172 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:55:55,618 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:55:55,633 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:55:57,529 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:56:00,844 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:06,060 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:07,598 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:56:10,605 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:56:10,607 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:56:11,821 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:15,623 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:56:17,090 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:22,091 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:23,171 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:56:25,606 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:56:25,606 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:56:25,659 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:56:27,868 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:32,869 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:35,682 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:56:38,844 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:40,607 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:56:40,610 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:56:43,755 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:56:43,880 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:48,882 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:51,793 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:56:53,172 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:56:54,173 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:56:55,611 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:56:55,611 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:56:59,361 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:01,825 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:57:04,373 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:09,475 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:09,851 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:57:10,608 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:57:10,611 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:57:14,756 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:19,786 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:19,882 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:57:23,173 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:57:25,174 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:25,608 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:57:25,614 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:57:27,928 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:57:30,683 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:36,475 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:37,960 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:57:40,609 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:57:40,609 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:57:41,871 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:45,980 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:57:47,253 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:52,256 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:57:53,182 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:57:55,609 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:57:55,609 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:57:56,096 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:57:57,837 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:03,066 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:04,123 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:58:08,068 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:10,611 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:58:10,611 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:58:13,561 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:14,170 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:58:18,561 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:22,196 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:58:23,174 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:58:24,175 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:25,613 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:58:25,614 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:58:29,426 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:32,240 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:58:34,427 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:39,997 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:40,328 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:58:40,615 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:58:40,616 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:58:45,832 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:49,363 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:58:51,774 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:53,175 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:58:55,617 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:58:55,619 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:58:56,807 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:58:59,402 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:59:02,527 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:07,436 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:59:07,985 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:10,617 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:59:10,618 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:59:13,829 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:17,479 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:59:19,674 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:23,176 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:59:25,201 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:25,544 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:59:25,618 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:59:25,618 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:59:27,695 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:59:30,795 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:35,723 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:59:36,329 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:40,618 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:59:40,622 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:59:41,828 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:45,749 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:59:47,495 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:52,497 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 15:59:53,177 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 15:59:55,618 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 15:59:55,619 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 15:59:55,791 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 15:59:57,867 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:02,873 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:05,879 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:00:08,336 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:10,619 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:00:10,622 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:00:13,728 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:13,901 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:00:18,732 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:21,944 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:00:23,178 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:00:24,180 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:25,621 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:00:25,621 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:00:30,071 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:31,987 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:00:35,081 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:40,026 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:00:40,237 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:40,619 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:00:40,620 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:00:45,864 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:50,088 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:00:51,045 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:53,182 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:00:55,620 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:00:55,621 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:00:56,807 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:00:58,118 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:01:01,808 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:06,158 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:01:06,933 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:10,620 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:01:10,620 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:01:12,778 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:16,195 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:01:18,575 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:23,183 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:01:24,189 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:25,620 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:01:25,622 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:01:26,240 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:01:29,793 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:35,210 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:36,291 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:01:40,210 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:40,620 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:01:40,621 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:01:44,331 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:01:45,798 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:50,802 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:01:53,184 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:01:54,368 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:01:55,622 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:01:55,626 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:01:55,828 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:00,831 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:04,511 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:02:06,025 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:10,620 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:02:10,621 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:02:11,427 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:14,558 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:02:16,439 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:21,614 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:02:22,226 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:23,186 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:02:25,621 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:02:25,623 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:02:27,856 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:29,722 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:02:33,529 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:39,350 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:39,759 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:02:40,621 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:02:40,622 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:02:44,843 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:47,900 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:02:50,333 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:53,187 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:02:55,622 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:02:55,623 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:02:55,806 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:02:57,958 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:03:01,257 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:06,874 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:08,046 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:03:10,622 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:03:10,625 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:03:12,864 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:16,071 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:03:17,892 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:22,893 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:23,188 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:03:25,623 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:03:25,624 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:03:26,244 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:03:28,854 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:34,309 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:03:34,663 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:39,665 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:40,626 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:03:40,627 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:03:42,330 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:03:45,093 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:50,094 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:52,487 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:03:53,188 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:03:55,189 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:03:55,630 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:03:55,633 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:04:00,260 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:02,524 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:04:05,265 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:10,612 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:04:10,624 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:04:10,626 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:04:10,886 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:15,888 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:20,684 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:04:21,524 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:23,190 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:04:25,624 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:04:25,628 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:04:26,850 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:28,718 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:04:32,214 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:37,750 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:04:37,847 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:40,624 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:04:40,625 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:04:43,844 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:45,788 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:04:49,815 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:53,191 DEBUG   SenderThread:36 [sender.py:send():378] send: stats
+2025-05-13 16:04:55,246 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:04:55,624 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:04:55,625 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:04:55,827 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:05:00,838 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:05:03,875 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:05:06,195 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:05:10,626 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: stop_status
+2025-05-13 16:05:10,632 DEBUG   SenderThread:36 [sender.py:send_request():405] send_request: stop_status
+2025-05-13 16:05:11,721 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report
+2025-05-13 16:05:13,906 INFO    Thread-12 :36 [dir_watcher.py:_on_file_modified():288] file/dir modified: /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/wandb/run-20250513_092019-gnn3d_1024_emb32_l3_nonFully/files/output.log
+2025-05-13 16:05:16,731 DEBUG   HandlerThread:36 [handler.py:handle_request():158] handle_request: status_report

@@ -45,3 +45,28 @@ Epoch 0 started
   Batch  1200, Loss: 16916.95, MAE: 18.9696
   Batch  1296, Loss: 12813.90, MAE: 15.4210
   Batch  1300, Loss: 11482.22, MAE: 14.0948
+  Batch  1400, Loss: 15606.72, MAE: 16.6187
+  Batch  1495, Loss: 13794.47, MAE: 15.9021
+  Batch  1500, Loss: 15732.50, MAE: 16.5728
+  Batch  1600, Loss: 12369.13, MAE: 14.9861
+  Batch  1700, Loss: 14499.83, MAE: 16.0508
+  Batch  1793, Loss: 15248.61, MAE: 16.8596
+  Batch  1800, Loss: 18019.89, MAE: 18.6737
+  Batch  1900, Loss: 16303.21, MAE: 17.2327
+  Batch  1989, Loss: 14017.96, MAE: 16.5648
+  Batch  2000, Loss: 10361.40, MAE: 13.0801
+  Batch  2100, Loss: 11742.12, MAE: 14.1655
+  Batch  2190, Loss: 14186.03, MAE: 16.0447
+  Batch  2200, Loss: 13877.97, MAE: 15.7897
+  Batch  2300, Loss: 14147.43, MAE: 15.7141
+  Batch  2395, Loss: 11493.39, MAE: 13.5605
+  Batch  2400, Loss: 14966.35, MAE: 16.3987
+  Batch  2497, Loss: 14222.36, MAE: 16.2106
+  Batch  2500, Loss: 11867.40, MAE: 14.7414
+  Batch  2600, Loss: 13375.96, MAE: 16.6804
+  Batch  2691, Loss: 14438.16, MAE: 16.0517
+  Batch  2700, Loss: 12255.51, MAE: 14.1484
+  Batch  2800, Loss: 12650.01, MAE: 15.2140
+Validation - Loss: 13856.5894, MAE: 15.8120
+Epoch 0 completed in 1933.31s. Loss: 14625.5387, MAE: 16.8956, Batch time: 190.5ms
+Epoch 1 started

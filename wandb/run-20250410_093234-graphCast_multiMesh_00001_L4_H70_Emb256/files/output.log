@@ -1,5 +1,0 @@
-
-2025-04-10 09:32:43,818 No scheduler. Using constant LR = args.learning_rate
-batch 100, time:1.849, lr: 0.000500, loss: 1151.9624, mean_absolute_error: 16.2435
-batch 200, time:1.807, lr: 0.000500, loss: 452.1394, mean_absolute_error: 10.8155
-batch 300, time:1.758, lr: 0.000500, loss: 437.4203, mean_absolute_error: 10.1220

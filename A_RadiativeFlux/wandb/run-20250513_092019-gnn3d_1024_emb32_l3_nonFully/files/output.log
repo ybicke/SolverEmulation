@@ -10707,3 +10707,819 @@ Message passing: 23.98ms
 Decoding: 0.93ms
 Total forward pass: 25.55ms
 Number of edges: 1131904
+batch 450, time:0.038, loss: 4550.8506, mean_absolute_error: 35.7158
+Feature prep: 0.14ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 22.70ms
+Decoding: 0.76ms
+Total forward pass: 24.09ms
+Number of edges: 1131904
+Feature prep: 0.18ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 22.53ms
+Decoding: 0.92ms
+Total forward pass: 24.11ms
+Number of edges: 1131904
+Feature prep: 0.14ms
+Graph construction: 0.17ms
+Encoding: 0.33ms
+Message passing: 25.12ms
+Decoding: 0.84ms
+Total forward pass: 26.61ms
+Number of edges: 1131904
+Feature prep: 0.27ms
+Graph construction: 0.33ms
+Encoding: 0.45ms
+Message passing: 34.86ms
+Decoding: 1.60ms
+Total forward pass: 37.52ms
+Number of edges: 1131904
+Feature prep: 0.20ms
+Graph construction: 0.19ms
+Encoding: 0.36ms
+Message passing: 23.24ms
+Decoding: 0.84ms
+Total forward pass: 24.83ms
+Number of edges: 1131904
+Feature prep: 0.23ms
+Graph construction: 0.23ms
+Encoding: 0.34ms
+Message passing: 22.93ms
+Decoding: 1.14ms
+Total forward pass: 24.87ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.18ms
+Encoding: 1.72ms
+Message passing: 29.33ms
+Decoding: 0.88ms
+Total forward pass: 32.26ms
+Number of edges: 1131904
+Feature prep: 0.30ms
+Graph construction: 0.20ms
+Encoding: 2.32ms
+Message passing: 24.96ms
+Decoding: 0.92ms
+Total forward pass: 28.70ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.18ms
+Encoding: 0.27ms
+Message passing: 24.79ms
+Decoding: 0.89ms
+Total forward pass: 26.30ms
+Number of edges: 1131904
+Feature prep: 0.20ms
+Graph construction: 0.20ms
+Encoding: 0.34ms
+Message passing: 22.80ms
+Decoding: 0.85ms
+Total forward pass: 24.39ms
+Number of edges: 1131904
+batch 460, time:0.040, loss: 3676.8948, mean_absolute_error: 35.3081
+Feature prep: 0.23ms
+Graph construction: 0.21ms
+Encoding: 3.85ms
+Message passing: 26.78ms
+Decoding: 1.31ms
+Total forward pass: 32.38ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.34ms
+Message passing: 23.81ms
+Decoding: 0.85ms
+Total forward pass: 25.36ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 26.14ms
+Decoding: 0.88ms
+Total forward pass: 27.69ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 27.40ms
+Decoding: 0.80ms
+Total forward pass: 28.86ms
+Number of edges: 1131904
+Feature prep: 0.26ms
+Graph construction: 0.32ms
+Encoding: 0.42ms
+Message passing: 22.75ms
+Decoding: 1.53ms
+Total forward pass: 25.28ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.20ms
+Encoding: 0.51ms
+Message passing: 23.18ms
+Decoding: 0.87ms
+Total forward pass: 24.93ms
+Number of edges: 1131904
+Feature prep: 0.26ms
+Graph construction: 0.32ms
+Encoding: 2.48ms
+Message passing: 29.92ms
+Decoding: 1.56ms
+Total forward pass: 34.54ms
+Number of edges: 1131904
+Feature prep: 0.17ms
+Graph construction: 0.18ms
+Encoding: 0.30ms
+Message passing: 22.50ms
+Decoding: 0.78ms
+Total forward pass: 23.94ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 36.10ms
+Decoding: 0.89ms
+Total forward pass: 37.65ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 36.91ms
+Decoding: 0.85ms
+Total forward pass: 38.43ms
+Number of edges: 1131904
+batch 470, time:0.056, loss: 216.3440, mean_absolute_error: 6.8555
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.28ms
+Message passing: 26.80ms
+Decoding: 0.83ms
+Total forward pass: 28.27ms
+Number of edges: 1131904
+Feature prep: 0.26ms
+Graph construction: 0.32ms
+Encoding: 0.42ms
+Message passing: 33.24ms
+Decoding: 1.51ms
+Total forward pass: 35.75ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.20ms
+Encoding: 0.29ms
+Message passing: 36.31ms
+Decoding: 1.94ms
+Total forward pass: 38.92ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.18ms
+Encoding: 0.31ms
+Message passing: 31.27ms
+Decoding: 0.86ms
+Total forward pass: 32.79ms
+Number of edges: 1131904
+Feature prep: 0.29ms
+Graph construction: 0.28ms
+Encoding: 0.35ms
+Message passing: 24.67ms
+Decoding: 1.10ms
+Total forward pass: 26.68ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.18ms
+Encoding: 0.28ms
+Message passing: 23.95ms
+Decoding: 0.89ms
+Total forward pass: 25.45ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.19ms
+Encoding: 0.33ms
+Message passing: 22.76ms
+Decoding: 3.98ms
+Total forward pass: 27.45ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.30ms
+Message passing: 33.10ms
+Decoding: 1.76ms
+Total forward pass: 35.53ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.20ms
+Encoding: 0.27ms
+Message passing: 22.43ms
+Decoding: 0.84ms
+Total forward pass: 23.90ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 5.25ms
+Encoding: 0.30ms
+Message passing: 28.53ms
+Decoding: 0.82ms
+Total forward pass: 35.06ms
+Number of edges: 1131904
+batch 480, time:0.052, loss: 3022.2925, mean_absolute_error: 29.8441
+Feature prep: 0.19ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 22.96ms
+Decoding: 0.83ms
+Total forward pass: 24.48ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.25ms
+Encoding: 0.28ms
+Message passing: 22.71ms
+Decoding: 0.90ms
+Total forward pass: 24.31ms
+Number of edges: 1131904
+Feature prep: 0.17ms
+Graph construction: 0.21ms
+Encoding: 0.28ms
+Message passing: 22.79ms
+Decoding: 0.91ms
+Total forward pass: 24.35ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 26.86ms
+Decoding: 0.86ms
+Total forward pass: 28.38ms
+Number of edges: 1131904
+Feature prep: 0.17ms
+Graph construction: 0.22ms
+Encoding: 0.29ms
+Message passing: 39.29ms
+Decoding: 3.43ms
+Total forward pass: 43.38ms
+Number of edges: 1131904
+Feature prep: 0.20ms
+Graph construction: 0.23ms
+Encoding: 0.32ms
+Message passing: 36.02ms
+Decoding: 0.84ms
+Total forward pass: 37.61ms
+Number of edges: 1131904
+Feature prep: 0.21ms
+Graph construction: 0.23ms
+Encoding: 0.34ms
+Message passing: 31.91ms
+Decoding: 1.12ms
+Total forward pass: 33.80ms
+Number of edges: 1131904
+Feature prep: 0.24ms
+Graph construction: 0.31ms
+Encoding: 0.44ms
+Message passing: 31.67ms
+Decoding: 1.50ms
+Total forward pass: 34.16ms
+Number of edges: 1131904
+Feature prep: 0.15ms
+Graph construction: 2.74ms
+Encoding: 0.28ms
+Message passing: 22.99ms
+Decoding: 0.80ms
+Total forward pass: 26.97ms
+Number of edges: 1131904
+Feature prep: 4.20ms
+Graph construction: 0.22ms
+Encoding: 0.39ms
+Message passing: 49.32ms
+Decoding: 0.81ms
+Total forward pass: 54.94ms
+Number of edges: 1131904
+batch 490, time:0.072, loss: 2086.4846, mean_absolute_error: 22.8170
+Feature prep: 0.18ms
+Graph construction: 0.19ms
+Encoding: 0.28ms
+Message passing: 31.56ms
+Decoding: 2.07ms
+Total forward pass: 34.28ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.20ms
+Encoding: 0.29ms
+Message passing: 25.46ms
+Decoding: 0.78ms
+Total forward pass: 26.89ms
+Number of edges: 1131904
+Feature prep: 0.15ms
+Graph construction: 0.20ms
+Encoding: 0.31ms
+Message passing: 22.80ms
+Decoding: 1.38ms
+Total forward pass: 24.84ms
+Number of edges: 1131904
+Feature prep: 0.21ms
+Graph construction: 0.21ms
+Encoding: 0.32ms
+Message passing: 22.69ms
+Decoding: 1.02ms
+Total forward pass: 24.45ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.30ms
+Message passing: 30.28ms
+Decoding: 0.88ms
+Total forward pass: 31.82ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.19ms
+Encoding: 0.30ms
+Message passing: 22.47ms
+Decoding: 0.83ms
+Total forward pass: 23.99ms
+Number of edges: 1131904
+Feature prep: 0.15ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 27.72ms
+Decoding: 0.86ms
+Total forward pass: 29.23ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.38ms
+Message passing: 24.85ms
+Decoding: 0.79ms
+Total forward pass: 26.39ms
+Number of edges: 1131904
+Feature prep: 0.14ms
+Graph construction: 0.17ms
+Encoding: 0.27ms
+Message passing: 30.65ms
+Decoding: 1.39ms
+Total forward pass: 32.62ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.18ms
+Encoding: 0.28ms
+Message passing: 31.32ms
+Decoding: 0.80ms
+Total forward pass: 32.75ms
+Number of edges: 1131904
+batch 500, time:0.045, loss: 1494.9977, mean_absolute_error: 16.9133
+Feature prep: 0.15ms
+Graph construction: 0.20ms
+Encoding: 0.28ms
+Message passing: 22.36ms
+Decoding: 0.82ms
+Total forward pass: 23.82ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.20ms
+Encoding: 0.28ms
+Message passing: 28.89ms
+Decoding: 0.84ms
+Total forward pass: 30.38ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 4.24ms
+Encoding: 0.30ms
+Message passing: 25.02ms
+Decoding: 0.97ms
+Total forward pass: 30.69ms
+Number of edges: 1131904
+Feature prep: 0.20ms
+Graph construction: 0.21ms
+Encoding: 0.32ms
+Message passing: 26.92ms
+Decoding: 1.17ms
+Total forward pass: 28.82ms
+Number of edges: 1131904
+Feature prep: 1.33ms
+Graph construction: 0.20ms
+Encoding: 0.30ms
+Message passing: 33.10ms
+Decoding: 1.04ms
+Total forward pass: 35.98ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 22.69ms
+Decoding: 0.88ms
+Total forward pass: 24.23ms
+Number of edges: 1131904
+Feature prep: 0.25ms
+Graph construction: 0.31ms
+Encoding: 0.42ms
+Message passing: 22.64ms
+Decoding: 0.83ms
+Total forward pass: 24.45ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.20ms
+Encoding: 0.30ms
+Message passing: 22.52ms
+Decoding: 0.79ms
+Total forward pass: 23.97ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.18ms
+Encoding: 0.31ms
+Message passing: 27.62ms
+Decoding: 0.95ms
+Total forward pass: 29.22ms
+Number of edges: 1131904
+Feature prep: 0.15ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 22.69ms
+Decoding: 0.93ms
+Total forward pass: 24.28ms
+Number of edges: 1131904
+batch 510, time:0.047, loss: 527.1774, mean_absolute_error: 11.3886
+Feature prep: 0.15ms
+Graph construction: 0.21ms
+Encoding: 0.31ms
+Message passing: 23.75ms
+Decoding: 1.69ms
+Total forward pass: 26.10ms
+Number of edges: 1131904
+Feature prep: 0.17ms
+Graph construction: 0.19ms
+Encoding: 0.31ms
+Message passing: 23.23ms
+Decoding: 1.79ms
+Total forward pass: 25.69ms
+Number of edges: 1131904
+Feature prep: 0.17ms
+Graph construction: 0.20ms
+Encoding: 0.27ms
+Message passing: 22.91ms
+Decoding: 1.88ms
+Total forward pass: 25.44ms
+Number of edges: 1131904
+Feature prep: 0.22ms
+Graph construction: 0.23ms
+Encoding: 0.37ms
+Message passing: 25.57ms
+Decoding: 1.06ms
+Total forward pass: 27.46ms
+Number of edges: 1131904
+Feature prep: 0.17ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 22.51ms
+Decoding: 0.84ms
+Total forward pass: 24.03ms
+Number of edges: 1131904
+Feature prep: 0.22ms
+Graph construction: 0.26ms
+Encoding: 0.34ms
+Message passing: 22.98ms
+Decoding: 1.15ms
+Total forward pass: 24.95ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 33.11ms
+Decoding: 0.86ms
+Total forward pass: 34.63ms
+Number of edges: 1131904
+Feature prep: 0.20ms
+Graph construction: 0.20ms
+Encoding: 0.31ms
+Message passing: 26.20ms
+Decoding: 0.85ms
+Total forward pass: 27.76ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.22ms
+Encoding: 0.28ms
+Message passing: 22.81ms
+Decoding: 0.88ms
+Total forward pass: 24.35ms
+Number of edges: 1131904
+Feature prep: 0.22ms
+Graph construction: 0.27ms
+Encoding: 0.36ms
+Message passing: 22.40ms
+Decoding: 0.89ms
+Total forward pass: 24.15ms
+Number of edges: 1131904
+batch 520, time:0.033, loss: 143.6400, mean_absolute_error: 4.7748
+Feature prep: 0.16ms
+Graph construction: 4.22ms
+Encoding: 0.28ms
+Message passing: 23.26ms
+Decoding: 0.91ms
+Total forward pass: 28.83ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.18ms
+Encoding: 0.28ms
+Message passing: 36.15ms
+Decoding: 0.88ms
+Total forward pass: 37.68ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.30ms
+Message passing: 22.71ms
+Decoding: 1.14ms
+Total forward pass: 24.52ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.18ms
+Encoding: 0.28ms
+Message passing: 22.41ms
+Decoding: 0.79ms
+Total forward pass: 23.81ms
+Number of edges: 1131904
+Feature prep: 0.15ms
+Graph construction: 0.20ms
+Encoding: 0.28ms
+Message passing: 23.04ms
+Decoding: 0.82ms
+Total forward pass: 24.49ms
+Number of edges: 1131904
+Feature prep: 0.14ms
+Graph construction: 0.21ms
+Encoding: 0.31ms
+Message passing: 22.42ms
+Decoding: 0.79ms
+Total forward pass: 23.88ms
+Number of edges: 1131904
+Feature prep: 0.24ms
+Graph construction: 0.36ms
+Encoding: 0.48ms
+Message passing: 22.31ms
+Decoding: 1.62ms
+Total forward pass: 25.01ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.30ms
+Message passing: 33.92ms
+Decoding: 0.84ms
+Total forward pass: 35.42ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.31ms
+Message passing: 22.45ms
+Decoding: 2.37ms
+Total forward pass: 25.50ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.23ms
+Encoding: 0.28ms
+Message passing: 22.80ms
+Decoding: 0.89ms
+Total forward pass: 24.35ms
+Number of edges: 1131904
+batch 530, time:0.037, loss: 388.2554, mean_absolute_error: 9.8739
+Feature prep: 5.24ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 31.76ms
+Decoding: 0.85ms
+Total forward pass: 38.33ms
+Number of edges: 1131904
+Feature prep: 0.22ms
+Graph construction: 0.22ms
+Encoding: 0.32ms
+Message passing: 22.93ms
+Decoding: 1.13ms
+Total forward pass: 24.81ms
+Number of edges: 1131904
+Feature prep: 0.58ms
+Graph construction: 0.22ms
+Encoding: 0.30ms
+Message passing: 23.30ms
+Decoding: 3.92ms
+Total forward pass: 28.32ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 28.92ms
+Decoding: 0.90ms
+Total forward pass: 30.49ms
+Number of edges: 1131904
+Feature prep: 0.22ms
+Graph construction: 0.23ms
+Encoding: 0.38ms
+Message passing: 34.00ms
+Decoding: 1.54ms
+Total forward pass: 36.37ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.28ms
+Message passing: 28.97ms
+Decoding: 0.84ms
+Total forward pass: 30.45ms
+Number of edges: 1131904
+Feature prep: 0.28ms
+Graph construction: 0.27ms
+Encoding: 0.43ms
+Message passing: 25.29ms
+Decoding: 1.37ms
+Total forward pass: 27.64ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 46.08ms
+Decoding: 0.85ms
+Total forward pass: 47.59ms
+Number of edges: 1131904
+Feature prep: 0.18ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 22.77ms
+Decoding: 1.16ms
+Total forward pass: 24.59ms
+Number of edges: 1131904
+Feature prep: 2.26ms
+Graph construction: 0.30ms
+Encoding: 0.39ms
+Message passing: 24.71ms
+Decoding: 0.94ms
+Total forward pass: 28.60ms
+Number of edges: 1131904
+batch 540, time:0.038, loss: 3815.7007, mean_absolute_error: 32.0204
+Feature prep: 0.16ms
+Graph construction: 0.20ms
+Encoding: 0.28ms
+Message passing: 22.42ms
+Decoding: 0.78ms
+Total forward pass: 23.84ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.20ms
+Encoding: 0.30ms
+Message passing: 26.41ms
+Decoding: 0.89ms
+Total forward pass: 27.95ms
+Number of edges: 1131904
+Feature prep: 0.22ms
+Graph construction: 0.22ms
+Encoding: 0.29ms
+Message passing: 24.97ms
+Decoding: 0.88ms
+Total forward pass: 26.58ms
+Number of edges: 1131904
+Feature prep: 1.39ms
+Graph construction: 0.31ms
+Encoding: 0.46ms
+Message passing: 24.08ms
+Decoding: 2.59ms
+Total forward pass: 28.82ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.19ms
+Encoding: 0.29ms
+Message passing: 40.82ms
+Decoding: 0.84ms
+Total forward pass: 42.34ms
+Number of edges: 1131904
+Feature prep: 0.17ms
+Graph construction: 0.18ms
+Encoding: 0.30ms
+Message passing: 27.53ms
+Decoding: 0.88ms
+Total forward pass: 29.07ms
+Number of edges: 1131904
+Feature prep: 0.20ms
+Graph construction: 0.21ms
+Encoding: 0.32ms
+Message passing: 26.28ms
+Decoding: 1.22ms
+Total forward pass: 28.22ms
+Number of edges: 1131904
+Feature prep: 0.23ms
+Graph construction: 4.09ms
+Encoding: 0.40ms
+Message passing: 27.09ms
+Decoding: 1.65ms
+Total forward pass: 33.45ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.18ms
+Encoding: 0.30ms
+Message passing: 36.69ms
+Decoding: 0.90ms
+Total forward pass: 38.22ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 1.73ms
+Encoding: 0.32ms
+Message passing: 26.81ms
+Decoding: 0.94ms
+Total forward pass: 29.99ms
+Number of edges: 1131904
+batch 550, time:0.049, loss: 1399.1711, mean_absolute_error: 17.6860
+Feature prep: 0.14ms
+Graph construction: 0.20ms
+Encoding: 0.28ms
+Message passing: 24.80ms
+Decoding: 1.55ms
+Total forward pass: 26.98ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.28ms
+Message passing: 22.52ms
+Decoding: 0.85ms
+Total forward pass: 24.02ms
+Number of edges: 1131904
+Feature prep: 3.27ms
+Graph construction: 0.19ms
+Encoding: 0.28ms
+Message passing: 24.93ms
+Decoding: 0.99ms
+Total forward pass: 29.66ms
+Number of edges: 1131904
+Feature prep: 0.15ms
+Graph construction: 0.22ms
+Encoding: 0.28ms
+Message passing: 22.49ms
+Decoding: 0.80ms
+Total forward pass: 23.94ms
+Number of edges: 1131904
+Feature prep: 0.23ms
+Graph construction: 0.27ms
+Encoding: 0.41ms
+Message passing: 29.67ms
+Decoding: 1.25ms
+Total forward pass: 31.83ms
+Number of edges: 1131904
+Feature prep: 0.23ms
+Graph construction: 0.21ms
+Encoding: 0.30ms
+Message passing: 22.47ms
+Decoding: 0.90ms
+Total forward pass: 24.12ms
+Number of edges: 1131904
+Feature prep: 0.18ms
+Graph construction: 0.19ms
+Encoding: 0.28ms
+Message passing: 22.37ms
+Decoding: 0.80ms
+Total forward pass: 23.82ms
+Number of edges: 1131904
+Feature prep: 0.16ms
+Graph construction: 0.21ms
+Encoding: 0.29ms
+Message passing: 24.36ms
+Decoding: 0.86ms
+Total forward pass: 25.88ms
+Number of edges: 1131904
+Feature prep: 11.38ms
+Graph construction: 0.32ms
+Encoding: 0.37ms
+Message passing: 25.35ms
+Decoding: 2.01ms
+Total forward pass: 39.44ms
+Number of edges: 1131904
+Feature prep: 0.24ms
+Graph construction: 0.22ms
+Encoding: 6.13ms
+Message passing: 23.63ms
+Decoding: 0.96ms
+Total forward pass: 31.19ms
+Number of edges: 1131904
+batch 560, time:0.056, loss: 1443.1743, mean_absolute_error: 17.6980
+Feature prep: 0.21ms
+Graph construction: 0.21ms
+Encoding: 0.35ms
+Message passing: 22.73ms
+Decoding: 0.85ms
+Total forward pass: 24.35ms
+Number of edges: 1131904
+Feature prep: 1.46ms
+Graph construction: 0.26ms
+Encoding: 0.34ms
+Message passing: 23.66ms
+Decoding: 2.33ms
+Total forward pass: 28.05ms
+Number of edges: 1131904
+Feature prep: 0.19ms
+Graph construction: 0.20ms
+Encoding: 0.32ms
+Message passing: 23.99ms
+Decoding: 0.90ms
+Total forward pass: 25.60ms
+Number of edges: 1131904
+Feature prep: 0.20ms
+Graph construction: 0.21ms
+Encoding: 0.36ms
+Message passing: 27.46ms
+Decoding: 0.90ms
+Total forward pass: 29.12ms
+Number of edges: 1131904
+Feature prep: 0.17ms
+Graph construction: 0.21ms
+Encoding: 0.30ms
+Message passing: 24.98ms
+Decoding: 0.85ms
+Total forward pass: 26.52ms

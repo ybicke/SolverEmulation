@@ -1,6 +1,0 @@
-/myhome/mambaforge/envs/deepFlux/lib/python3.9/site-packages/torch/optim/lr_scheduler.py:28: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
-  warnings.warn("The verbose parameter is deprecated. Please use get_last_lr() "
-2025-03-19 09:11:17,774 Using ReduceLROnPlateau scheduler.
-2025-03-19 09:11:17,784 Loading checkpoint: 30, /mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256/checkpoint_epoch_30.pth
-2025-03-19 09:11:18,882 Training will continue from epoch: 30/30
-2025-03-19 09:11:18,883 Test started...
