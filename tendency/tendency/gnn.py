@@ -1,16 +1,19 @@
 import torch
 import torch.nn as nn
 from torch_geometric.nn import MessagePassing
-import torch.utils.checkpoint
 
-from .base_methods import BaseRadiationModel
+# from .base_methods import BaseRadiationModel
 
+# Global cache for edge indices to avoid recomputing for identical parameters
+_EDGE_INDEX_CACHE = {}
 
-
-class AtmosphericColumnGNN(BaseRadiationModel):
+class AtmosphericColumnGNN(nn.Module):
     """
     Graph Neural Network for atmospheric column radiative transfer modeling.
-    Memory-optimized version with edge index caching and efficient processing.
+    
+    Creates a graph where nodes represent atmospheric levels, and edges represent
+    connections between these levels. Edge features are derived from height differences
+    when available.
     """
     def __init__(self,
                  embed_dim,
@@ -23,19 +26,18 @@ class AtmosphericColumnGNN(BaseRadiationModel):
                  channels_out,
                  edge_channels_in,
                  fully_connected,
+                 device,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
         
         self.channels_out = channels_out
+        
         self.max_skip = max_skip
         self.embed_dim = embed_dim
         self.fully_connected = fully_connected
         self.edge_channels_in = edge_channels_in
-        
-        # Cache for edge indices to avoid redundant computation
-        self.edge_index_cache = {}
-        
+        self.device = device
         channels_in = channel_3d + channel_2d
 
         self.encoder = Encoder(channels_in, edge_channels_in, embed_dim, emb_dropout)
@@ -44,56 +46,46 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         
         self.sigmoid = nn.Sigmoid()
     
-    def forward(self, x3d_norm, x2d_norm, x2d_orig):
+
+
+    def forward(self, x3d_norm, x2d_norm):
+        # Ensure tensors are float32
+        x3d_norm = x3d_norm.to(torch.float32)
+        x2d_norm = x2d_norm.to(torch.float32)
+        
         B, L, _ = x3d_norm.shape
 
         # Append surface features to each atmospheric level
-        surface_features = x2d_norm.unsqueeze(1)
-        repeat_surface_at_all_levels = surface_features.repeat(1, L, 1)
-        augmented_atmospheric_column = torch.cat([x3d_norm, repeat_surface_at_all_levels], dim=-1)
+        x2d_to_70 = x2d_norm.unsqueeze(1).repeat(1, x3d_norm.shape[1], 1)
+        x = torch.cat((x3d_norm, x2d_to_70), dim=-1)
         
-        # Create extra surface nodes with ones and match the batch dimension
-        one_surface_tensor = torch.ones(B, 1, x2d_norm.shape[1], device=x3d_norm.device)
-        append_one_surface_tensor = torch.cat([one_surface_tensor, surface_features], dim=-1)
-        
-        # Combine extra zero surface nodes with atmospheric columns
-        x = torch.cat([append_one_surface_tensor, augmented_atmospheric_column], dim=1)
-        
-        # MEMORY OPTIMIZATION 1: Cache edge indices for common configurations
-        cache_key = (L+1, B, self.fully_connected)
-        if cache_key in self.edge_index_cache and self.edge_index_cache[cache_key].device == x.device:
-            edge_index = self.edge_index_cache[cache_key]
+        # Get edge indices from cache or create new ones
+        if self.fully_connected:
+            edge_index = get_cached_edge_index_fully_connected(L, B, x.device)
         else:
-            if self.fully_connected:
-                edge_index = create_edge_index_fully_connected_fast(L+1, B, x.device)
-            else:
-                edge_index = create_edge_index_multiMesh(L+1, B, x.device, self.max_skip)
-            
-            # Only cache common configurations to prevent memory leaks
-            if B in [32, 64, 128, 256, 512]:
-                self.edge_index_cache[cache_key] = edge_index
+            edge_index = get_cached_edge_index_multimesh(L, B, x.device, self.max_skip)
         
-        # Encode node features first
-        x, _ = self.encoder.node_mlp(x)
-        B, N, E = x.shape
-        x = x.view(B*N, E)
+        # Encode the node features first
+        x = self.encoder.node_mlp(x)
+        _, _, E = x.shape
+        x = x.view(B*L, E)
         
-      
-        # Create zero-filled edge features with same dimension as node features
+        # Now create edge features with the SAME dimension as node features
         num_edges = edge_index.size(1)
-        embed_dim = x.size(1)
-        edge_attr = torch.zeros(num_edges, embed_dim, device=x.device)
+        edge_attr = torch.zeros(num_edges, self.edge_channels_in, device=x.device)
+        edge_attr_encoded = self.encoder.edge_mlp(edge_attr)
+
         
         # Pass directly to processor, skipping edge encoding
-        x = self.processor(x, edge_index, edge_attr)
+        x = self.processor(x, edge_index, edge_attr_encoded)
 
         # reshape the output to the original shape and decode the output variables
-        x = x.view(B, L+1, -1)
+        x = x.view(B, L, -1)
         x = self.decoder(x)
         
         # scale the output variables to the original range
-        x = self.sigmoid(x)
-        x = self._scale_output(x, x2d_orig)
+        # x = self.sigmoid(x)
+        # x = self._scale_output(x, x2d_orig)
 
         return x.squeeze()
     
@@ -173,6 +165,7 @@ class GNNLayer(MessagePassing):
         return node_update, edge_update
     
     def message(self, edge_attr):
+        # Simply pass the updated edge features as messages
         return edge_attr
     
     def update(self, aggr_out):
@@ -298,7 +291,8 @@ def create_edge_index_multiMesh(num_nodes, batch_size, device, max_skip):
 
 def create_edge_index_fully_connected(num_nodes, batch_size, device):
     """
-    Creates a fully connected edge index where each node is connected to every other node
+    Creates a fully connected edge index where each node is connected to every other node,
+    using highly vectorized tensor operations.
     """
     # For a single graph, generate all source nodes
     sources = torch.arange(num_nodes, device=device).repeat_interleave(num_nodes-1)
@@ -329,38 +323,66 @@ def create_edge_index_fully_connected(num_nodes, batch_size, device):
     
     return edge_index
 
+def get_cached_edge_index_fully_connected(num_nodes, batch_size, device):
+    """
+    Get a cached edge index for a fully connected graph, creating it if needed.
+    
+    Args:
+        num_nodes: Number of nodes per graph
+        batch_size: Batch size
+        device: PyTorch device
+        
+    Returns:
+        edge_index: Edge index tensor for the graph
+    """
+    # Create a unique key for this configuration
+    cache_key = f"fully_connected_{num_nodes}_{batch_size}"
+    
+    # Check if we already have this configuration in the cache
+    if cache_key in _EDGE_INDEX_CACHE:
+        # Get from cache and ensure it's on the right device
+        edge_index = _EDGE_INDEX_CACHE[cache_key]
+        if edge_index.device != device:
+            edge_index = edge_index.to(device)
+        return edge_index
+    
+    # Not in cache, create it
+    edge_index = create_edge_index_fully_connected(num_nodes, batch_size, device)
+    
+    # Store in cache (on CPU to save GPU memory)
+    _EDGE_INDEX_CACHE[cache_key] = edge_index.cpu()
+    
+    return edge_index
 
+def get_cached_edge_index_multimesh(num_nodes, batch_size, device, max_skip):
+    """
+    Get a cached edge index for a multimesh graph, creating it if needed.
+    
+    Args:
+        num_nodes: Number of nodes per graph
+        batch_size: Batch size
+        device: PyTorch device
+        max_skip: Maximum skip distance
+        
+    Returns:
+        edge_index: Edge index tensor for the graph
+    """
+    # Create a unique key for this configuration
+    cache_key = f"multimesh_{num_nodes}_{batch_size}_{max_skip}"
+    
+    # Check if we already have this configuration in the cache
+    if cache_key in _EDGE_INDEX_CACHE:
+        # Get from cache and ensure it's on the right device
+        edge_index = _EDGE_INDEX_CACHE[cache_key]
+        if edge_index.device != device:
+            edge_index = edge_index.to(device)
+        return edge_index
+    
+    # Not in cache, create it
+    edge_index = create_edge_index_multiMesh(num_nodes, batch_size, device, max_skip)
+    
+    # Store in cache (on CPU to save GPU memory)
+    _EDGE_INDEX_CACHE[cache_key] = edge_index.cpu()
+    
+    return edge_index
 
-
-def create_edge_index_fully_connected_fast(num_nodes, batch_size, device):
-    # Create edges for a single graph
-    row = torch.arange(num_nodes, device=device)
-    col = torch.arange(num_nodes, device=device)
-    
-    # Create a mesh grid of all possible connections
-    row = row.repeat_interleave(num_nodes)
-    col = col.repeat(num_nodes)
-    
-    # Remove self-loops
-    mask = row != col
-    row, col = row[mask], col[mask]
-    
-    # Stack into a 2 x E tensor for a single graph
-    edge_index_single = torch.stack([row, col], dim=0)
-    
-    # Fast batch offsets
-    edge_count = edge_index_single.size(1)
-    batch_edge_index = edge_index_single.repeat(1, batch_size)
-    
-    # Create offsets tensor once
-    offsets = torch.arange(0, batch_size, device=device) * num_nodes
-    
-    # Apply offsets to all batches at once (vectorized)
-    batch_indices = torch.arange(batch_size, device=device).repeat_interleave(edge_count)
-    batch_offsets = offsets[batch_indices]
-    
-    # Add offsets to both source and target nodes
-    batch_edge_index[0] += batch_offsets
-    batch_edge_index[1] += batch_offsets
-    
-    return batch_edge_index

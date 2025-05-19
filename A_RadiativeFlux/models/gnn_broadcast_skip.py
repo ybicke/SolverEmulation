@@ -26,6 +26,7 @@ class AtmosphericColumnGNN(BaseRadiationModel):
                  channels_out,
                  edge_channels_in,
                  fully_connected,
+                 connections_per_node=None,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
@@ -36,6 +37,7 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         self.embed_dim = embed_dim
         self.fully_connected = fully_connected
         self.edge_channels_in = edge_channels_in
+        self.connections_per_node = connections_per_node
                 
         channels_in = channel_3d + channel_2d
 
@@ -44,7 +46,38 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         self.decoder = Decoder(embed_dim, channels_out, dropout=dropout)
         
         self.sigmoid = nn.Sigmoid()
+        
+        # Cache for edge indices by batch size
+        self.edge_index_cache = {}
+        
+        # Initialize device attribute
+        self.device = kwargs.get('device', torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
     
+
+
+    def _get_edge_index(self, num_nodes, batch_size):
+        """
+        Get the edge index from cache or create it if it doesn't exist.
+        Using the batch size as a key to cache different edge indices.
+        """
+        # Check if we have already created this edge pattern for this batch size
+        cache_key = batch_size
+        
+        if cache_key in self.edge_index_cache:
+            return self.edge_index_cache[cache_key]
+        
+        # Create the edge indices based on chosen connectivity pattern
+        if self.fully_connected:
+            edge_index = create_edge_index_fully_connected(num_nodes, batch_size, self.device)
+        elif self.connections_per_node is not None:
+            edge_index = create_edge_index_optimal_sparse(num_nodes, batch_size, self.device, self.connections_per_node)
+        else:
+            edge_index = create_edge_index_multiMesh(num_nodes, batch_size, self.device, self.max_skip)
+        
+        # Cache for future use
+        self.edge_index_cache[cache_key] = edge_index
+        
+        return edge_index
 
 
     def forward(self, x3d_norm, x2d_norm, x2d_orig):
@@ -62,11 +95,8 @@ class AtmosphericColumnGNN(BaseRadiationModel):
         # Combine extra zero surface nodes with atmospheric columns
         x = torch.cat([augmented_atmospheric_column, append_zero_surface_tensor], dim=1)
         
-        # create the edge indices based on chosen connectivity pattern
-        if self.fully_connected:
-            edge_index = create_edge_index_fully_connected(L+1, B, x.device)
-        else:
-            edge_index = create_edge_index_multiMesh(L+1, B, x.device, self.max_skip)
+        # Get the edge index, reusing from cache if available
+        edge_index = self._get_edge_index(L+1, B)
         
         # Encode the node features first
         x = self.encoder.node_mlp(x)
@@ -323,4 +353,103 @@ def create_edge_index_fully_connected(num_nodes, batch_size, device):
     edge_index = base_edges + offset.view(1, -1)
     
     return edge_index
+
+
+
+def create_edge_index_optimal_sparse(num_nodes, batch_size, device, connections_per_node):
+    """
+    Creates an optimally distributed sparse connection pattern using mathematical principles.
+    
+    This method uses the golden ratio to create the most uniform distribution of connections
+    possible, inspired by techniques used in low-discrepancy sampling and point distribution.
+    
+    The connections are bidirectional - for each connection from A→B, there's also a connection B→A.
+    
+    Args:
+        num_nodes (int): Number of nodes in a single chain.
+        batch_size (int): Number of chains (batches).
+        device (torch.device): The device to push edge_index onto.
+        connections_per_node (int): Number of outgoing connections per node (total connections will be 2x).
+        
+    Returns:
+        edge_index (torch.LongTensor of shape [2, E]):
+            Edge indices with optimally distributed bidirectional connections.
+    """
+    if connections_per_node >= num_nodes - 1:
+        # If we want too many connections, fall back to fully connected
+        return create_edge_index_fully_connected(num_nodes, batch_size, device)
+    
+    if connections_per_node <= 0:
+        # No connections requested
+        return torch.zeros(2, 0, dtype=torch.long, device=device)
+    
+    # Use vectorized operations for efficiency
+    all_sources = []
+    all_targets = []
+    
+    # Phi is the golden ratio conjugate, which gives the most uniform distribution
+    phi = (5**0.5 - 1) / 2  # ≈ 0.618033988749895
+    
+    for node_idx in range(num_nodes):
+        # Generate optimally distributed offsets using golden ratio
+        # This creates the most even distribution mathematically possible
+        offsets = []
+        for i in range(1, connections_per_node + 1):
+            # Scale connections to span the entire range
+            offset = int(round(i * phi * (num_nodes - 1))) % (num_nodes - 1)
+            # Add 1 to avoid zero offset
+            offset = offset + 1 if offset < num_nodes - 1 else 1
+            offsets.append(offset)
+        
+        # Create wrap-around connections
+        targets = [(node_idx + offset) % num_nodes for offset in offsets]
+        
+        # Remove any self-connections or duplicates
+        targets = [t for t in targets if t != node_idx]
+        targets = list(dict.fromkeys(targets))  # remove duplicates while preserving order
+        
+        # If we lost some connections due to duplicates or self-references,
+        # add additional connections to compensate
+        if len(targets) < connections_per_node:
+            # Find nodes not yet connected
+            missing = connections_per_node - len(targets)
+            candidates = [i for i in range(num_nodes) if i != node_idx and i not in targets]
+            
+            if candidates:
+                # Use the same golden ratio principle to select additional targets
+                indices = [(int(j * phi * len(candidates))) % len(candidates) 
+                           for j in range(missing)]
+                additional = [candidates[idx] for idx in indices]
+                targets.extend(additional)
+        
+        # If we somehow got too many connections, trim
+        targets = targets[:connections_per_node]
+        
+        # Add to our edge lists
+        all_sources.extend([node_idx] * len(targets))
+        all_targets.extend(targets)
+    
+    # Convert to tensor format
+    if all_sources:
+        # Create forward edges
+        forward_edges = torch.tensor([all_sources, all_targets], device=device)
+        
+        # Create reverse edges (making the graph bidirectional)
+        reverse_edges = torch.tensor([all_targets, all_sources], device=device)
+        
+        # Combine forward and reverse edges
+        edge_index = torch.cat([forward_edges, reverse_edges], dim=1)
+        
+        # Repeat for batch_size
+        base_edges = edge_index.repeat(1, batch_size)
+        
+        # Offset node indices for each batch
+        offset = torch.arange(batch_size, device=device) * num_nodes
+        offset = offset.repeat_interleave(base_edges.shape[1] // batch_size)
+        edge_index = base_edges + offset.view(1, -1)
+        
+        return edge_index
+    else:
+        # Fallback for edge case with no edges
+        return torch.zeros(2, 0, dtype=torch.long, device=device)
 

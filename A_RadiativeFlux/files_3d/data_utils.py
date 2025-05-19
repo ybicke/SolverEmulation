@@ -53,7 +53,7 @@ class DataNormalizer:
 
 
 
-def get_triangle_indices(triangle_id=1, total_cols=81920, division_factor=1):
+def get_triangle_indices(triangle_id, division_factor, total_cols):
     """
     Get indices of triangle cells for a specific triangle ID with optional division.
     

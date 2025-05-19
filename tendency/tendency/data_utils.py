@@ -44,11 +44,23 @@ class DataNormalizer:
         # Store original 2D data for scaling output
         x2d_original = x2d.clone()
         
-        # Normalize 3D data - apply normalization along the channel dimension
-        # Using proper broadcasting by ensuring dimensions are properly aligned
-        x3d_normalized = (x3d - self.mean3d.view(1, 1, 1, -1)) / self.std3d.view(1, 1, 1, -1)        
-        # Normalize 2D data
-        x2d_normalized = (x2d - self.mean2d.view(1, 1, -1)) / self.std2d.view(1, 1, -1)        
+        # Check input dimensions and handle accordingly
+        if len(x3d.shape) == 3:  # [batch, height, channels]
+            x3d_normalized = (x3d - self.mean3d.view(1, 1, -1)) / self.std3d.view(1, 1, -1)
+        elif len(x3d.shape) == 4:  # [batch, sub_batch, height, channels]
+            # Either reshape to 3D by merging batch dimensions
+            batch_size, sub_batch, height, channels = x3d.shape
+            x3d = x3d.reshape(batch_size * sub_batch, height, channels)
+            x3d_normalized = (x3d - self.mean3d.view(1, 1, -1)) / self.std3d.view(1, 1, -1)
+        
+        # Normalize 2D data - similar logic for dimension handling
+        if len(x2d.shape) == 2:  # [batch, channels]
+            x2d_normalized = (x2d - self.mean2d.view(1, -1)) / self.std2d.view(1, -1)
+        elif len(x2d.shape) == 3:  # [batch, sub_batch, channels]
+            batch_size, sub_batch, channels = x2d.shape
+            x2d = x2d.reshape(batch_size * sub_batch, channels)
+            x2d_normalized = (x2d - self.mean2d.view(1, -1)) / self.std2d.view(1, -1)
+        
         return x3d_normalized, x2d_normalized, x2d_original
 
 

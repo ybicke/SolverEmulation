@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch_geometric.nn import MessagePassing
 from .graph_3d_full import get_3d_graph
 from .base_methods import BaseRadiationModel
-import time
 
 
 
@@ -48,9 +47,12 @@ class GNN3d(BaseRadiationModel):
         self.encoder = Encoder(total_channels, edge_channels_in, embed_dim, dropout)
         self.processor = Processor(embed_dim, depth=depth, dropout=dropout)
         self.decoder = Decoder(embed_dim, channels_out, dropout=dropout)
+        
+        self.sigmoid = nn.Sigmoid()
+
     
     def forward(self, x3d_norm, x2d_norm, x2d_orig):
-        start_time = time.time()
+        #start_time = time.time()
         
         # Feature preparation
         B, N, L, _ = x3d_norm.shape
@@ -60,7 +62,7 @@ class GNN3d(BaseRadiationModel):
         ones_2d = torch.ones(B, N, 1, augmented_3d_column.shape[-1], device=x3d_norm.device)
         x = torch.cat([ones_2d, augmented_3d_column], dim=2)
         
-        prep_time = time.time()
+        #prep_time = time.time()
         
         # Graph construction or retrieval
         batch_edge_index, N = get_3d_graph(
@@ -75,7 +77,7 @@ class GNN3d(BaseRadiationModel):
             disable_horizontal=self.disable_horizontal
         )
         
-        graph_time = time.time()
+        #graph_time = time.time()
         
         # Edge feature initialization
         num_edges = batch_edge_index.size(1)
@@ -85,29 +87,30 @@ class GNN3d(BaseRadiationModel):
         x_features = x.reshape(B * N * (L+1), -1)
         x_encoded = self.encoder.node_mlp(x_features)
         
-        encode_time = time.time()
+        #encode_time = time.time()
         
         # Message passing
         x_processed = self.processor(x_encoded, batch_edge_index, edge_attr)
         
-        process_time = time.time()
+        #process_time = time.time()
         
         # Decoding and output
         x_decoded = self.decoder(x_processed)
         x_output = x_decoded.view(B, N, L+1, self.channels_out)
+        x_output = self.sigmoid(x_output)
         output = self._scale_output(x_output, x2d_orig)
         
-        end_time = time.time()
+        #end_time = time.time()
         
         # Print timing metrics
-        if True:  # Only print for first batch to avoid cluttering logs
-            print(f"Feature prep: {(prep_time - start_time)*1000:.2f}ms")
-            print(f"Graph construction: {(graph_time - prep_time)*1000:.2f}ms")
-            print(f"Encoding: {(encode_time - graph_time)*1000:.2f}ms")
-            print(f"Message passing: {(process_time - encode_time)*1000:.2f}ms")
-            print(f"Decoding: {(end_time - process_time)*1000:.2f}ms")
-            print(f"Total forward pass: {(end_time - start_time)*1000:.2f}ms")
-            print(f"Number of edges: {num_edges}")
+        #if True:  # Only print for first batch to avoid cluttering logs
+        #    print(f"Feature prep: {(prep_time - start_time)*1000:.2f}ms")
+        #    print(f"Graph construction: {(graph_time - prep_time)*1000:.2f}ms")
+        #    print(f"Encoding: {(encode_time - graph_time)*1000:.2f}ms")
+        #    print(f"Message passing: {(process_time - encode_time)*1000:.2f}ms")
+        #    print(f"Decoding: {(end_time - process_time)*1000:.2f}ms")
+        #    print(f"Total forward pass: {(end_time - start_time)*1000:.2f}ms")
+        #    print(f"Number of edges: {num_edges}")
         
         return output
     

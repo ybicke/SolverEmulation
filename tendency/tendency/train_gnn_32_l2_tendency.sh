@@ -4,49 +4,51 @@
 set -e
 
 # Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
-source /mydata/deepcloud/yves/online-datasets/workspace/scripts/setup.sh
+source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.sh
 
 # Check if GPU available
 #nvidia-smi
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation
+myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency
 
 
 # run script
 
 cd $myfolder
-echo training$line_number started!
+echo "GNN tendency training started!"
 
 
 # bash <(sed -n "${line_number}p" run_all_models.sh)
 
 
-# Run the training script with specified parameters
+# Run the training script with all required parameters
 python train_column_tendency_normTarg.py \
-    --model afno_tendency \
+    --model gnn_tendency \
     --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg \
+    --save /mydata/deepcloud/shared/results-temp/gnn_32_l2_tendency_normTarg \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --no-train \
+    --channel-3d 10 \
+    --channel-2d 3 \
+    --channels-out 7 \
+    --train \
     --test \
     --shuffle \
     --batch-size 2048 \
-    --vbatch 1 \
     --optimizer adamw \
-    --clip 1.0 \
-    --num-epoch 100 \
+    --clip 1 \
+    --num-epoch 60 \
     --learning-rate 0.0005 \
-    --patch-size 1 \
-    --vit-hidden-dim 128 \
-    --vit-layers 4 \
-    --vit-heads 8 \
-    --vit-dropout 0.0 \
-    --afno-sparsity-threshold 0.01 \
-    --wandb-mode online \
+    --hidden-dim 32 \
+    --layers 2 \
+    --dropout 0.0 \
+    --edge-channels-in 1 \
+    --fully-connected \
+    --wandb-mode online 
+

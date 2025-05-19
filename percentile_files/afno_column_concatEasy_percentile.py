@@ -1,3 +1,4 @@
+import math
 import logging
 from functools import partial
 from collections import OrderedDict
@@ -9,8 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
-# from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+
 import torch.fft
 from torch.nn.modules.container import Sequential
 # from main_afnonet import get_args
@@ -19,7 +19,10 @@ from torch.utils.checkpoint import checkpoint_sequential
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
-from .afno1d import AFNO1D
+# Bring your packages onto the path
+import sys
+sys.path.append('/myhome/AFNO/AFNO-transformer')
+from afno1d_percentile import AFNO1D
 # from afno.afno2d import AFNO2D
 from afno.bfno2d import BFNO2D
 from afno.ls import AttentionLS
@@ -77,41 +80,46 @@ class Block(nn.Module):
                  drop=0.,
                  drop_path=0.,
                  act_layer=nn.GELU,
-                 norm_layer=nn.LayerNorm, # maybe check without layernorm??
+                 norm_layer=nn.LayerNorm,
+                 h=14, # gets overwritten
+                 w=8,
                  mixing_type="afno",
                  hidden_size=256,
                  fno_blocks=8,
                  sparsity_threshold=0.01,
                  hard_thresholding_fraction=1.0,
                  hidden_size_factor=1,
+                 cutoff_frequency=0.1,
+                 collect_magnitudes=False,
                  double_skip=True):
         super().__init__()
         
         self.norm1 = norm_layer(dim)
+        
         self.norm2 = norm_layer(dim)
+        self.collect_magnitudes = collect_magnitudes
 
         # could potentially implment other mixing types here such as bfno, sa from the paper
         # here hidden_size = hidden_size before, for making embedding dimension smaller..? 
         # I had to adjust it to make it suit the division by the block size in the afno1D
         if mixing_type == "afno":
-            self.filter = AFNO1D(hidden_size=dim,
+            self.filter = AFNO1D(hidden_size=dim, # What's hidden size here
                                  num_blocks=fno_blocks,
                                  sparsity_threshold=sparsity_threshold,
                                  hard_thresholding_fraction=hard_thresholding_fraction,
-                                 hidden_size_factor=1
-                                 )
+                                 hidden_size_factor=1,
+                                 collect_magnitudes=collect_magnitudes)
         
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
     
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-
         self.double_skip = double_skip
 
     def forward(self, x):
         residual = x
         x = self.norm1(x)
-        x = self.filter(x)
+        x, freq_mag = self.filter(x)
 
         if self.double_skip:
             x = x + residual
@@ -121,7 +129,18 @@ class Block(nn.Module):
         x = self.mlp(x)
         x = self.drop_path(x)
         x = x + residual
-        return x
+        return x, freq_mag
+    
+## For extra dimension in the output, lazy concat
+#class OutputPadding(nn.Module):
+#    def __init__(self, channels_out):
+#        super(OutputPadding, self).__init__()
+#        self.channels_out = channels_out
+#        self.padding_vector = nn.Parameter(torch.randn(1, 1, channels_out))
+
+#    def forward(self, x):
+#        return torch.cat((x, self.padding_vector.repeat(x.shape[0], 1, 1)), dim=1)
+    
     
     
 class AFNONet(nn.Module):
@@ -141,18 +160,17 @@ class AFNONet(nn.Module):
                  patch_size,
                  num_cells,
                  embed_dim, # (mlp_dim)
-                 depth, # actually num of blocks, what about the layers?
+                 depth, # actually num of blocks
                  # heads, not used in afno
                  dropout,
                  emb_dropout=0.,
-                 channels_in=13,
-                 channels_in_2D = 3, 
-                 channels_out=7,
-                 height=70,
+                 channels_in=12, # 12 because of the lazy concatenation
+                 channels_out=4,
+                 height=71,
                  swflx_idx=[2, 3],
                  lwflx_idx=[0, 1], 
                  cosmu0_idx=1, 
-                 tsfctrad_idx=5, 
+                 tsfctrad_idx=5,   
                  mean2d=None,
                  var2d=None, 
                  mean3d=None, 
@@ -160,9 +178,11 @@ class AFNONet(nn.Module):
                  device=None,
                  uniform_drop=False, 
                  drop_path_rate=0.,
-                 mlp_ratio=4.,
+                 mlp_ratio=4., 
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
+                 cutoff_frequency=0.1,
+                 is_test=False,
                  *args,
                  **kwargs): 
 
@@ -177,14 +197,15 @@ class AFNONet(nn.Module):
         self.lwflx_idx = lwflx_idx
         self.cosmu0_idx = cosmu0_idx
         self.tsfctrad_idx = tsfctrad_idx
+        self.is_collecting = is_test  # Only collect magnitudes during testing
+        self.collected_magnitudes = []
         
-        # Convert statistics variables to torch.float32
-        var2d = var2d.to(dtype=torch.float32)
-        mean2d = mean2d.to(dtype=torch.float32)
-        var3d = var3d.to(dtype=torch.float32)
-        mean3d = mean3d.to(dtype=torch.float32)
-        
-        # Initialize normalizers for 2D and 3D inputs
+        # due to the lazy concat
+        # self.output_padding = OutputPadding(channels_out)
+        # self.output_padding = nn.Parameter(torch.randn(1, output_padding_size, 1))
+        self.dummy_vector = nn.Parameter(torch.randn(1, 1, 6))
+
+
         self.normalizer2d = Normalization(std=torch.sqrt(var2d), mean=mean2d)
         self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
 
@@ -199,20 +220,20 @@ class AFNONet(nn.Module):
             nn.LayerNorm(embed_dim),
         )
 
-        self.to_patch_embedding_2D = nn.Sequential(
-            nn.Linear(channels_in_2D, embed_dim),
-            nn.LayerNorm(embed_dim)
-        )
+        # not needed in lazy apporach
+        #self.to_patch_embedding_2D = nn.Sequential(
+        #    nn.Linear(channels_in, embed_dim),
+        #    nn.LayerNorm(embed_dim)
+        #)
         
         self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches, embed_dim))
         self.pos_drop = nn.Dropout(p=dropout)
         self.norm = nn.LayerNorm(embed_dim)              
         
-        # Define the MLP head for final output 
         self.mlp_head = nn.Linear(embed_dim, patch_size*channels_out)
         self.sigmoid = nn.Sigmoid()
 
-      
+
         # With uniform fals and drop_path_rate to 0 not really used. Responsible for calculating the drop path rates for each 
         # "transformer" block based on the uniform_drop flag and the drop_path_rate value. If uniform_drop is True, the same 
         # drop_path_rate is used for all blocks. Otherwise, a linearly increasing drop path rate is used, starting from 0 and 
@@ -226,55 +247,122 @@ class AFNONet(nn.Module):
             dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
         # dpr = [drop_path_rate for _ in range(depth)]  # stochastic depth decay rule
         
-          
+
+        # The patch embedding is applied only along the height dimension, and the resulting feature maps have a width of 1.
         h=height // patch_size
         w=1
         
       
         self.blocks = nn.ModuleList([
             Block(
-                dim=embed_dim, 
+                dim=embed_dim,
                 mlp_ratio=mlp_ratio,
                 drop=dropout,
                 drop_path=dpr[i],
                 norm_layer=nn.LayerNorm,
+                h=h,
+                w=w,
                 sparsity_threshold=sparsity_threshold,
-                hard_thresholding_fraction = hard_thresholding_fraction
-                )
-                for i in range(depth)                
+                hard_thresholding_fraction = hard_thresholding_fraction,
+                cutoff_frequency=cutoff_frequency,
+                collect_magnitudes=is_test)
+                for i in range(depth)
         ])
         
+    def reset_magnitude_collection(self):
+        """Reset collected magnitudes"""
+        self.collected_magnitudes = []
+        
+    def enable_magnitude_collection(self, enable=True):
+        """Enable or disable magnitude collection"""
+        self.is_collecting = enable
+        for block in self.blocks:
+            block.collect_magnitudes = enable
+            block.filter.collect_magnitudes = enable
 
+    # Radiation task specifics:
+    def _unscale_swflx(self, swflx, cosmu0):
+        return torch.where(
+            cosmu0 >= torch.tensor(1e-4, dtype=torch.float32),
+            swflx * (cosmu0 * 1400),
+            0
+        )
+
+    def _unscale_lwflx(self, lwflx, tsfctrad):
+        stefan_boltzmann_const = torch.tensor(5.670374419e-08, dtype=torch.float32)
+        return torch.where(
+            tsfctrad >= torch.tensor(1e-4, dtype=torch.float32),
+            lwflx * torch.pow(tsfctrad, 4) * stefan_boltzmann_const,
+            lwflx
+        )
+
+    def _scale_output(self, y_pred, x2d):
+        y_pred_scaled = []
+
+        for i in range(y_pred.shape[-1]):
+            f_pred = y_pred[..., i:i+1]
+
+            if i in self.swflx_idx:
+                cosmu0 = x2d[..., self.cosmu0_idx]
+                cosmu0 = torch.tile(
+                    cosmu0[..., None, None], 
+                    (1, 1, f_pred.shape[-2], 1)
+                )
+                y_pred_scaled.append(self._unscale_swflx(f_pred, cosmu0))
+            elif i in self.lwflx_idx:
+                tsfctrad = x2d[..., self.tsfctrad_idx]
+                tsfctrad = torch.tile(
+                    tsfctrad[..., None, None], 
+                    (1, 1, f_pred.shape[-2], 1)
+                )
+                y_pred_scaled.append(self._unscale_lwflx(f_pred, tsfctrad))
+            else:
+                y_pred_scaled.append(f_pred)
+
+        y_pred = torch.cat(y_pred_scaled, dim=-1)
+        return y_pred
+        
+        
+              
             
-    def forward_features(self, x3d, x2d):
+    def forward(self, x3d, x2d):
 
         x3d = self.normalizer3d(x3d)
         x2d = self.normalizer2d(x2d)
-         
-        x2d_to_70 = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
-        x3d_merged = torch.cat((x3d, x2d_to_70), dim=-1)
         
-        x = self.to_patch_embedding(x3d_merged)
-        #x3d = self.to_patch_embedding(x3d)
-        #x2d = self.to_patch_embedding_2D(x2d)
-        #x = torch.cat((x3d, x2d[:, None, :]), axis=-2)
+        
+        # Repeat x2d along the height dimension to match the shape of x3d
+        x2d_repeated = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
+        
+        # Concatenate x3d and x2d_repeated along the feature dimension
+        x_concat = torch.cat((x3d, x2d_repeated), dim=-1)
+        
+        # Repeat the dummy vector along the batch dimension, same random nr accross the batch
+        dummy_vector_repeated = self.dummy_vector.repeat(x3d.shape[0], 1, 1)
+        
+        # Concatenate the repeated dummy vector with the normalized x2d
+        dummy_vector_with_x2d = torch.cat((dummy_vector_repeated, x2d.unsqueeze(1)), dim=-1)
+        
+        # Concatenate the resulting tensor as an additional height level
+        x_concat = torch.cat((x_concat, dummy_vector_with_x2d), dim=1)
+        
+        # Embed the concatenated features using a single embedding layer
+        x = self.to_patch_embedding(x_concat)
+        
 
         x = x + self.pos_embed
         x = self.pos_drop(x)
 
-        for blk in self.blocks:
-            x = blk(x)
+        # Process through transformer blocks
+        for blk in self.blocks: 
+            x, freq_mag = blk(x)
+            if self.is_collecting and freq_mag is not None:
+                self.collected_magnitudes.append(freq_mag.detach().cpu())
 
         x = self.norm(x)
-        return x
-
-    def forward(self, x3d, x2d):
-        x = self.forward_features(x3d, x2d)
-        
-        x = self.mlp_head(x)
-        
-        # x = self.sigmoid(x)
-        # x = self._scale_output(x, x2d)
+        x = self.mlp_head(x)   
+        x = self.sigmoid(x)
+        x = self._scale_output(x, x2d)
         
         return x.squeeze()    
     

@@ -208,7 +208,7 @@ class AFNONet(BaseRadiationModel):
             nn.LayerNorm(embed_dim),
         )
         
-        self.dummy_vector = nn.Parameter(torch.randn(1, 1, channel_2d))
+        # self.dummy_vector = nn.Parameter(torch.randn(1, 1, channel_2d))
         
         self.pos_embed = nn.Parameter(torch.randn(1, self.num_patches, embed_dim))
         self.pos_drop = nn.Dropout(p=dropout)
@@ -242,11 +242,17 @@ class AFNONet(BaseRadiationModel):
         x_concat = torch.cat((x3d_norm, x2d_repeated), dim=-1)
         
         # Repeat the dummy vector along the batch dimension, same random nr accross the batch
-        dummy_vector_repeated = self.dummy_vector.repeat(x3d_norm.shape[0], 1, 1)
-        concat_with_x2d = torch.cat((dummy_vector_repeated, x2d_norm.unsqueeze(1)), dim=-1)
+        #dummy_vector_repeated = self.dummy_vector.repeat(x3d_norm.shape[0], 1, 1)
+        # concat_with_x2d = torch.cat((dummy_vector_repeated, x2d_norm.unsqueeze(1)), dim=-1)
+        
+        ones = torch.ones(x2d_norm.shape[0], 1, x2d_norm.shape[1], device=x3d_norm.device)
+        concat_ones_with_x2d = torch.cat((ones, x2d_norm.unsqueeze(1)), dim=-1)
+        
+        #dummy_vector_repeated = self.dummy_vector.repeat(x3d_norm.shape[0], 1, 1)
+        # concat_with_x2d = torch.cat((dummy_vector_repeated, x2d_norm.unsqueeze(1)), dim=-1)
         
         # Concatenate the resulting tensor as an additional height level
-        x_concat = torch.cat((concat_with_x2d, x_concat), dim=1)
+        x_concat = torch.cat((concat_ones_with_x2d, x_concat), dim=1)
         x = self.to_patch_embedding(x_concat)
 
         x = x + self.pos_embed

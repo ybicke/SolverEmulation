@@ -23,21 +23,31 @@ plt.rcParams.update({
     'legend.fontsize': 12,
 })
 
+# Configuration options
+# Choose whether to use all samples or only selected ones
+use_all_samples = True  # Set to True to use all samples from the test set
+
+# If not using all samples, specify which samples to use
+selected_samples = [112]  # List of sample indices to visualize
+
+# Set to True to save to the model's test directory
+save_to_test_path = True
+# Optional additional save path
+# additional_save_path = '/mydata/deepcloud/yves/Tendency-normTarget-true_vs_pred-sample.png'
+
+# Define models to evaluate
 models = [
     {
         'name': 'AFNO',
         'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
     },
-    
-        # { 'name': 'RF-concat-tendency-norm',        'path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_RF/test'},
-    
-    
+    # Add more models as needed for comparison
+    # {'name': 'Model2', 'path': '/path/to/model2/test'},
 ]
 
 # Containers for plotting
 y_pred_hs = []   # will hold one (height, channels) tensor per model
 y_true_h = None  # will store the ground‑truth tensor (height, channels) once
-train_target_means = []
 
 for model in models:
     test_path = model['path']
@@ -51,17 +61,14 @@ for model in models:
         y_pred = pickle.load(handle)
     print(f'y_pred shape: {y_pred.shape}')
 
-    # >>> choose which test‑set indices you want to look at <<<
-    #    – a single sample,    e.g. [17]
-    #    – a few samples,      e.g. [3, 8, 12]
-    #    – or the first k,     e.g. range(5)
-    sample_idx = [112]                 # change this line to taste
-    # ---------------------------------------------------------------
-
-    # keep only the requested samples
-    y_true = y_true[sample_idx]
-    y_pred = y_pred[sample_idx]
-    # ---------------------------------------------------------------
+    # Decide whether to use all samples or only selected ones
+    if not use_all_samples:
+        # Use only selected samples
+        y_true = y_true[selected_samples]
+        y_pred = y_pred[selected_samples]
+        print(f'Using selected samples: {selected_samples}')
+    else:
+        print(f'Using all {len(y_true)} samples')
 
     # Convert y_true and y_pred to PyTorch tensors if they are numpy arrays
     if isinstance(y_true, np.ndarray):
@@ -74,7 +81,6 @@ for model in models:
         y_true = y_true.reshape(-1, 70, 7)  # Reshape to [batch, height, features]
         y_pred = y_pred.reshape(-1, 70, 7)
         print(f'Reshaped y_true: {y_true.shape}')
-
         print(f'Reshaped y_pred: {y_pred.shape}')
 
     # ------------------------------------------------------------------
@@ -119,69 +125,76 @@ target_units = {
 
 # Prepare the figure
 models_name = [model['name'] for model in models]
-mask = [True] * len(models_name)
+
+# Define colors for consistent plotting - true is black, predictions use a consistent color set
+colors = ['black']  # True value is always black
+pred_colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink']  # For predictions
 
 # Height indices (0 ... H-1)
 height_range = range(y_true_h.shape[0])
 
 fig = plt.figure(figsize=(12, 18))
 
-# Create one subplot for each of the 7 target channels in a 3 × 3 grid
-ax_list = []
-
-for i, (label, units) in enumerate(target_units.items()):
-    subplot_idx = (3, 3, i + 1)
-
-    ax = fig.add_subplot(*subplot_idx)
-
-    # Plot TRUE (black solid) – label only once (first panel) so legend keys
-    # are not duplicated.
-    true_label = 'True' if i == 0 else None
+def add_subplot_true_pred(
+    fig,
+    height_vals,
+    true_data,       # Tensor, shape [height, channel]
+    pred_data_list,  # list of Tensors, shape [height, channel]
+    subplot_pos,
+    models_names,
+    channel_idx,
+    title=None,
+    ylabel=None,
+    xlabel=None
+):
+    """
+    Plots true vs predicted lines for each model on the same subplot.
+    """
+    ax = fig.add_subplot(*subplot_pos)
+    
+    # Plot TRUE (black solid)
     ax.plot(
-        y_true_h[:, i],
-        height_range,
-        label=true_label,
+        true_data[:, channel_idx],
+        height_vals,
+        label='True' if channel_idx == 0 else None,
         color='black',
         linewidth=2,
     )
 
-    # ---- plot PREDICTIONS for each model ----
-    for y_pred_h, model_name, msk in zip(y_pred_hs, models_name, mask):
-        if msk:
-            pred_label = f'Pred • {model_name}' if i == 0 else None
-            ax.plot(
-                y_pred_h[:, i],
-                height_range,
-                label=pred_label,
-                linestyle='--',
-            )
+    # Plot PREDICTIONS for each model
+    for i, (pred_data, model_name) in enumerate(zip(pred_data_list, models_names)):
+        ax.plot(
+            pred_data[:, channel_idx],
+            height_vals,
+            label=f'Pred • {model_name}' if channel_idx == 0 else None,
+            linestyle='--',
+            color=pred_colors[i % len(pred_colors)]  # Use consistent colors from list
+        )
 
     ax.grid(True)
     ax.invert_yaxis()
     ax.tick_params(axis='both', which='major', labelsize=12)
-    ax.set_title(label, fontsize=12, pad=6)
-    if i in [0, 3, 6]:
-        ax.set_ylabel('Height index', fontsize=14)
-
-    # ---- Setup scientific notation with proper formatting ----
-    # 1. Use ScalarFormatter with mathtext for proper scientific notation
+    
+    if title:
+        ax.set_title(title, fontsize=13.5)
+    if ylabel:
+        ax.set_ylabel(ylabel, fontsize=14)
+    if xlabel:
+        ax.set_xlabel(xlabel, fontsize=14)
+    
+    # Setup scientific notation with proper formatting
     formatter = ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
-    # 2. Force scientific notation regardless of magnitude
     formatter.set_powerlimits((-1, 1))
     ax.xaxis.set_major_formatter(formatter)
     
-    # 3. Add descriptive label with properly formatted units
-    ax.set_xlabel(f'[$\\mathrm{{{units}}}$]')
-    
-    # 4. Set appropriate number of ticks (not too crowded, not too sparse)
+    # Set appropriate number of ticks
     ax.xaxis.set_major_locator(ticker.MaxNLocator(5))
     
-    # 5. Calculate appropriate axis limits for this specific subplot
-    # Get min/max values for this channel
-    data_values = [y_true_h[:, i]]
-    for pred in y_pred_hs:
-        data_values.append(pred[:, i])
+    # Calculate appropriate axis limits
+    data_values = [true_data[:, channel_idx]]
+    for pred in pred_data_list:
+        data_values.append(pred[:, channel_idx])
     
     min_val = min(d.min().item() for d in data_values)
     max_val = max(d.max().item() for d in data_values)
@@ -193,14 +206,33 @@ for i, (label, units) in enumerate(target_units.items()):
     
     # Set the limits
     ax.set_xlim(min_val, max_val)
+    
+    return ax
 
+# Create one subplot for each of the 7 target channels in a 3 × 3 grid
+ax_list = []
+
+for i, (label, units) in enumerate(target_units.items()):
+    subplot_idx = (3, 3, i + 1)
+
+    ax = add_subplot_true_pred(
+        fig=fig,
+        height_vals=height_range,
+        true_data=y_true_h,
+        pred_data_list=y_pred_hs,
+        subplot_pos=subplot_idx,
+        models_names=models_name,
+        channel_idx=i,
+        title=label,
+        ylabel='Height index' if i in [0, 3, 6] else None,
+        xlabel=f'[$\\mathrm{{{units}}}$]'
+    )
+    
     ax_list.append(ax)
 
 # ------------------------------ Legend & Layout ------------------------------
 
 # Create a single legend at the bottom centered across the figure with clear labels
-# for true values and predicted values
-
 handles, labels = [], []
 for ax in ax_list:
     for h, l in zip(*ax.get_legend_handles_labels()):
@@ -215,10 +247,25 @@ fig.legend(handles, labels, loc='lower center', ncol=len(labels),
 # Tight layout with extra space at bottom for legend
 fig.tight_layout(rect=[0, 0.05, 1, 1])
 
-
-
 # Save the figure
-plt.savefig('/mydata/deepcloud/yves/Tendency-normTarget-true_vs_pred-sample.png',
-            bbox_inches='tight', dpi=300)
+# Create a descriptive sample suffix for filenames
+if use_all_samples:
+    sample_suffix = "all_samples"
+else:
+    sample_suffix = f"samples_{'-'.join(map(str, selected_samples))}" if len(selected_samples) > 1 else f"sample_{selected_samples[0]}"
+
+# Save to each model's test path if requested
+if save_to_test_path:
+    for model in models:
+        output_path = join(model['path'], f'tendency-true-vs-pred-{sample_suffix}.png')
+        plt.savefig(output_path, bbox_inches='tight', dpi=300)
+        print(f"Saved visualization to {output_path}")
+
+# Save to additional path if provided
+if additional_save_path:
+    plt.savefig(additional_save_path, bbox_inches='tight', dpi=300)
+    print(f"Saved visualization to {additional_save_path}")
+
+plt.show()
 
 

@@ -28,7 +28,7 @@ python train_column_tendency_normTarg.py \
     --model afno_tendency \
     --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg \
+    --save /mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg_test \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \

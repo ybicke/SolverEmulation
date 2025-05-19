@@ -4,19 +4,11 @@ from os.path import join, basename, exists
 
 import h5py
 import torch
-import random
-from torch.utils.data import IterableDataset, DataLoader
+from torch.utils.data import IterableDataset
 
 
-
-# This dataloader controls randomness better. I use the random module with a seed for reproducability
 class IconColumnIterableDataset(IterableDataset):
-    def __init__(self, 
-                 filenames,
-                 shuffle=None,
-                 subsample=None, 
-                 dtype='float32', 
-                 cache_dir=None):
+    def __init__(self, filenames, shuffle=None, subsample=None, dtype='flaot32', cache_dir=None):
         super(IconColumnIterableDataset).__init__()
         self.filenames = filenames
         self.dtype = torch.float32
@@ -28,7 +20,6 @@ class IconColumnIterableDataset(IterableDataset):
         local_file = join(self.cache_dir, basename(filename))
         if not exists(local_file) and self.cache_dir:
             shutil.copy2(filename, local_file)
-        
         for _ in range(10):
             try:
                 with h5py.File(local_file, 'r') as h:
@@ -42,6 +33,9 @@ class IconColumnIterableDataset(IterableDataset):
                 shutil.copy2(filename, local_file)
                 continue
             break         
+        if self.shuffle:
+            # TODO: Add shuffle        
+            pass
 
         if self.subsample:
             indices = torch.randint(0, y.size(0), (int(self.subsample*y.size(0)), ))
@@ -61,18 +55,8 @@ class IconColumnIterableDataset(IterableDataset):
             iter_start = worker_id * per_worker
             iter_end = min(iter_start + per_worker, len(self.filenames))
             
-        if self.shuffle:
-            # Shuffle the filenames within the worker's range
-            indices = list(range(iter_start, iter_end))
-            random.shuffle(indices)
-            filenames = [self.filenames[i] for i in indices]
-        else:
-            filenames = self.filenames[iter_start:iter_end]
-            
-        for filename in filenames:
+        for filename in self.filenames[iter_start: iter_end]:
             x3d, x2d, y = self.read_file(filename)
             for x3d_, x2d_, y_ in zip(x3d, x2d, y):
                 yield x3d_, x2d_, y_
 
-    def __len__(self):
-        return len(self.filenames)

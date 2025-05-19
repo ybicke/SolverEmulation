@@ -1,33 +1,12 @@
 import logging
-from functools import partial
-from collections import OrderedDict
-from copy import Error, deepcopy
-from re import S
-from numpy.lib.arraypad import pad
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
-# from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
-# from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 import torch.fft
-from torch.nn.modules.container import Sequential
-# from main_afnonet import get_args
-from torch.utils.checkpoint import checkpoint_sequential
 
-from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
-from .afno1d import AFNO1D
-# from afno.afno2d import AFNO2D
-from afno.bfno2d import BFNO2D
-from afno.ls import AttentionLS
-from afno.sa import SelfAttention
-from afno.gfn import GlobalFilter
+from afno1d import AFNO1D
 
-import matplotlib.pyplot as plt
-import os
 
 _logger = logging.getLogger(__name__)   
 
@@ -75,7 +54,6 @@ class Block(nn.Module):
                  dim,
                  mlp_ratio=4.,
                  drop=0.,
-                 drop_path=0.,
                  act_layer=nn.GELU,
                  norm_layer=nn.LayerNorm, # maybe check without layernorm??
                  mixing_type="afno",
@@ -101,7 +79,6 @@ class Block(nn.Module):
                                  hidden_size_factor=1
                                  )
         
-        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
     
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
@@ -119,7 +96,6 @@ class Block(nn.Module):
 
         x = self.norm2(x)
         x = self.mlp(x)
-        x = self.drop_path(x)
         x = x + residual
         return x
     
@@ -133,7 +109,6 @@ class AFNONet(nn.Module):
         depth (int): depth of transformer layers, here blocks
         mlp_ratio (int): ratio of mlp hidden dim to embedding dim
         drop_rate (float): dropout rate
-        drop_path_rate (float): stochastic depth rate
         norm_layer: (nn.Module): normalization layer
     """
         
@@ -153,13 +128,9 @@ class AFNONet(nn.Module):
                  lwflx_idx=[0, 1], 
                  cosmu0_idx=1, 
                  tsfctrad_idx=5, 
-                 mean2d=None,
-                 var2d=None, 
-                 mean3d=None, 
-                 var3d=None,
                  device=None,
+                 is_test=False,
                  uniform_drop=False, 
-                 drop_path_rate=0.,
                  mlp_ratio=4.,
                  hard_thresholding_fraction=1,
                  sparsity_threshold=0.01,
@@ -178,17 +149,7 @@ class AFNONet(nn.Module):
         self.cosmu0_idx = cosmu0_idx
         self.tsfctrad_idx = tsfctrad_idx
         
-        # Convert statistics variables to torch.float32
-        var2d = var2d.to(dtype=torch.float32)
-        mean2d = mean2d.to(dtype=torch.float32)
-        var3d = var3d.to(dtype=torch.float32)
-        mean3d = mean3d.to(dtype=torch.float32)
-        
-        # Initialize normalizers for 2D and 3D inputs
-        self.normalizer2d = Normalization(std=torch.sqrt(var2d), mean=mean2d)
-        self.normalizer3d = Normalization(std=torch.sqrt(var3d), mean=mean3d)
-
-        patch_dim = channels_in  * patch_size
+        patch_dim = channels_in * patch_size
 
         # same patch embedding as in ViT code
         self.to_patch_embedding = nn.Sequential(
@@ -212,31 +173,13 @@ class AFNONet(nn.Module):
         self.mlp_head = nn.Linear(embed_dim, patch_size*channels_out)
         self.sigmoid = nn.Sigmoid()
 
-      
-        # With uniform fals and drop_path_rate to 0 not really used. Responsible for calculating the drop path rates for each 
-        # "transformer" block based on the uniform_drop flag and the drop_path_rate value. If uniform_drop is True, the same 
-        # drop_path_rate is used for all blocks. Otherwise, a linearly increasing drop path rate is used, starting from 0 and 
-        # reaching drop_path_rate at the last block.
 
-        if uniform_drop:
-            print('using uniform droppath with expect rate', drop_path_rate)
-            dpr = [drop_path_rate for _ in range(depth)]  # stochastic depth decay rule
-        else:
-            print('using linear droppath with expect rate', drop_path_rate * 0.5)
-            dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
-        # dpr = [drop_path_rate for _ in range(depth)]  # stochastic depth decay rule
-        
-          
-        h=height // patch_size
-        w=1
-        
       
         self.blocks = nn.ModuleList([
             Block(
                 dim=embed_dim, 
                 mlp_ratio=mlp_ratio,
                 drop=dropout,
-                drop_path=dpr[i],
                 norm_layer=nn.LayerNorm,
                 sparsity_threshold=sparsity_threshold,
                 hard_thresholding_fraction = hard_thresholding_fraction
@@ -246,18 +189,15 @@ class AFNONet(nn.Module):
         
 
             
-    def forward_features(self, x3d, x2d):
 
-        x3d = self.normalizer3d(x3d)
-        x2d = self.normalizer2d(x2d)
-         
-        x2d_to_70 = x2d.unsqueeze(1).repeat(1, x3d.shape[1], 1)
-        x3d_merged = torch.cat((x3d, x2d_to_70), dim=-1)
+
+    def forward(self, x3d_norm, x2d_norm, x2d_orig):
+        # Both x3d and x2d should already be normalized
+        # This function now expects normalized inputs
+        x2d_to_70 = x2d_norm.unsqueeze(1).repeat(1, x3d_norm.shape[1], 1)
+        x3d_merged = torch.cat((x3d_norm, x2d_to_70), dim=-1)
         
         x = self.to_patch_embedding(x3d_merged)
-        #x3d = self.to_patch_embedding(x3d)
-        #x2d = self.to_patch_embedding_2D(x2d)
-        #x = torch.cat((x3d, x2d[:, None, :]), axis=-2)
 
         x = x + self.pos_embed
         x = self.pos_drop(x)
@@ -266,15 +206,10 @@ class AFNONet(nn.Module):
             x = blk(x)
 
         x = self.norm(x)
-        return x
-
-    def forward(self, x3d, x2d):
-        x = self.forward_features(x3d, x2d)
-        
         x = self.mlp_head(x)
         
-        # x = self.sigmoid(x)
-        # x = self._scale_output(x, x2d)
+        #x = self.sigmoid(x)
+        #x = self._scale_output(x, x2d_orig)
         
         return x.squeeze()    
     

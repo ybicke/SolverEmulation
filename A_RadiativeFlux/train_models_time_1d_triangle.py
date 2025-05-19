@@ -7,6 +7,8 @@ import yaml
 import pickle
 import logging
 import random
+import math
+
 
 import argparse
 from os.path import join, dirname, basename, normpath, isfile
@@ -18,10 +20,12 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
+# Import matplotlib for visualizations
+import matplotlib.pyplot as plt
 
 
-from files_3d.data_loader_3d import IconIterableDataset_3D
-from files_3d.data_utils import DataNormalizer
+from files_3d.data_loader_1d_triangle import IconTriangleColumnDataset
+from data_utils import DataNormalizer
 
 
 
@@ -48,7 +52,6 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 
-
 parser = argparse.ArgumentParser(description='Train Transformer models.')
 
 # General parameters
@@ -60,7 +63,7 @@ parser.add_argument('--subsample', type=float, default=None, help='Subsampling r
 parser.add_argument('--num-workers', type=int, default=os.cpu_count(), help='Number of workers to load data')
 parser.add_argument('--prefetch-factor', type=int, default=2, help='Prefetch factor')
 parser.add_argument('--wandb-mode', type=str, default='disabled', choices={'online', 'offline', 'disabled'}, help='Operating mode for W&B')
-parser.add_argument('--num-cells', type=int, default=81920, help='Number of ICON cells')
+parser.add_argument('--num-cells', type=int, default=81921, help='Number of ICON cells in a complete Earth model')
 parser.add_argument('--train', action=argparse.BooleanOptionalAction, default=True, help='Specify if training takes place')
 parser.add_argument('--test', action=argparse.BooleanOptionalAction, default=True, help='Specify if test takes place')
 parser.add_argument('--shuffle', action=argparse.BooleanOptionalAction, default=True, help='Shuffling the train dataset')
@@ -79,11 +82,12 @@ parser.add_argument('--channel-3d', type=int, default=6, help='3D input channels
 parser.add_argument('--channel-2d', type=int, default=6, help='2D input channels')
 parser.add_argument('--patch-size', type=int, default=2, help='Patch size for transformer models')
 parser.add_argument('--scale-output', action=argparse.BooleanOptionalAction, default=True, help='Whether to scale output')
-parser.add_argument('--height-in', type=int, default=70, help='Number of height levels')
+parser.add_argument('--height-in', type=int, default=71, help='Number of height levels')
 
+# Add this argument to your parser arguments section
+parser.add_argument('--hr-smoothness-weight', type=float, default=0.0, 
+                   help='Weight for heating rate smoothness loss (0.0 to disable, higher values create smoother profiles)')
 
-# To create argument groups, just call the method on the parser
-# These groups are for better help text organization, but all arguments are still part of the main namespace
 
 # ViT specific parameters
 vit_group = parser.add_argument_group('ViT model arguments')
@@ -108,22 +112,20 @@ gnn_group.add_argument('--max-skip', type=int, default=3, help='Maximum skip dis
 gnn_group.add_argument('--fully-connected', action=argparse.BooleanOptionalAction, default=False, help='Use fully connected graph')
 gnn_group.add_argument('--edge-channels-in', type=int, default=1, help='Number of edge feature channels')
 gnn_group.add_argument('--heights-file', type=str, default=None, help='Path to file containing height data')
-
-# GNN 3d specific parameters
-gnn_3d_group = parser.add_argument_group('GNN 3d model arguments')
-gnn_3d_group.add_argument('--grid-file-path', type=str, default=None, help='Path to the ICON grid file')
-gnn_3d_group.add_argument('--triangle-id', type=int, default=1, help='ID of the triangle to use')
-gnn_3d_group.add_argument('--embed-dim', type=int, default=256, help='Embedding dimension for GNN 3d')
-gnn_3d_group.add_argument('--triangle-division-factor', type=int, default=4, 
-                        help='Factor by which to divide the triangle (1 for full 4096 columns, 4 for 1024 columns, 16 for 256 columns)')
-gnn_3d_group.add_argument('--fully-connected-vertical', action=argparse.BooleanOptionalAction, default=False, 
-                        help='Whether to use fully connected edges in the vertical dimension of the atmospheric column')
+gnn_group.add_argument('--connections-per-node', type=int, default=None, help='Number of connections per node for optimal sparse connectivity (used with gnn_broadcast_skip)')
 
 # RNN specific parameters
 rnn_group = parser.add_argument_group('RNN model arguments')
 rnn_group.add_argument('--lstm-units', nargs='+', type=int, default=[256, 512], help='LSTM units for RNN model')
 rnn_group.add_argument('--mlp-units', nargs='+', type=int, default=[256, 256], help='MLP units for RNN model')
 rnn_group.add_argument('--lstm-droprate', type=float, default=0.0, help='Dropout rate for LSTM layers')
+
+# Add these arguments to your parser arguments section
+unet_group = parser.add_argument_group('UNet model arguments')
+unet_group.add_argument('--cnn-units', nargs='+', type=int, default=[64, 128, 256, 512], 
+                     help='Number of filters in each CNN layer')
+unet_group.add_argument('--cnn-kernel-sizes', nargs='+', type=int, default=[2, 2, 2, 2], 
+                     help='Kernel sizes for maxpooling in CNN layers')
 
 
 args = parser.parse_args()
@@ -221,6 +223,24 @@ def get_model(model_name):
         ).to(device)    
         
         
+    elif model_name == 'gnn_optimized1':
+        from models.gnn_optimized1 import AtmosphericColumnGNN
+        
+        model = AtmosphericColumnGNN(
+            embed_dim=args.hidden_dim,
+            depth=args.layers, 
+            dropout=args.dropout,
+            max_skip=args.max_skip,
+            emb_dropout=args.dropout,  # Using main dropout for embedding
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            edge_channels_in=args.edge_channels_in,
+            fully_connected=args.fully_connected,
+            device=device
+        ).to(device)    
+        
+        
     elif model_name == 'gnn_broadcast_skip':
         from models.gnn_broadcast_skip import AtmosphericColumnGNN  
                 
@@ -235,6 +255,7 @@ def get_model(model_name):
             channels_out=args.channel_out,
             edge_channels_in=args.edge_channels_in,
             fully_connected=args.fully_connected,
+            connections_per_node=args.connections_per_node,
             device=device
         ).to(device)    
         
@@ -274,26 +295,7 @@ def get_model(model_name):
         ).to(device)    
         
         
-    elif model_name == 'gnn_3d':
-        from files_3d.gnn_3d import GNN3d   
         
-        model = GNN3d(
-            total_cols=args.num_cells,
-            grid_file_path=args.grid_file_path,
-            triangle_id=args.triangle_id,
-            embed_dim=args.hidden_dim,
-            depth=args.layers,
-            dropout=args.dropout,
-            channels_in_3d=args.channel_3d,
-            channels_in_2d=args.channel_2d,
-            channels_out=args.channel_out,
-            edge_channels_in=args.edge_channels_in,
-            num_height_levels=args.height_in,
-            device=device,
-            division_factor=args.triangle_division_factor,
-            fully_connected_vertical=args.fully_connected_vertical
-        ).to(device)
-            
         
     elif model_name == 'rnn':
         from models.rnn import FastRnnIg
@@ -305,6 +307,19 @@ def get_model(model_name):
             lstm_units=args.lstm_units,
             lstm_droprate=args.lstm_droprate,
             mlp_units=args.mlp_units,
+            device=device
+        ).to(device)
+        
+    elif model_name == 'unet':
+        from models.unet import UNet
+        model = UNet(
+            height_in=args.height_in,
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channel_out=args.channel_out,
+            cnn_units=args.cnn_units,
+            kernel_sizes=args.cnn_kernel_sizes,
+            dropout=args.dropout,
             device=device
         ).to(device)
         
@@ -338,6 +353,7 @@ def train_model(model, train_set, valid_set, normalizer):
     else:
         raise NameError('optimizer not supported.')
     
+    # Standard loss function
     train_loss = MeanSquaredError().to(device)
     valid_loss = MeanSquaredError().to(device)
     train_mae = MeanAbsoluteError().to(device)
@@ -358,14 +374,14 @@ def train_model(model, train_set, valid_set, normalizer):
 
     epoch_number = init_epoch
     best_loss = 1e9999999 
-    
-
+      
     # Training loop
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
         
-        model.train(True)        
+        model.train(True)
+        
         for i, data in enumerate(train_set):
             
             t1_1 = time.perf_counter()
@@ -379,7 +395,10 @@ def train_model(model, train_set, valid_set, normalizer):
             # Forward pass with normalized data
             outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
             
+            # Use standard MSE loss
             loss = train_loss(outputs, batch_y)
+            
+            # Update metrics for logging
             batch_mae = train_mae(outputs, batch_y)
             
             if i > 0:
@@ -389,8 +408,9 @@ def train_model(model, train_set, valid_set, normalizer):
                 optimizer.step()
                 t2_1 = time.perf_counter()
                 
-                if i % 10 == 9:
-                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
+                if i % 100 == 99:
+                    print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, '
+                          f'mean_absolute_error: {batch_mae:.4f}')
                 
 
         # Validation step
@@ -408,13 +428,13 @@ def train_model(model, train_set, valid_set, normalizer):
                 v_outputs = model(vx3d_norm, vx2d_norm, vx2d_orig)
                 
                 valid_loss.update(v_outputs, v_labels)
-                valid_mae.update(v_outputs, v_labels)                
+                valid_mae.update(v_outputs, v_labels)
 
         total_train_loss = train_loss.compute()
         total_valid_loss = valid_loss.compute()
         total_train_mae = train_mae.compute()
         total_valid_mae = valid_mae.compute()
-
+        
         t2 = time.perf_counter()
 
         # Keep logging metrics continuously
@@ -423,16 +443,16 @@ def train_model(model, train_set, valid_set, normalizer):
             'loss': total_train_loss,
             'val_loss': total_valid_loss,
             'mean_absolute_error': total_train_mae,
-            'val_mean_absolute_error': total_valid_mae
+            'val_mean_absolute_error': total_valid_mae,
             })
 
         # Print epoch summary
         print(f'{epoch_number:03}/{args.num_epoch}: ',
-            f'time: {t2-t1:.3f}', 
-            f'loss: {total_train_loss:.4f} ',
-            f'mean_absolute_error: {total_train_mae:.4f}, ',
-            f'val_loss: {total_valid_loss:.4f}, ',
-            f'val_mean_absolute_error: {total_valid_mae:.4f}')
+              f'time: {t2-t1:.3f}', 
+              f'loss: {total_train_loss:.4f} ',
+              f'mean_absolute_error: {total_train_mae:.4f}, ',
+              f'val_loss: {total_valid_loss:.4f}, ',
+              f'val_mean_absolute_error: {total_valid_mae:.4f}')
         
         # Save checkpoints
         checkpoint = {
@@ -486,125 +506,10 @@ def calculate_heating_rates(y, x3d, x2d):
     return heating_rate
 
 
-
-def test_model(model, test_set, normalizer):
-    logger.info('Test started...')    
-
-    best_chkpt = join(checkpoint_path, 'best_model.pth')
-    assert isfile(best_chkpt), 'Checkpoint not found, testing faild!'
-    checkpoint = torch.load(best_chkpt, map_location=torch.device(device))
-    model.load_state_dict(checkpoint['model_state_dict'])
-    
-    test_loss = MeanSquaredError().to(device)
-    test_mae = MeanAbsoluteError().to(device)
-
-    y_true, y_pred = list(), list()
-    h_true, h_pred = list(), list()
-    
-    # Timing configuration
-    num_timing_batches = 1000  
-    warmup_batches = 10       
-    timing_data = []
-    
-    # Perform warmup to stabilize GPU performance
-    logger.info(f'Performing {warmup_batches} warmup passes...')
-    warmup_iter = iter(test_set)
-    for _ in range(warmup_batches):
-        try:
-            data = next(warmup_iter)
-            batch_x3, batch_x2, _ = data
-            batch_x3, batch_x2 = batch_x3.to(device), batch_x2.to(device)
-            batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
-            with torch.no_grad():
-                _ = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
-        except StopIteration:
-            # If we run out of data, just break the loop
-            break
-    
-    # Synchronize GPU to ensure warmup is complete
-    torch.cuda.synchronize()
-    
-    t1 = time.perf_counter(), time.process_time()
-    
-    for i, data in enumerate(test_set):
-        
-        batch_x3, batch_x2, batch_y = data
-        batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
-        
-        # Normalize test data
-        batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
-        
-        model.eval()
-        with torch.no_grad():
-            # Time inference for a subset of batches
-            if i < num_timing_batches:
-                # Ensure all previous GPU operations are complete
-                torch.cuda.synchronize()
-                
-                # Time forward pass
-                start = time.perf_counter()
-                outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
-                
-                # Ensure forward pass is complete before stopping timer
-                torch.cuda.synchronize()
-                
-                end = time.perf_counter()
-                timing_data.append(end - start)
-            else:
-                outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
-            
-        y_true.append(batch_y.detach().cpu())
-        y_pred.append(outputs.detach().cpu())
-        h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
-        h_pred.append(calculate_heating_rates(outputs, batch_x3, batch_x2).detach().cpu())
-
-        loss = test_loss(outputs, batch_y)
-        mae = test_mae(outputs, batch_y)
-        if i % 10 == 9:
-            print(f'batch {i+1} loss: {loss:.4f}, '
-                    f'mean_absolute_error: {mae:.4f},')
-
-    t2 = time.perf_counter(), time.process_time()
-    
-    # Process timing statistics
-    samples_per_second, per_sample_time, earth_time, earth_batch_time = None, None, None, None
-    if timing_data:
-        samples_per_second, per_sample_time, earth_time, earth_batch_time = process_timing_statistics(
-            timing_data, model, test_path)
-    
-    y_true = torch.cat(y_true, 0)
-    y_pred = torch.cat(y_pred, 0)
-    h_true = torch.cat(h_true, 0)
-    h_pred = torch.cat(h_pred, 0)
-
-    total_test_loss = test_loss.compute()
-    total_test_mae = test_mae.compute()
-
-    print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} ',
-            f'mean_absolute_error: {total_test_mae:.4f}')
-
-
-    with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
-        pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
-    with open(join(test_path, 'y_pred.pickle'), 'wb') as handle:
-        pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    with open(join(test_path, 'h_true.pickle'), 'wb') as handle:
-        pickle.dump(h_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
-    with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
-        pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        
-    # Return timing metrics for logging in wandb
-    return samples_per_second, per_sample_time, earth_time, earth_batch_time
-
 def process_timing_statistics(timing_data, model, test_path):
     """
     Process and report timing statistics from collected data.
     """
-    import math
-    
     batch_size = args.batch_size
     
     # Calculate basic statistics
@@ -672,22 +577,142 @@ def process_timing_statistics(timing_data, model, test_path):
     return samples_per_second, per_sample_time, earth_time, earth_batch_time
 
 
-# TODO: Might use subsampling here when I want to subsample a large triangle
+
+
+def test_model(model, test_set, normalizer):
+    logger.info('Test started...')    
+ 
+    best_chkpt = join(checkpoint_path, 'best_model.pth')
+    assert isfile(best_chkpt), 'Checkpoint not found, testing faild!'
+    checkpoint = torch.load(best_chkpt, map_location=torch.device(device))
+    model.load_state_dict(checkpoint['model_state_dict'])
+
+    
+    
+    test_loss = MeanSquaredError().to(device)
+    test_mae = MeanAbsoluteError().to(device)
+
+    y_true, y_pred = list(), list()
+    h_true, h_pred = list(), list()
+    
+    # Timing configuration
+    # -------------------------------
+    num_timing_batches = 1000  
+    warmup_batches = 10       
+    timing_data = []
+    
+    # Perform warmup to stabilize GPU performance
+    logger.info(f'Performing {warmup_batches} warmup passes...')
+    warmup_iter = iter(test_set)
+    for _ in range(warmup_batches):
+        try:
+            data = next(warmup_iter)
+            batch_x3, batch_x2, _ = data
+            batch_x3, batch_x2 = batch_x3.to(device), batch_x2.to(device)
+            batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
+            with torch.no_grad():
+                _ = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+        except StopIteration:
+            # If we run out of data, just break the loop
+            break
+    
+    # Synchronize GPU to ensure warmup is complete
+    # This makes sure all previous operations are finished before we start timing
+    torch.cuda.synchronize()
+    # -------------------------------   
+
+    
+    t1 = time.perf_counter(), time.process_time()
+    
+    for i, data in enumerate(test_set):
+        
+        batch_x3, batch_x2, batch_y = data
+        batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
+        
+        # Normalize test data
+        batch_x3_norm, batch_x2_norm, batch_x2_orig = normalizer.normalize(batch_x3, batch_x2)
+        
+        model.eval()
+        with torch.no_grad():
+            # Time inference for a subset of batches
+            # -------------------------------   
+            if i < num_timing_batches:
+                # Ensure all previous GPU operations are complete
+                torch.cuda.synchronize()
+                
+                # Time forward pass
+                start = time.perf_counter()
+                # -------------------------------   
+                
+                outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+                
+                # Ensure forward pass is complete before stopping timer
+                # -------------------------------   
+                torch.cuda.synchronize()
+                
+                end = time.perf_counter()
+                timing_data.append(end - start)
+                # -------------------------------   
+            else:
+                outputs = model(batch_x3_norm, batch_x2_norm, batch_x2_orig)
+            
+        y_true.append(batch_y.detach().cpu())
+        y_pred.append(outputs.detach().cpu())
+        h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
+        h_pred.append(calculate_heating_rates(outputs, batch_x3, batch_x2).detach().cpu())
+
+        loss = test_loss(outputs, batch_y)
+        mae = test_mae(outputs, batch_y)
+        if i % 1000 == 999:
+            print(f'batch {i+1} loss: {loss:.4f}, '
+                    f'mean_absolute_error: {mae:.4f},')
+
+    t2 = time.perf_counter(), time.process_time()
+    
+    # Process timing statistics using dedicated function
+    # -------------------------------   
+    samples_per_second, per_sample_time, earth_time, earth_batch_time = None, None, None, None
+    if timing_data:
+        samples_per_second, per_sample_time, earth_time, earth_batch_time = process_timing_statistics(
+            timing_data, model, test_path)
+        
+    # -------------------------------   
+    
+    y_true = torch.cat(y_true, 0)
+    y_pred = torch.cat(y_pred, 0)
+    h_true = torch.cat(h_true, 0)
+    h_pred = torch.cat(h_pred, 0)
+
+    total_test_loss = test_loss.compute()
+    total_test_mae = test_mae.compute()
+
+    print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} ',
+            f'mean_absolute_error: {total_test_mae:.4f}')
+
+
+    with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
+        pickle.dump(y_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    with open(join(test_path, 'y_pred.pickle'), 'wb') as handle:
+        pickle.dump(y_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open(join(test_path, 'h_true.pickle'), 'wb') as handle:
+        pickle.dump(h_true, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
+        pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    
+        
+    # Return timing metrics for logging in wandb
+    return samples_per_second, per_sample_time, earth_time, earth_batch_time
+
+
 def get_column_data_with_disk_cache(filenames, 
                                     shuffle, 
-                                    triangle_id=args.triangle_id,
-                                    division_factor=args.triangle_division_factor,
+                                    subsample=args.subsample, 
                                     num_workers=args.num_workers):
     
-    logger.info(f"Creating dataset with triangle_id={triangle_id}, division_factor={division_factor}")
-
-    icon_data = IconIterableDataset_3D(
-        filenames, 
-        cache_dir='/tmp', 
-        shuffle=shuffle,
-        division_factor=division_factor,
-        triangle_id=triangle_id
-    )
+    icon_data = IconTriangleColumnDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
 
     # Prepare arguments for DataLoader
     dataloader_args = {
@@ -701,6 +726,7 @@ def get_column_data_with_disk_cache(filenames,
         dataloader_args['prefetch_factor'] = args.prefetch_factor
 
     return DataLoader(**dataloader_args)
+
 
 
 
@@ -740,8 +766,7 @@ def main():
     # First create the model before initializing wandb
     model = get_model(args.model)
     num_params = count_parameters(model)
-    print(f"Trainable parameters: {num_params:,}")
-
+    
     
     # Initialize W&B here before anything else
     wandb.init(
@@ -771,12 +796,8 @@ def main():
 
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
-        train_loader = get_column_data_with_disk_cache(train_files, shuffle=True,
-                                                        #subsample=1.0
-                                                       )
-        val_loader = get_column_data_with_disk_cache(val_files, shuffle=False,
-                                                     #subsample=1.0
-                                                     )
+        train_loader = get_column_data_with_disk_cache(train_files, shuffle=True)
+        val_loader = get_column_data_with_disk_cache(val_files, shuffle=False, subsample=1.0)
         
         train_model(model, train_loader, val_loader, normalizer)
         
@@ -785,36 +806,34 @@ def main():
         train_cpu_time = tr2[1] - tr1[1]
         print(f'Training time: Real time: {train_real_time:.2f}, CPU time: {train_cpu_time:.2f}')
         
-        # Store training times for end summary
-        summary_metrics["train_real_time"] = train_real_time
-        summary_metrics["train_cpu_time"] = train_cpu_time
+        # Store training times for end summary in wandb
+        #summary_metrics["train_real_time"] = train_real_time
+        #summary_metrics["train_cpu_time"] = train_cpu_time
     
     if args.test:
-        test1 = time.perf_counter(), time.process_time()
+        #test1 = time.perf_counter(), time.process_time()
         test_loader = get_column_data_with_disk_cache(test_files, shuffle=False)
         
         # First measure inference time
         logger.info('---------------------------------------')
-        logger.info('Measuring inference time...')
+        logger.info('Step 1: Measuring inference time...')
         samples_per_second, per_sample_time, earth_time, earth_batch_time = test_model(model, test_loader, normalizer)
         
-        test2 = time.perf_counter(), time.process_time()
+        #test2 = time.perf_counter(), time.process_time()
         
-        test_real_time = test2[0] - test1[0]
-        test_cpu_time = test2[1] - test1[1]
-        print(f'Test time: Real time: {test_real_time:.2f}, CPU time: {test_cpu_time:.2f}')
+        #test_real_time = test2[0] - test1[0]
+        #test_cpu_time = test2[1] - test1[1]
+        #print(f'Total test time: Real time: {test_real_time:.2f}, CPU time: {test_cpu_time:.2f}')
         
-        summary_metrics["test_real_time"] = test_real_time
-        summary_metrics["test_cpu_time"] = test_cpu_time
+        #summary_metrics["test_real_time"] = test_real_time
+        #summary_metrics["test_cpu_time"] = test_cpu_time
         
         # Log timing metrics in wandb
-        if samples_per_second is not None and per_sample_time is not None:
-            summary_metrics["samples_per_second"] = samples_per_second
-            summary_metrics["per_sample_time_ms"] = per_sample_time * 1000  # Convert to ms
-            summary_metrics["earth_time_seconds"] = earth_time
-            summary_metrics["earth_batch_time_seconds"] = earth_batch_time
-            print(f'Samples per second: {samples_per_second:.2f}, Per sample time: {per_sample_time*1000:.2f} ms')
-    
+        # if samples_per_second is not None and per_sample_time is not None:
+        #     summary_metrics["samples_per_second"] = samples_per_second
+        #     summary_metrics["per_sample_time"] = per_sample_time
+        #     print(f'Samples per second: {samples_per_second:.2f}, Per sample time: {per_sample_time:.2f}')
+            
     # Log all summary metrics at the end
     wandb.log(summary_metrics, commit=True)
     

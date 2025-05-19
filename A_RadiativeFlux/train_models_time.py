@@ -82,7 +82,7 @@ parser.add_argument('--channel-3d', type=int, default=6, help='3D input channels
 parser.add_argument('--channel-2d', type=int, default=6, help='2D input channels')
 parser.add_argument('--patch-size', type=int, default=2, help='Patch size for transformer models')
 parser.add_argument('--scale-output', action=argparse.BooleanOptionalAction, default=True, help='Whether to scale output')
-parser.add_argument('--height-in', type=int, default=70, help='Number of height levels')
+parser.add_argument('--height-in', type=int, default=71, help='Number of height levels')
 
 # Add this argument to your parser arguments section
 parser.add_argument('--hr-smoothness-weight', type=float, default=0.0, 
@@ -112,6 +112,7 @@ gnn_group.add_argument('--max-skip', type=int, default=3, help='Maximum skip dis
 gnn_group.add_argument('--fully-connected', action=argparse.BooleanOptionalAction, default=False, help='Use fully connected graph')
 gnn_group.add_argument('--edge-channels-in', type=int, default=1, help='Number of edge feature channels')
 gnn_group.add_argument('--heights-file', type=str, default=None, help='Path to file containing height data')
+gnn_group.add_argument('--connections-per-node', type=int, default=None, help='Number of connections per node for optimal sparse connectivity (used with gnn_broadcast_skip)')
 
 # RNN specific parameters
 rnn_group = parser.add_argument_group('RNN model arguments')
@@ -254,6 +255,7 @@ def get_model(model_name):
             channels_out=args.channel_out,
             edge_channels_in=args.edge_channels_in,
             fully_connected=args.fully_connected,
+            connections_per_node=args.connections_per_node,
             device=device
         ).to(device)    
         
@@ -705,7 +707,11 @@ def test_model(model, test_set, normalizer):
     return samples_per_second, per_sample_time, earth_time, earth_batch_time
 
 
-def get_column_data_with_disk_cache(filenames, subsample=args.subsample, shuffle=False, num_workers=0):
+def get_column_data_with_disk_cache(filenames, 
+                                    shuffle, 
+                                    subsample=args.subsample, 
+                                    num_workers=args.num_workers):
+    
     icon_data = IconColumnIterableDataset(filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
 
     # Prepare arguments for DataLoader
