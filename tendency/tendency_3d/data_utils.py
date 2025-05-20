@@ -44,11 +44,22 @@ class DataNormalizer:
         # Store original 2D data for scaling output
         x2d_original = x2d.clone()
         
-        # Normalize 3D data - apply normalization along the channel dimension
-        # Using proper broadcasting by ensuring dimensions are properly aligned
-        x3d_normalized = (x3d - self.mean3d.view(1, 1, 1, -1)) / self.std3d.view(1, 1, 1, -1)        
-        # Normalize 2D data
-        x2d_normalized = (x2d - self.mean2d.view(1, 1, -1)) / self.std2d.view(1, 1, -1)        
+        # For 4D input [batch, columns, height, channels]
+        if len(x3d.shape) == 4:
+            batch_size, num_columns, height, channels = x3d.shape
+            # Normalize while preserving 4D structure
+            x3d_normalized = (x3d - self.mean3d.view(1, 1, 1, -1)) / self.std3d.view(1, 1, 1, -1)
+        elif len(x3d.shape) == 3:
+            # Handle 3D case as before
+            x3d_normalized = (x3d - self.mean3d.view(1, 1, -1)) / self.std3d.view(1, 1, -1)
+        
+        # Normalize 2D data - similar logic for dimension handling
+        if len(x2d.shape) == 2:  # [batch, channels]
+            x2d_normalized = (x2d - self.mean2d.view(1, -1)) / self.std2d.view(1, -1)
+        elif len(x2d.shape) == 3:  # [batch, columns, channels]
+            # Preserve 3D structure instead of reshaping
+            x2d_normalized = (x2d - self.mean2d.view(1, 1, -1)) / self.std2d.view(1, 1, -1)
+        
         return x3d_normalized, x2d_normalized, x2d_original
 
 
@@ -68,22 +79,44 @@ def get_triangle_indices(triangle_id, division_factor, total_cols):
     Returns:
         torch.Tensor: Indices for the selected triangle area
     """
-    # First get the large triangle size (4096 columns)
+    # First get the large triangle size
     large_triangle_size = total_cols // 20
     
-    # Calculate actual block size based on division factor
+    # Calculate block size for subdivided triangles
     block_size = large_triangle_size // division_factor
     
-    # Calculate start index within the large triangle
-    large_triangle_start = (triangle_id // 20) * large_triangle_size
+    # Which of the 20 large triangles are we in?
+    large_triangle_id = triangle_id // division_factor
     
-    # Calculate sub-block index within the large triangle
-    if division_factor > 1:
-        # For a division factor of 4, there are 4 possible sub-blocks (0,1,2,3)
-        sub_block_index = triangle_id % division_factor
-        start_idx = large_triangle_start + (sub_block_index * block_size)
-    else:
-        start_idx = large_triangle_start
+    # Which subdivision within that large triangle?
+    sub_block_index = triangle_id % division_factor
+    
+    # Calculate start index
+    start_idx = (large_triangle_id * large_triangle_size) + (sub_block_index * block_size)
     
     end_idx = min(start_idx + block_size, total_cols)
-    return torch.arange(start_idx, end_idx, dtype=torch.long) 
+    return torch.arange(start_idx, end_idx, dtype=torch.long)
+
+def interpolate_w_to_full_levels(w):
+    """
+    Linear interpolation of vertical velocity from half levels to full levels.
+    Works with both 3D data [B,N,L,1] and 2D data [B,L,1].
+    
+    Args:
+        w: Vertical velocity at half levels
+        
+    Returns:
+        Interpolated vertical velocity at full levels
+    """
+    if len(w.shape) == 4:  # 3D data [B,N,L,1]
+        batch_size, num_columns, num_half_levels, _ = w.shape
+        num_full_levels = num_half_levels - 1
+        w_full = torch.zeros((batch_size, num_columns, num_full_levels, 1), device=w.device)
+        w_full[:, :, :, :] = 0.5 * (w[:, :, :-1, :] + w[:, :, 1:, :])
+    else:  # 2D data [B,L,1]
+        batch_size, num_half_levels, _ = w.shape
+        num_full_levels = num_half_levels - 1
+        w_full = torch.zeros((batch_size, num_full_levels, 1), device=w.device)
+        w_full[:, :, :] = 0.5 * (w[:, :-1, :] + w[:, 1:, :])
+        
+    return w_full 

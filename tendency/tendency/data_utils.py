@@ -98,4 +98,28 @@ def get_triangle_indices(triangle_id, division_factor, total_cols):
         start_idx = large_triangle_start
     
     end_idx = min(start_idx + block_size, total_cols)
-    return torch.arange(start_idx, end_idx, dtype=torch.long) 
+    return torch.arange(start_idx, end_idx, dtype=torch.long)
+
+def interpolate_w_to_full_levels(w):
+    """
+    Linear interpolation of vertical velocity from half levels to full levels.
+    Works with both 3D data [B,N,L,1] and 2D data [B,L,1].
+    
+    Args:
+        w: Vertical velocity at half levels
+        
+    Returns:
+        Interpolated vertical velocity at full levels
+    """
+    if len(w.shape) == 4:  # 3D data [B,N,L,1]
+        batch_size, num_columns, num_half_levels, _ = w.shape
+        num_full_levels = num_half_levels - 1
+        w_full = torch.zeros((batch_size, num_columns, num_full_levels, 1), device=w.device)
+        w_full[:, :, :, :] = 0.5 * (w[:, :, :-1, :] + w[:, :, 1:, :])
+    else:  # 2D data [B,L,1]
+        batch_size, num_half_levels, _ = w.shape
+        num_full_levels = num_half_levels - 1
+        w_full = torch.zeros((batch_size, num_full_levels, 1), device=w.device)
+        w_full[:, :, :] = 0.5 * (w[:, :-1, :] + w[:, 1:, :])
+        
+    return w_full 
