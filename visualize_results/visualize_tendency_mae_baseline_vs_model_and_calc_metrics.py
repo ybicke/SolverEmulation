@@ -13,7 +13,10 @@ args = parser.parse_args()
 models = [
     {
         'name': 'AFNO',
-        'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
+        #'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
+        'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
+        # 'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'
+
     },
 ]
 

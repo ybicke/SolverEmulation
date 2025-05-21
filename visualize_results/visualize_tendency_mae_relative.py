@@ -10,7 +10,18 @@ models = [
         'name': 'AFNO',
         'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
     },
-    # Add more models here if needed
+    {
+        'name': 'GNN-32-L2',
+        'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
+    },
+    {
+        'name': 'GNN-64-L3',
+        'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
+    },
+    {
+        'name': 'GNN-128-L2',
+        'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'
+    }
 ]
 
 y_norm_errors = []
@@ -139,6 +150,6 @@ for i, (label, units) in enumerate(target_units.items()):
 ax_list[0].legend(fontsize=12, loc='best')
 
 plt.tight_layout()
-plt.savefig('/mydata/deepcloud/yves/results-temp/tendency-norm-targetMean-normalized-error-afno.png',
+plt.savefig('/mydata/deepcloud/yves/results-temp/tendency-normalized-error-model-comparison.png',
             bbox_inches='tight', dpi=300)   
 plt.show()

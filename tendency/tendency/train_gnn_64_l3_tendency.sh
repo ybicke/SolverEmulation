@@ -28,7 +28,7 @@ python train_column_tendency_normTarg.py \
     --model gnn_tendency \
     --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/gnn_64_l3_tendency_normTarg \
+    --save /mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \

@@ -39,7 +39,10 @@ save_to_test_path = True
 models = [
     {
         'name': 'AFNO',
-        'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
+        #'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
+        #'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
+        #'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
+        'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'
     },
     # Add more models as needed for comparison
     # {'name': 'Model2', 'path': '/path/to/model2/test'},
@@ -262,9 +265,9 @@ if save_to_test_path:
         print(f"Saved visualization to {output_path}")
 
 # Save to additional path if provided
-if additional_save_path:
-    plt.savefig(additional_save_path, bbox_inches='tight', dpi=300)
-    print(f"Saved visualization to {additional_save_path}")
+# if additional_save_path:
+#     plt.savefig(additional_save_path, bbox_inches='tight', dpi=300)
+#     print(f"Saved visualization to {additional_save_path}")
 
 plt.show()
 
