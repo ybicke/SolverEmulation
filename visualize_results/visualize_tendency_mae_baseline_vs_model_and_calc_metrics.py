@@ -14,7 +14,9 @@ models = [
     {
         'name': 'AFNO',
         #'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
-        'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
+        #'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
+        #'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_32_l2_indep/test',
+        'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_32_l2/test',
         # 'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'
 
     },
