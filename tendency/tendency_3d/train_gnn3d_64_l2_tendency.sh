@@ -22,8 +22,8 @@ python train_models_3d_tendency.py \
     --model gnn_3d_tendency \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/shared/results-temp/gnn3d_id39_tendency_64_l2 \
-    --percent 0.1 \
+    --save /mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100 \
+    --percent 1 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
@@ -37,9 +37,9 @@ python train_models_3d_tendency.py \
     --batch-size 2 \
     --optimizer adamw \
     --clip 1.0 \
-    --num-epoch 30 \
+    --num-epoch 100 \
     --learning-rate 0.0005 \
-    --embed-dim 32 \
+    --embed-dim 64 \
     --layers 2 \
     --dropout 0.0 \
     --edge-channels-in 1 \

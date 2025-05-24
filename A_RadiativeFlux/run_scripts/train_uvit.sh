@@ -17,40 +17,36 @@ myfolder=/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/
 # run script
 
 cd $myfolder
-echo "GNN3d training started!"
-
-
-# bash <(sed -n "${line_number}p" run_all_models.sh)
+echo "U-ViT training started!"
 
 
 # Run the training script with all required parameters
 python train_models_3d_time.py \
-    --model gnn_3d   \
+    --model uvit \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn3d_1024_emb32_l3_horizontal_testing4 \
-    --percent 1 \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/uvit_test \
+    --percent 0.1 \
+    --subsample 0.1 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --height-in 71 \
     --channel-3d 6 \
     --channel-2d 6 \
     --channel-out 4 \
+    --height-in 71 \
     --train \
     --test \
     --shuffle \
-    --batch-size 2 \
+    --batch-size 512 \
     --optimizer adamw \
-    --clip 1 \
-    --num-epoch 30 \
+    --clip 1.0 \
+    --num-epoch 80 \
     --learning-rate 0.0005 \
-    --hidden-dim 32 \
-    --layers 3 \
     --dropout 0.0 \
-    --edge-channels-in 1 \
-    --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
-    --triangle-id 39 \
-    --triangle-division-factor 4 \
-    --fully-connected \
-    --no-disable-horizontal \
-    --wandb-mode offline
+    --cnn-units 128 256 512 1024 \
+    --kernel-sizes 1 2 5 7 \
+    --attention-heads 8 \
+    --attention-dim-head 64 \
+    --attention-depth 2 \
+    --attention-dropout 0.0 \
+    --wandb-mode online \

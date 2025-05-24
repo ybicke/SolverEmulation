@@ -72,12 +72,12 @@ class AtmosphericColumnGNN(nn.Module):
         
         # Now create edge features with the SAME dimension as node features
         num_edges = edge_index.size(1)
-        edge_attr = torch.zeros(num_edges, self.edge_channels_in, device=x.device)
-        edge_attr_encoded = self.encoder.edge_mlp(edge_attr)
+        edge_attr = torch.zeros(num_edges, self.embed_dim, device=x.device)
+        #edge_attr_encoded = self.encoder.edge_mlp(edge_attr)
 
         
         # Pass directly to processor, skipping edge encoding
-        x = self.processor(x, edge_index, edge_attr_encoded)
+        x = self.processor(x, edge_index, edge_attr)
 
         # reshape the output to the original shape and decode the output variables
         x = x.view(B, L, -1)

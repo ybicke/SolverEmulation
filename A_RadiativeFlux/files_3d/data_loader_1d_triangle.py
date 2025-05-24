@@ -60,15 +60,10 @@ class IconTriangleColumnDataset(IterableDataset):
         for _ in range(10):  # Try up to 10 times if there are file access issues
             try:
                 with h5py.File(local_file, 'r') as h:
-                    # Load only data for columns in our triangle area
-                    x3d_full = torch.tensor(h['x3d'][:], dtype=self.dtype)
-                    x2d_full = torch.tensor(h['x2d'][:], dtype=self.dtype)
-                    y_full   = torch.tensor(h['y'][:],   dtype=self.dtype)
-                    
-                # Extract triangle columns
-                x3d = x3d_full[self.triangle_indices]
-                x2d = x2d_full[self.triangle_indices]
-                y   = y_full[self.triangle_indices]
+                    # Directly load only triangle columns to save memory and I/O
+                    x3d = torch.tensor(h['x3d'][self.triangle_indices, :, :], dtype=self.dtype)
+                    x2d = torch.tensor(h['x2d'][self.triangle_indices], dtype=self.dtype)
+                    y = torch.tensor(h['y'][self.triangle_indices, :, :], dtype=self.dtype)
                 
                 # Apply subsampling if specified
                 if self.subsample is not None and self.subsample < 1.0:

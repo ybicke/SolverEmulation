@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch_geometric.nn import MessagePassing
 from graph_3d_full import get_3d_graph
+import time
 
 class GNN3dTendency(nn.Module):
     def __init__(self,
@@ -82,6 +83,7 @@ class GNN3dTendency(nn.Module):
         # Edge feature initialization - start with zeros
         num_edges = batch_edge_index.size(1)
         edge_attr = torch.zeros(num_edges, self.embed_dim, device=x.device)
+        #edge_attr_encoded = self.encoder.edge_mlp(edge_attr)
         
         # Node encoding - flatten for processing
         x_features = x.reshape(B * N * L, -1)
@@ -89,7 +91,8 @@ class GNN3dTendency(nn.Module):
         
         # Message passing through GNN layers
         x_processed = self.processor(x_encoded, batch_edge_index, edge_attr)
-        
+
+
         # Decoding and output
         x_decoded = self.decoder(x_processed)
         

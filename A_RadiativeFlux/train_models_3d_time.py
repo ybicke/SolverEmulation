@@ -124,6 +124,14 @@ rnn_group.add_argument('--lstm-units', nargs='+', type=int, default=[256, 512], 
 rnn_group.add_argument('--mlp-units', nargs='+', type=int, default=[256, 256], help='MLP units for RNN model')
 rnn_group.add_argument('--lstm-droprate', type=float, default=0.0, help='Dropout rate for LSTM layers')
 
+# U-ViT specific parameters
+uvit_group = parser.add_argument_group('U-ViT model arguments')
+uvit_group.add_argument('--cnn-units', nargs='+', type=int, default=[64, 128, 256, 512], help='CNN units for U-ViT encoder/decoder')
+uvit_group.add_argument('--kernel-sizes', nargs='+', type=int, default=[2, 2, 2], help='Kernel sizes for max pooling in U-ViT')
+uvit_group.add_argument('--attention-heads', type=int, default=8, help='Number of attention heads in U-ViT bottleneck')
+uvit_group.add_argument('--attention-dim-head', type=int, default=64, help='Dimension per attention head in U-ViT')
+uvit_group.add_argument('--attention-depth', type=int, default=2, help='Number of transformer blocks in U-ViT bottleneck')
+uvit_group.add_argument('--attention-dropout', type=float, default=0.1, help='Dropout rate for attention layers in U-ViT')
 
 args = parser.parse_args()
 
@@ -308,6 +316,23 @@ def get_model(model_name):
             device=device
         ).to(device)
         
+    elif model_name == 'uvit':
+        from models.uvit import UViT
+        model = UViT(
+            height_in=args.height_in,
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channel_out=args.channel_out,
+            cnn_units=args.cnn_units,
+            kernel_sizes=args.kernel_sizes,
+            dropout=args.dropout,
+            device=device,
+            attention_heads=args.attention_heads,
+            attention_dim_head=args.attention_dim_head,
+            attention_depth=args.attention_depth,
+            attention_dropout=args.attention_dropout,
+            scale_output=args.scale_output
+        ).to(device)
         
     else:
         raise NotImplementedError('Model has not implemented yet!')

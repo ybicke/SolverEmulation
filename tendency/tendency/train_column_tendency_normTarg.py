@@ -289,14 +289,14 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
             batch_mae = train_mae(outputs, batch_y_transformed)
             
             
-            if i > 0 and i % vbatch == 0:
+            if i > 0:
                 optimizer.zero_grad()
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
                 optimizer.step()
                 t2_1 = time.perf_counter()
                 
-                if i % 100 == 99 or vbatch > 1:
+                if i % 100 == 99:
                     print(f'batch {i+1}, time:{t2_1-t1_1:.3f}, loss: {loss:.4f}, mean_absolute_error: {batch_mae:.4f}')
                 
 
@@ -621,7 +621,6 @@ def main():
     
     if args.test:
         test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False)
-        
         test_model(model, test_loader, normalizer, target_means, target_vars)
         
         print("\nTesting completed. Run the evaluation script to see detailed metrics:")
