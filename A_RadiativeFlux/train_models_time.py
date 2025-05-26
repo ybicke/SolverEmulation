@@ -127,6 +127,15 @@ unet_group.add_argument('--cnn-units', nargs='+', type=int, default=[64, 128, 25
 unet_group.add_argument('--cnn-kernel-sizes', nargs='+', type=int, default=[2, 2, 2, 2], 
                      help='Kernel sizes for maxpooling in CNN layers')
 
+# U-ViT specific parameters
+uvit_group = parser.add_argument_group('U-ViT model arguments')
+uvit_group.add_argument('--uvit-cnn-units', nargs='+', type=int, default=[64, 128, 256, 512], help='CNN units for U-ViT encoder/decoder')
+uvit_group.add_argument('--uvit-kernel-sizes', nargs='+', type=int, default=[2, 2, 2], help='Kernel sizes for max pooling in U-ViT')
+uvit_group.add_argument('--uvit-attention-heads', type=int, default=8, help='Number of attention heads in U-ViT bottleneck')
+uvit_group.add_argument('--uvit-attention-dim-head', type=int, default=64, help='Dimension per attention head in U-ViT')
+uvit_group.add_argument('--uvit-attention-depth', type=int, default=2, help='Number of transformer blocks in U-ViT bottleneck')
+uvit_group.add_argument('--uvit-attention-dropout', type=float, default=0.1, help='Dropout rate for attention layers in U-ViT')
+
 
 args = parser.parse_args()
 
@@ -322,6 +331,26 @@ def get_model(model_name):
             dropout=args.dropout,
             device=device
         ).to(device)
+        
+        
+    elif model_name == 'uvit':
+        from models.uvit import UViT
+        model = UViT(
+            height_in=args.height_in,
+            channel_3d=args.channel_3d,
+            channel_2d=args.channel_2d,
+            channel_out=args.channel_out,
+            cnn_units=args.uvit_cnn_units,
+            kernel_sizes=args.uvit_kernel_sizes,
+            dropout=args.dropout,
+            device=device,
+            attention_heads=args.uvit_attention_heads,
+            attention_dim_head=args.uvit_attention_dim_head,
+            attention_depth=args.uvit_attention_depth,
+            attention_dropout=args.uvit_attention_dropout,
+            scale_output=args.scale_output
+        ).to(device)
+        
         
         
     else:

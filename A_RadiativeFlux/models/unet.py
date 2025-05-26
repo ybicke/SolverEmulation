@@ -146,8 +146,23 @@ class UNet(BaseRadiationModel):
 
     def forward(self, x3d_norm, x2d_norm, x2d_orig):
         
-        # Broadcast 2D data to match height dimension of 3D data
-        x2d = x2d_norm.unsqueeze(1).repeat(1, x3d_norm.shape[1], 1)  # [batch, height, features_2d]
+        # Debug: Check input shapes
+        # print(f"Debug - x3d_norm shape: {x3d_norm.shape}")
+        # print(f"Debug - x2d_norm shape: {x2d_norm.shape}")
+        
+        # Handle different input shapes for x2d_norm
+        if x2d_norm.dim() == 2:
+            # Expected case: [batch, features_2d]
+            x2d = x2d_norm.unsqueeze(1).repeat(1, x3d_norm.shape[1], 1)  # [batch, height, features_2d]
+        elif x2d_norm.dim() == 3:
+            # Already has height dimension: [batch, height, features_2d] or [batch, 1, features_2d]
+            if x2d_norm.shape[1] == 1:
+                x2d = x2d_norm.repeat(1, x3d_norm.shape[1], 1)  # [batch, height, features_2d]
+            else:
+                x2d = x2d_norm  # Already correct shape
+        else:
+            raise ValueError(f"Unexpected x2d_norm dimensions: {x2d_norm.shape}")
+            
         x3d_norm = torch.cat([x2d, x3d_norm], dim=-1)  # [batch, height, features_2d + features_3d]
         
         # Create extra 2d nodes with ones and concatenate with the 3d column

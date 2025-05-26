@@ -11,23 +11,28 @@ source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency
+myfolder=/mydata/deepcloud/yves/SolverEmulation
+
 
 # run script
 
 cd $myfolder
-echo "GNN tendency triangle training started!"
+echo "GNN tendency baseline computation started!"
+
+
+# bash <(sed -n "${line_number}p" run_all_models.sh)
+
 
 # Run the training script with all required parameters
-python train_column_tendency_1d_tringle.py \
-    --model gnn \
-    --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
-    --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle \
+python train_column_tendency_normTarg.py \
+    --model gnn_tendency \
+    --dataset_input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
+    --dataset_output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
+    --save /mydata/deepcloud/shared/results-temp/STATISTIC_TRAINING_TARGET_ONLY \
     --percent 1 \
     --subsample 1 \
-    --num-workers 4 \
-    --prefetch-factor 2 \
+    --num-workers 8 \
+    --prefetch-factor 4 \
     --num-cells 81920 \
     --channel-3d 10 \
     --channel-2d 3 \
@@ -35,15 +40,15 @@ python train_column_tendency_1d_tringle.py \
     --train \
     --test \
     --shuffle \
-    --batch-size 2048 \
+    --batch-size 5000 \
     --optimizer adamw \
     --clip 1 \
-    --num-epoch 100 \
+    --num-epoch 1 \
     --learning-rate 0.0005 \
-    --hidden-dim 64 \
+    --hidden-dim 32 \
     --layers 2 \
     --dropout 0.0 \
-    --triangle-id 39 \
-    --triangle-division-factor 4 \
     --edge-channels-in 1 \
-    --wandb-mode online 
+    --fully-connected \
+    --wandb-mode disabled
+

@@ -344,7 +344,7 @@ best_models_table = tabulate([best_models_headers, ['---']*3] + best_models, tab
 output_text += best_models_table
 
 # Save the text file
-with open('/mydata/deepcloud/yves/results-temp/model_performance_summary.md', 'w') as f:
+with open('/mydata/deepcloud/yves/results-temp/model_performance_new.md', 'w') as f:
     f.write(output_text)
 
 # Create a heatmap of the ranking (for visual comparison) - fixed for proper numeric data
@@ -364,6 +364,6 @@ except Exception as e:
     print(f"Error generating heatmap: {e}")
 
 print("\nAnalysis complete! Results saved to:")
-print("1. Markdown summary: /mydata/deepcloud/yves/results-temp/model_performance_summary.md")
+print("1. Markdown summary: /mydata/deepcloud/yves/results-temp/model_performance_new.md")
 print("2. Ranking heatmap: /mydata/deepcloud/yves/results-temp/model_ranking.png")
 print("\nYou can view the markdown file directly in VS Code or any markdown viewer.") 

@@ -27,7 +27,7 @@ echo training$line_number started!
 python train_models_time.py \
     --model afno \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/Results-A_RadiativeFlux/afno_256_l4_b8 \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/afno_256_l4_b8 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -43,7 +43,7 @@ python train_models_time.py \
     --batch-size 2048 \
     --optimizer adamw \
     --clip 1.0 \
-    --num-epoch 60 \
+    --num-epoch 100 \
     --learning-rate 0.0005 \
     --patch-size 1 \
     --hidden-dim 256 \

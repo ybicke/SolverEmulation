@@ -19,16 +19,25 @@ plt.rcParams.update({
 
 # Models to compare
 models = [
-    {'name': 'AFNO','path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'},
+    #{'name': 'AFNO','path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'},
     #{
     #    'name': 'GNN-32-L2',
     #    'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
     #},
-    {'name': 'GNN-64-L3', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'},
+    #{'name': 'GNN-64-L3', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'},
 
     # { 'name': 'GNN-128-L2', 'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'}
     #{'name': 'GNN3d-32-L2', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_32_l2/test'},
     #{'name': 'GNN3d-32-L2-Indep','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_32_l2_indep/test'},
+    
+    
+    {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100/test'},
+    #{'name': 'GNN-3D-64-L2-100-Indep','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100/test'},
+    #{'name': 'GNN-1D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle/test'},
+    {'name': 'GNN-3D-64-L2-100-NoFully','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_nofully/test'},
+
+    
+
 ]
 
 # Define target names and units
@@ -214,10 +223,10 @@ def create_and_save_plot(use_all_samples, sample_idx=None):
     if use_all_samples:
         num_samples = len(y_true) if len(y_true.shape) >= 2 else 1
         sample_desc = f"All Samples (Mean of {num_samples})"
-        output_path = f'/mydata/deepcloud/yves/results-temp/true-vs-pred-indep-vs-horizontal-32-all-samples-{num_samples}.png'
+        output_path = f'/mydata/deepcloud/yves/results-temp/true-vs-pred-3d-fully-vs-nonfully-64-all-samples-{num_samples}.png'
     else:
         sample_desc = f"Sample {sample_idx}"
-        output_path = f'/mydata/deepcloud/yves/results-temp/true-vs-pred-indep-vs-horizontal-32-sample-{sample_idx}.png'
+        output_path = f'/mydata/deepcloud/yves/results-temp/true-vs-pred-3d-fully-vs-nonfully-64-sample-{sample_idx}.png'
     
     fig.suptitle(f'True vs. Predicted Values Across All Models - {sample_desc}', fontsize=16, y=0.98)
 

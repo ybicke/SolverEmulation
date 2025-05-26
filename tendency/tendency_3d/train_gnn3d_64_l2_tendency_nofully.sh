@@ -22,7 +22,7 @@ python train_models_3d_tendency.py \
     --model gnn_3d_tendency \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_test \
+    --save /mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_nofully \
     --percent 1 \
     --num-workers 4 \
     --prefetch-factor 2 \
@@ -46,8 +46,7 @@ python train_models_3d_tendency.py \
     --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
     --triangle-id 39 \
     --triangle-division-factor 4 \
-    --fully-connected \
-    --disable-horizontal \
+    --no-fully-connected \
     --wandb-mode disabled
 
 echo "Training completed!" 

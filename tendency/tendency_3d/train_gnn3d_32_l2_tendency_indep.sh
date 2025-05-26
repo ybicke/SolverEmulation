@@ -37,7 +37,7 @@ python train_models_3d_tendency.py \
     --batch-size 2 \
     --optimizer adamw \
     --clip 1.0 \
-    --num-epoch 30 \
+    --num-epoch 80 \
     --learning-rate 0.0005 \
     --embed-dim 32 \
     --layers 2 \

@@ -12,12 +12,19 @@ args = parser.parse_args()
 # Define models to evaluate
 models = [
     {
-        'name': 'AFNO',
+        #'name': 'AFNO',
         #'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
         #'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
         #'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_32_l2_indep/test',
-        'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_32_l2/test',
+        # 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_32_l2/test',
         # 'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'
+        #'name': 'GNN-64-l2-100eps','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100/test',
+        #'name': 'GNN-64-l2-100eps-indep','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100/test'
+        
+        #'name': 'GNN-1D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle/test',
+        'name': 'GNN-3D-64-L2-100-NoFully','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_nofully/test',
+
+        
 
     },
 ]
@@ -174,15 +181,35 @@ for mdl in models:
     
     
     # 3. Height-dependent metrics
-    # Since shape is [batch, height, features], we average over dim=0
-    dim_for_batch = 0
+    print(f"\nShape analysis:")
+    print(f"y_true shape: {y_true.shape}")
+    print(f"y_pred shape: {y_pred.shape}")
+    print(f"train_target_mean shape: {train_target_mean.shape}")
 
-    # A) Model MAE vs. Height (and feature) - shape will be [height, 7]
-    y_mae_h = torch.mean(torch.abs(y_true - y_pred), dim=dim_for_batch)
-    model_mae_heights.append(y_mae_h)
+    # Handle different tensor formats
+    if len(y_true.shape) == 4:  # Shape: [B,N,H,C] format
+        print("Processing 4D tensor format [Batch, Columns, Height, Channels]")
+        # Average over both batch and columns (dims 0 and 1)
+        y_mae_h = torch.mean(torch.abs(y_true - y_pred), dim=(0, 1))  # Result: [H,C]
+        
+        # For baseline, handle train_target_mean with shape [N,H,C]
+        # First unsqueeze batch dimension to [1,N,H,C], then broadcast to [B,N,H,C]
+        baseline_diff = y_true - train_target_mean.unsqueeze(0)
+        baseline_mae_h = torch.mean(torch.abs(baseline_diff), dim=(0, 1))  # Result: [H,C]
+        
+    else:  # Shape: [B,H,C] format
+        print("Processing 3D tensor format [Batch, Height, Channels]")
+        # Average over batch dimension only (dim 0)
+        y_mae_h = torch.mean(torch.abs(y_true - y_pred), dim=0)  # Result: [H,C]
+        
+        # For baseline, broadcast train_target_mean to match batch dimension
+        baseline_diff = y_true - train_target_mean.unsqueeze(0)
+        baseline_mae_h = torch.mean(torch.abs(baseline_diff), dim=0)  # Result: [H,C]
+
+    print(f"Resulting MAE shape: {y_mae_h.shape}")
+    print(f"Resulting baseline MAE shape: {baseline_mae_h.shape}")
     
-    # B) Baseline MAE vs. Height, (Predicting 'train_target_mean' for each sample)
-    baseline_mae_h = torch.mean(torch.abs(y_true - train_target_mean), dim=dim_for_batch)
+    model_mae_heights.append(y_mae_h)
     baseline_mae_heights.append(baseline_mae_h)
 
 # -------------------------------------------------------------

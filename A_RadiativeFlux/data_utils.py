@@ -46,9 +46,9 @@ class DataNormalizer:
         
         # Normalize 3D data - apply normalization along the channel dimension
         # Using proper broadcasting by ensuring dimensions are properly aligned
-        x3d_normalized = (x3d - self.mean3d.view(1, 1, 1, -1)) / self.std3d.view(1, 1, 1, -1)        
+        x3d_normalized = (x3d - self.mean3d.view(1, 1, -1)) / self.std3d.view(1, 1, -1)        
         # Normalize 2D data
-        x2d_normalized = (x2d - self.mean2d.view(1, 1, -1)) / self.std2d.view(1, 1, -1)        
+        x2d_normalized = (x2d - self.mean2d.view(1, -1)) / self.std2d.view(1, -1)        
         return x3d_normalized, x2d_normalized, x2d_original
 
 

@@ -39,7 +39,7 @@ python train_column_gnn_scheduler.py \
     --batch-size 512 \
     --optimizer adamw \
     --clip 1 \
-    --num-epoch 30 \
+    --num-epoch 100 \
     --learning-rate 0.0005 \
     --hidden-dim 256 \
     --dropout 0.0 \

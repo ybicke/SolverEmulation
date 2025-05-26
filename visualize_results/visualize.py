@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 models = [  
           
     #{'name': 'AFNO-Emb128-lamb-000','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_000/test'},   
-    # {'name': 'AFNO-Emb128-lamb-00000','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_noSparsification/test'},      
+    #{'name': 'AFNO-Emb128-lamb-00000','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_noSparsification/test'},      
     
     #{'name': 'AFNO-Emb128-concat-standard','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_easy_concat2/test'},
     #{'name': 'AFNO-Emb128_concat_mlp','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_128_easy_concat_mlp/test'},
@@ -27,7 +27,7 @@ models = [
 
     #{'name': 'AFNO-Emb128_sparse0001','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat/test'},    
     #{'name': 'AFNO-Emb128_sparse004','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_004/test'},
-    # {'name': 'AFNO-Emb128_lamb008','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_008/test'},
+    #{'name': 'AFNO-Emb128_lamb008','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_008/test'},
     #{'name': 'AFNO-Emb128_lamb012','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_012/test'},
     
     
@@ -41,8 +41,8 @@ models = [
     
     #{'name': 'AFNO-Emb128','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},   
     
-    # # {'name': 'AFNO-Emb128-concat','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_control/test'},   
-    # {'name': 'ViT-Emb128-standard','path': '/mydata/deepcloud/yves/results_git/vit_column_1percent_emb128_h4/test'},   
+    #{'name': 'AFNO-Emb128-concat','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_control/test'},   
+    #{'name': 'ViT-Emb128-standard','path': '/mydata/deepcloud/yves/results_git/vit_column_1percent_emb128_h4/test'},   
 
     # {'name': 'AFNO-Emb128-Cross','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_afno_crossAttention_clean/test'},   
 
@@ -50,11 +50,8 @@ models = [
     # {'name': 'AFNO-Emb128_HeightSpecSig_lwup','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwup/test'},    
     #{'name': 'AFNO-Emb128_sparse008','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_008/test'},    
     #{'name': 'AFNO-Emb128_sparse012','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_012/test'},    
- 
 
-    
     # {'name': 'AFNO-Emb128-lamb-004','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_004/test'},
-       
     # {'name': 'AFNO-Emb128-lamb-008','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_008/test'},   
     # {'name': 'AFNO-Emb128-lamb-012','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_012/test'},   
 
@@ -77,25 +74,32 @@ models = [
     #{'name': 'AFNO-Emb128_spars04','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars04/test'},
     #{'name': 'AFNO-Emb128_spars05','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars05/test'},
     
+    
+    
     #{'name': 'ViT-Emb128_l3','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1percent_emb128_h3/test'},
     #{'name': 'ViT-Emb128_l4','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1percent_emb128_h4/test'},
     #{'name': 'ViT-Emb128_l5','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1percent_emb128_h5/test'},
     #{'name': 'ViT-Emb128_l6','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1percent_emb128_h6/test'},
-    
-    #{'name': 'AFNO-Emb128_l3','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_h3/test'},
-    #{'name': 'AFNO-Emb128_l4','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_h4/test'},
-    #{'name': 'AFNO-Emb128_l5','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_h5/test'},
-    #{'name': 'AFNO-Emb128_l6','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_h6/test'},
     
     #{'name': 'ViT-Emb8','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1percent_Emb8/test'},
     #{'name': 'ViT-Emb16','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1percent_Emb16/test'},
     #{'name': 'ViT-Emb32','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1percent_Emb32/test'},
     #{'name': 'ViT-Emb64','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1percent_Emb64/test'},
     
+    
+    
+    
+    #{'name': 'AFNO-Emb128_l3','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_h3/test'},
+    # {'name': 'AFNO-Emb128_l4','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_h4/test'},
+    #{'name': 'AFNO-Emb128_l5','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_h5/test'},
+    #{'name': 'AFNO-Emb128_l6','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_h6/test'},
+    
     #{'name': 'AFNO-Emb8','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb8/test'},
     #{'name': 'AFNO-Emb16','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb16/test'},
     #{'name': 'AFNO-Emb32','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb32/test'},
     #{'name': 'AFNO-Emb64','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb64/test'},
+    
+    
     
     #{'name': 'AFNO-Test_year','path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent/test'},
     #{'name': 'ViT-Test_year', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/vit_column_1year_30percent/test_year_checkpoint'},
@@ -110,17 +114,19 @@ models = [
     #{'name': 'AFNO-Emb128-SpecSigmoid-lwDown','path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwdown/test'},
     #{'name': 'AFNO-Emb128-SpecSig-lw-Down','path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_lwdown_concat/test'},
     #{'name': 'AFNO-Emb128-SpecSig-lw-DownUp','path': '/mydata/deepcloud/shared/results-temp/afno_column_1percent_Emb128_HeightSpecificSigmoid_concat/test'},
-
-
-    # {'name': 'AFNO-Emb128-concat_w0_layerNorm','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_concatEasy_clean_wO_LayerNorm/test'},
+    #{'name': 'AFNO-Emb128-concat_w0_layerNorm','path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_concatEasy_clean_wO_LayerNorm/test'},
+    
+    
     #{'name': 'GNN-skip-Emb128-l4-h5','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256/test'},
     #{'name': 'GNN-skip-Emb128-l4-h5-concat','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256_concat/test'},
 
 
     #{'name': 'GNN-gt70-Emb128-l2','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L2_H70_Emb128_new/test'},
     #{'name': 'GNN-gt70-Emb128-l3','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L3_H70_Emb128_new/test'},
-    # {'name': 'GNN-gt70-Emb256-l4','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L4_H70_Emb256_new/test'},
-    # {'name': 'Bi-LSTM-Emb128','path': '/mydata/deepcloud/yves/results_git/rnn_BiLSTM_128_128/test'},
+    
+    # {'name': 'GNN-256-l4','path': '/mydata/deepcloud/yves/results_git/graphCast_multiMesh_00001_L4_H70_Emb256_new/test'},
+    
+    #{'name': 'Bi-LSTM-Emb128','path': '/mydata/deepcloud/yves/results_git/rnn_BiLSTM_128_128/test'},
     #{'name': 'Bi-LSTM-Emb256','path': '/mydata/deepcloud/yves/results_git/rnn_BiLSTM_256_256/test'},
     
     # {'name': 'GNN-Hirarchical-Emb256-l4-h5','path': '/mydata/deepcloud/yves/results_git/graphCast_hirarchical_lrPlateau_00001_l4_h5_bs_512_Emb256_concat/test'},
@@ -138,14 +144,15 @@ models = [
     #{'name': 'GNN-8-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_8_l3_optimized1/test'},
     #{'name': 'GNN-16-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_16_l3_optimized1/test'},
     #{'name': 'GNN-32-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_optimized/test'},
+    
     #{'name': 'GNN-32-l3-hrl-02','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_02/test'},
     #{'name': 'GNN-32-l3-hrl-05','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_05/test'},
-    # {'name': 'GNN-32-l3-hrl-1','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_1/test'},
+    #{'name': 'GNN-32-l3-hrl-1','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_1/test'},
 
     #{'name': 'GNN-32-l3-hrl-005','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrl_005/test'},
     #{'name': 'GNN-32-l3-hrlu-005','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrlu_005/test'},
     #{'name': 'GNN-32-l3-hrlu-0005','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrlu_0005/test'},
-    # {'name': 'GNN-32-l3-hrlu-005-L1','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrlu_005_L1/test'},
+    #{'name': 'GNN-32-l3-hrlu-005-L1','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_32_l3_hrlu_005_L1/test'},
 
 
     #{'name': 'GNN-64-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_64_l3_optimized/test'},
@@ -156,9 +163,12 @@ models = [
 
     
     
-    
-    #{'name': 'GNN-512-l3','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_medium/test'},
-    #{'name': 'BiLSTM-128-265','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/rnn_medium/test'},
+    {'name': 'AFNO-256-100eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/afno_256_l4_b8/test'},
+
+    # {'name': 'GNN-512-l3-30eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_medium/test'},
+    {'name': 'BiLSTM-128-265-80eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/rnn_medium/test'},
+    {'name': 'Unet-1024-80eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/unet_test/test'},
+    {'name': 'UViT-medium-60eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/uvit_test/test'},
 
 
 ]
@@ -245,4 +255,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/GNN_Comparing_sparse_connections.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/Best_Performing_Models.png', bbox_inches='tight', dpi=300)

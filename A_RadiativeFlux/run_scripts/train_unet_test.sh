@@ -36,7 +36,7 @@ python train_models_time.py \
   --test \
   --shuffle \
   --batch-size 512 \
-  --num-epoch 30 \
+  --num-epoch 80 \
   --learning-rate 0.0005 \
   --optimizer adamw \
   --channel-out 4 \

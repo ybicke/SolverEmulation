@@ -21,7 +21,7 @@ echo "U-ViT training started!"
 
 
 # Run the training script with all required parameters
-python train_models_3d_time.py \
+python train_models_time.py \
     --model uvit \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
     --save /mydata/deepcloud/yves/A_RadiativeFlux/results/uvit_test \
@@ -43,10 +43,10 @@ python train_models_3d_time.py \
     --num-epoch 80 \
     --learning-rate 0.0005 \
     --dropout 0.0 \
-    --cnn-units 128 256 512 1024 \
-    --kernel-sizes 1 2 5 7 \
-    --attention-heads 8 \
-    --attention-dim-head 64 \
-    --attention-depth 2 \
-    --attention-dropout 0.0 \
+    --uvit-cnn-units 64 128 256 512 \
+    --uvit-kernel-sizes 1 2 5 7 \
+    --uvit-attention-heads 6 \
+    --uvit-attention-dim-head 64 \
+    --uvit-attention-depth 4 \
+    --uvit-attention-dropout 0.0 
     --wandb-mode online \

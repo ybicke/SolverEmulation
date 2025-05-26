@@ -73,7 +73,11 @@ class OutConv(nn.Module):
 
 class MultiHeadAttention(nn.Module):
     """Multi-head attention module for the bottleneck"""
-    def __init__(self, dim, heads=8, dim_head=64, dropout=0.1):
+    def __init__(self, 
+                 dim, 
+                 heads, 
+                 dim_head, 
+                 dropout):
         super().__init__()
         inner_dim = dim_head * heads
         project_out = not (heads == 1 and dim_head == dim)
@@ -107,7 +111,7 @@ class MultiHeadAttention(nn.Module):
 
 class FeedForward(nn.Module):
     """Feed forward network for transformer block"""
-    def __init__(self, dim, hidden_dim, dropout=0.1):
+    def __init__(self, dim, hidden_dim, dropout):
         super().__init__()
         self.net = nn.Sequential(
             nn.LayerNorm(dim),
@@ -124,7 +128,7 @@ class FeedForward(nn.Module):
 
 class TransformerBlock(nn.Module):
     """Transformer block with attention and feed forward"""
-    def __init__(self, dim, heads=8, dim_head=64, mlp_dim=None, dropout=0.1):
+    def __init__(self, dim, heads, dim_head, mlp_dim, dropout):
         super().__init__()
         if mlp_dim is None:
             mlp_dim = dim * 4
@@ -140,7 +144,7 @@ class TransformerBlock(nn.Module):
 
 class AttentionBottleneck(nn.Module):
     """Attention bottleneck for U-ViT"""
-    def __init__(self, channels, depth=2, heads=8, dim_head=64, dropout=0.1):
+    def __init__(self, channels, depth, heads, dim_head, dropout):
         super().__init__()
         self.channels = channels
         
@@ -150,7 +154,7 @@ class AttentionBottleneck(nn.Module):
         
         # Transformer blocks
         self.transformer_blocks = nn.ModuleList([
-            TransformerBlock(channels, heads, dim_head, dropout=dropout)
+            TransformerBlock(channels, heads, dim_head = dim_head, mlp_dim = None, dropout = dropout)
             for _ in range(depth)
         ])
         
@@ -194,10 +198,10 @@ class UViT(BaseRadiationModel):
             dropout,
             device,
             # Attention parameters
-            attention_heads=8,
-            attention_dim_head=64,
-            attention_depth=2,
-            attention_dropout=0.1,
+            attention_heads,
+            attention_dim_head,
+            attention_depth,
+            attention_dropout,
             **kwargs
         ):
         """
