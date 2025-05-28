@@ -330,6 +330,54 @@ def get_model(model_name):
             disable_horizontal=args.disable_horizontal
         ).to(device)
         
+    elif model_name == 'traditional_graph_transformer':
+        from files_3d.traditional_graph_transformer_3d import TraditionalGraphTransformer3D
+        model = TraditionalGraphTransformer3D(
+            total_cols=args.num_cells,
+            grid_file_path=args.grid_file_path,
+            triangle_id=args.triangle_id,
+            embed_dim=args.hidden_dim,
+            depth=args.layers,
+            dropout=args.dropout,
+            channels_in_3d=args.channel_3d,
+            channels_in_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            num_height_levels=args.height_in,
+            device=device,
+            division_factor=args.triangle_division_factor,
+            heads=args.heads,
+            dim_head=args.dim_head,
+            mlp_ratio=args.mlp_ratio,
+            fully_connected=args.fully_connected,
+            disable_horizontal=args.disable_horizontal,
+            # process_vertically=True,  # Enable vertical processing
+            # max_hops=args.max_hops, not specified in argparse yet
+            # horizontal_only_graph=args.horizontal_only_graph not specified in argparse yet
+        ).to(device)
+        
+    elif model_name == 'gencast_transformer':
+        from files_3d.gencast_transformer_3d import GenCastTransformer3D
+        model = GenCastTransformer3D(
+            total_cols=args.num_cells,
+            grid_file_path=args.grid_file_path,
+            triangle_id=args.triangle_id,
+            embed_dim=args.hidden_dim,
+            depth=args.layers,
+            dropout=args.dropout,
+            channels_in_3d=args.channel_3d,
+            channels_in_2d=args.channel_2d,
+            channels_out=args.channel_out,
+            num_height_levels=args.height_in,
+            device=device,
+            division_factor=args.triangle_division_factor,
+            heads=args.heads,
+            dim_head=args.dim_head,
+            mlp_ratio=args.mlp_ratio,
+            fully_connected=args.fully_connected,
+            disable_horizontal=args.disable_horizontal,
+            vertical_layers=args.layers // 2  # Use half layers for vertical processing
+        ).to(device)
+        
     else:
         raise NotImplementedError('Model has not implemented yet!')
     return model

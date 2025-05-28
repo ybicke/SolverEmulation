@@ -22,6 +22,9 @@ from data_loaders_tendency import IconColumnIterableDataset
 from data_utils import DataNormalizer
 
 
+from memory_efficient_baseline_function import precompute_train_target_mean
+
+
 
 
 sys.path.append(dirname(__file__))
@@ -187,18 +190,6 @@ def interpolate_w_to_full_levels_tensor(w):
     return w_full
 
 
-def precompute_train_target_mean(train_set):
-    """
-    Compute mean of target variables from training data for baseline comparison.
-    This serves as a simple 'predict-the-mean' baseline model.
-    """
-    logger.info('Computing target statistics from training data...')
-    train_targets = []
-    for _, _, batch_y, _ in train_set:
-        train_targets.append(batch_y.cpu())
-    train_targets = torch.cat(train_targets, dim=0)
-    train_target_mean = torch.mean(train_targets, dim=0)  # Compute mean along batch dimension
-    return train_target_mean
 
 
 def train_model(model, train_set, valid_set, normalizer, target_means, target_vars):
@@ -603,7 +594,7 @@ def main():
         
         
         # Compute train target mean and save it to test path for later use during testing
-        train_target_mean_file = join(test_path, 'train_target_mean.pickle')
+        train_target_mean_file = join(test_path, 'train_target_mean_all_train_data.pickle')
         print('Computing train_target_mean from training data...')
         train_target_mean = precompute_train_target_mean(train_loader)
         

@@ -11,7 +11,7 @@ source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation
+myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency
 
 
 # run script

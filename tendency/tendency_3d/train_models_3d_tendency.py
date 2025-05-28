@@ -69,6 +69,7 @@ parser.add_argument('--dropout', type=float, default=0.0, help='Dropout rate')
 parser.add_argument('--channel-3d', type=int, default=13, help='Number of 3D input channels')
 parser.add_argument('--channel-2d', type=int, default=3, help='Number of 2D input channels')
 parser.add_argument('--channels-out', type=int, default=7, help='Number of output channels')
+parser.add_argument('--channel-out', type=int, default=7, help='Number of output channels (alternative name)')
 parser.add_argument('--edge-channels-in', type=int, default=1, help='Number of edge feature channels')
 parser.add_argument('--grid-file-path', type=str, required=True, help='Path to the ICON grid file')
 parser.add_argument('--triangle-id', type=int, default=1, help='ID of the triangle to use')
@@ -79,10 +80,23 @@ parser.add_argument('--triangle-division-factor', type=int, default=4,
 parser.add_argument('--fully-connected', action=argparse.BooleanOptionalAction, default=False, help='Use fully connected graph')
 parser.add_argument('--disable-horizontal', action=argparse.BooleanOptionalAction, default=False, help='Disable horizontal edges')
 
+# Transformer specific parameters (for traditional_graph_transformer model)
+parser.add_argument('--hidden-dim', type=int, default=256, help='Hidden dimension for transformer models')
+parser.add_argument('--heads', type=int, default=8, help='Number of attention heads')
+parser.add_argument('--dim-head', type=int, default=64, help='Dimension of each attention head')
+parser.add_argument('--mlp-ratio', type=float, default=4.0, help='Ratio of MLP hidden dim to embedding dim')
+parser.add_argument('--emb-dropout', type=float, default=0.0, help='Dropout rate for embeddings')
+parser.add_argument('--max-hops', type=int, default=2, help='Maximum hops for graph transformer')
+
 parser.add_argument('--model', type=str, default='gnn_3d_tendency', 
                     help='Model type to use for training')
 
 args = parser.parse_args()
+
+
+
+
+
 
 save_id = f'{basename(normpath(args.save))}'
 checkpoint_path = join(args.save)
@@ -115,25 +129,87 @@ def get_normalization_params(stats_file):
 def get_model():
     logger.info('Preparing the model...')
     
-    from gnn_3d_tendency import GNN3dTendency   
+    if args.model == 'gnn_3d_tendency':
+        from gnn_3d_tendency import GNN3dTendency   
+        
+        model = GNN3dTendency(
+            total_cols=args.num_cells,
+            grid_file_path=args.grid_file_path,
+            triangle_id=args.triangle_id,
+            embed_dim=args.embed_dim,
+            depth=args.layers,
+            dropout=args.dropout,
+            channels_in_3d=args.channel_3d,
+            channels_in_2d=args.channel_2d,
+            channels_out=args.channels_out,
+            edge_channels_in=args.edge_channels_in,
+            num_height_levels=args.height_in,
+            device=device,
+            division_factor=args.triangle_division_factor,
+            fully_connected=args.fully_connected,
+            disable_horizontal=args.disable_horizontal
+        ).to(device)
     
-    model = GNN3dTendency(
-        total_cols=args.num_cells,
-        grid_file_path=args.grid_file_path,
-        triangle_id=args.triangle_id,
-        embed_dim=args.embed_dim,
-        depth=args.layers,
-        dropout=args.dropout,
-        channels_in_3d=args.channel_3d,
-        channels_in_2d=args.channel_2d,
-        channels_out=args.channels_out,
-        edge_channels_in=args.edge_channels_in,
-        num_height_levels=args.height_in,
-        device=device,
-        division_factor=args.triangle_division_factor,
-        fully_connected=args.fully_connected,
-        disable_horizontal=args.disable_horizontal
-    ).to(device)
+    elif args.model == 'graph_transformer':
+        from graph_transformer_3d import GraphTransformer3D
+        
+        # Use hidden_dim as embed_dim for transformer models
+        embed_dim = args.hidden_dim if hasattr(args, 'hidden_dim') else args.embed_dim
+        
+        model = GraphTransformer3D(
+            total_cols=args.num_cells,
+            grid_file_path=args.grid_file_path,
+            triangle_id=args.triangle_id,
+            embed_dim=embed_dim,
+            depth=args.layers,
+            dropout=args.dropout,
+            channels_in_3d=args.channel_3d,
+            channels_in_2d=args.channel_2d,
+            channels_out=args.channels_out,
+            num_height_levels=args.height_in,
+            device=device,
+            division_factor=args.triangle_division_factor,
+            heads=args.heads,
+            dim_head=args.dim_head,
+            mlp_ratio=args.mlp_ratio,
+            fully_connected=args.fully_connected,
+            disable_horizontal=args.disable_horizontal,
+            max_hops=args.max_hops
+        ).to(device)
+        
+        
+        
+    elif args.model == 'graph_transformer_hybrid_clean':  
+        from graph_transformer_hybrid_3d_clean import HybridGraphTransformer3D
+        
+        # Use hidden_dim as embed_dim for transformer models
+        embed_dim = args.hidden_dim if hasattr(args, 'hidden_dim') else args.embed_dim
+        
+        model = HybridGraphTransformer3D(
+            total_cols=args.num_cells,
+            grid_file_path=args.grid_file_path,
+            triangle_id=args.triangle_id,
+            embed_dim=embed_dim,
+            depth=args.layers,
+            dropout=args.dropout,
+            channels_in_3d=args.channel_3d,
+            channels_in_2d=args.channel_2d,
+            channels_out=args.channels_out,
+            num_height_levels=args.height_in,
+            device=device,
+            division_factor=args.triangle_division_factor,
+            heads=args.heads,
+            dim_head=args.dim_head,
+            mlp_ratio=args.mlp_ratio,
+            emb_dropout=args.emb_dropout,
+            fully_connected=args.fully_connected,
+            disable_horizontal=args.disable_horizontal,
+            max_hops=args.max_hops
+        ).to(device)
+    
+    
+    else:
+        raise ValueError(f"Unsupported model: {args.model}. Supported models: 'gnn_3d_tendency', 'traditional_graph_transformer'")
         
     return model
 
@@ -182,6 +258,57 @@ def precompute_train_target_mean(train_set):
     train_targets = torch.cat(train_targets, dim=0)
     train_target_mean = torch.mean(train_targets, dim=0)  # Compute mean along batch dimension
     return train_target_mean
+
+
+def process_timing_statistics(timing_data, model, test_path):
+    """
+    Process and report timing statistics from collected data.
+    """
+    batch_size = args.batch_size
+    
+    # Calculate basic statistics
+    mean_time = sum(timing_data) / len(timing_data)
+    std_time = (sum((t - mean_time) ** 2 for t in timing_data) / len(timing_data)) ** 0.5
+    min_time = min(timing_data)
+    max_time = max(timing_data)
+    
+    # Calculate per-sample metrics
+    per_sample_time = mean_time / batch_size
+    samples_per_second = batch_size / mean_time
+    gpu_info = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU"
+    
+    summary_text = f"""
+    ==================== INFERENCE TIMING SUMMARY ====================
+    Model: {args.model}
+    Hardware: {gpu_info}
+    Parameters: {count_parameters(model):,}
+
+    Configuration:
+    Embed Dimension: {args.embed_dim}
+    Layers: {args.layers}
+    Train Batch Size: {args.batch_size}
+    Test Batch Size: {batch_size}
+
+    Batch Performance:
+    Batches measured: {len(timing_data)}
+    Mean batch time: {mean_time*1000:.3f} ms/batch
+    Std deviation: {std_time*1000:.3f} ms/batch
+    Min/Max batch time: {min_time*1000:.3f}/{max_time*1000:.3f} ms/batch
+    
+    Sample Performance:
+    Per sample time: {per_sample_time*1000:.3f} ms/sample
+    Throughput: {samples_per_second:.1f} samples/second
+    """
+    summary_text += "================================================================\n"
+    
+    # Print to console
+    print(summary_text)
+    
+    # Save human-readable summary to text file
+    with open(join(test_path, 'inference_timing_summary.txt'), 'w') as f:
+        f.write(summary_text)
+        
+    return samples_per_second, per_sample_time
 
 
 def train_model(model, train_set, valid_set, normalizer, target_means, target_vars):
@@ -369,6 +496,37 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
 
     y_true, y_pred = list(), list()
     
+    # Timing configuration-------------------------------------------------
+    num_timing_batches = 5  
+    warmup_batches = 2   
+    timing_data = []
+    
+    # Perform warmup to stabilize GPU performance
+    if torch.cuda.is_available():
+        logger.info(f'Performing {warmup_batches} warmup passes...')
+        warmup_iter = iter(test_set)
+        for _ in range(warmup_batches):
+            try:
+                data = next(warmup_iter)
+                batch_x3, batch_x2, _, batch_w = data
+                batch_x3, batch_x2, batch_w = batch_x3.to(device), batch_x2.to(device), batch_w.to(device)
+                
+                # Process inputs the same way as in training
+                w_full = interpolate_w_to_full_levels(batch_w)
+                batch_x3_with_w = torch.cat([batch_x3, w_full], dim=-1)
+                batch_x3_norm_with_w, batch_x2_norm, _ = normalizer.normalize(batch_x3_with_w, batch_x2)
+                
+                with torch.no_grad():
+                    _ = model(batch_x3_norm_with_w, batch_x2_norm)
+            except StopIteration:
+                # If we run out of data, just break the loop
+                break
+        
+        # Synchronize GPU to ensure warmup is complete
+        torch.cuda.synchronize()
+        
+    #---------------------------------------------------------------------
+    
     t1 = time.perf_counter(), time.process_time()
     
     for i, data in enumerate(test_set):
@@ -389,8 +547,24 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
         
         model.eval()
         with torch.no_grad():
-            # Pass normalized inputs to the model
-            outputs = model(batch_x3_norm_with_w, batch_x2_norm)
+            # Time inference for a subset of batches-----------------------------------
+            if i < num_timing_batches and torch.cuda.is_available():
+                # Ensure all previous GPU operations are complete
+                torch.cuda.synchronize()
+                
+                # Time forward pass
+                start = time.perf_counter()
+                outputs = model(batch_x3_norm_with_w, batch_x2_norm)
+                
+                # Ensure forward pass is complete before stopping timer
+                torch.cuda.synchronize()
+                
+                end = time.perf_counter()
+                timing_data.append(end - start)
+                #---------------------------------------------------------------------
+            else:
+                # Pass normalized inputs to the model
+                outputs = model(batch_x3_norm_with_w, batch_x2_norm)
             
         # Calculate loss on transformed outputs
         loss = test_loss(outputs, batch_y_transformed)
@@ -407,6 +581,12 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
             print(f'batch {i+1} loss: {loss:.4f}, mean_absolute_error: {mae:.4f}')
 
     t2 = time.perf_counter(), time.process_time()
+    
+    # Process timing statistics
+    samples_per_second, per_sample_time = None, None
+    if timing_data:
+        samples_per_second, per_sample_time = process_timing_statistics(
+            timing_data, model, test_path)
     
     # Concatenate all collected true and predicted values
     y_true = torch.cat(y_true, 0)
@@ -428,6 +608,10 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
     # Also save target statistics for proper evaluation
     with open(join(test_path, 'target_stats.pickle'), 'wb') as handle:
         pickle.dump({'means': target_means.cpu(), 'vars': target_vars.cpu()}, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # Return timing metrics for logging in wandb
+    return samples_per_second, per_sample_time
+
 
 def get_column_data_with_disk_cache(input_filenames, output_filenames, shuffle=False, num_workers=0):
     logger.info(f"Creating dataset with triangle_id={args.triangle_id}, division_factor={args.triangle_division_factor}")
@@ -538,27 +722,17 @@ def main():
     np.random.set_state(np_rng_state)
     random.setstate(random_rng_state)
 
+    # Summary metrics for the end
+    summary_metrics = {}
+    summary_metrics["num_parameters"] = num_params
+    
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
 
         train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=True, num_workers=args.num_workers)
         val_loader = get_column_data_with_disk_cache(val_input_files, val_output_files, shuffle=False, num_workers=args.num_workers)
         
-        # Check if train_target_mean already exists
-        train_target_mean_file = join(test_path, 'train_target_mean.pickle')
-        if isfile(train_target_mean_file):
-            print(f'Loading existing train_target_mean from {train_target_mean_file}')
-            with open(train_target_mean_file, 'rb') as handle:
-                train_target_mean = pickle.load(handle)
-        else:
-            print('Computing train_target_mean from training data...')
-            train_target_mean = precompute_train_target_mean(train_loader)
-            
-            # Save train_target_mean for later use during testing
-            with open(train_target_mean_file, 'wb') as handle:
-                pickle.dump(train_target_mean, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            print(f'Saved train_target_mean to {train_target_mean_file}')
-        
+          
         # Train the model
         train_model(model, train_loader, val_loader, normalizer, target_means, target_vars)
 
@@ -568,7 +742,21 @@ def main():
     
     if args.test:
         test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False, num_workers=args.num_workers)
-        test_model(model, test_loader, normalizer, target_means, target_vars)
+        
+        
+        # First measure inference time
+        logger.info('---------------------------------------')
+        logger.info('Measuring inference time...')
+        samples_per_second, per_sample_time = test_model(model, test_loader, normalizer, target_means, target_vars)
+        
+        
+
+
+        # Add timing metrics if available
+        if samples_per_second is not None:
+            summary_metrics["samples_per_second"] = samples_per_second
+            summary_metrics["per_sample_time"] = per_sample_time
+
         
         print("\nTesting completed. Run the evaluation script to see detailed metrics.")
     
