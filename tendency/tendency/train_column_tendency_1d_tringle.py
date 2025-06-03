@@ -256,8 +256,8 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
         logger.info(f'Training will continue from epoch: {init_epoch}/{args.num_epoch}')
     else:
         init_epoch = 0
+        logger.info('No checkpoint found. Starting training from scratch.')
 
-    vbatch = args.vbatch
     epoch_number = init_epoch
     best_loss = 1e9999999 
       
@@ -266,6 +266,12 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
+        
+        # Reset metrics at the start of each epoch (important for consistent tracking)
+        train_mae.reset()
+        valid_mae.reset()
+        train_loss.reset()
+        valid_loss.reset()
         
         # Training step
         model.train(True)        
@@ -293,7 +299,7 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
             batch_mae = train_mae(outputs, batch_y_transformed)
             
             
-            if i > 0:
+            if i >= 0:
                 optimizer.zero_grad()
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
@@ -355,12 +361,19 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
               f'val_loss: {total_valid_loss:.4f}, ',
               f'val_mean_absolute_error: {total_valid_mae:.4f}')
 
-        # Save checkpoints
+        # Save checkpoints with enhanced state information
         checkpoint = {
             'epoch': epoch + 1,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'loss': valid_loss,
+            'loss': total_valid_loss,  # Store the computed loss value
+            'torch_rng_state': torch.get_rng_state(),
+            'numpy_rng_state': np.random.get_state(),
+            'random_rng_state': random.getstate(),
+            'total_train_loss': total_train_loss,
+            'total_valid_loss': total_valid_loss,
+            'total_train_mae': total_train_mae,
+            'total_valid_mae': total_valid_mae
         }
         torch.save(
             checkpoint, 
@@ -369,12 +382,6 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
         if total_valid_loss < best_loss:
             torch.save(checkpoint, join(checkpoint_path, 'best_model.pth'))
             best_loss = total_valid_loss
-            
-        # Reset metrics for the next epoch
-        train_mae.reset()
-        valid_mae.reset()
-        train_loss.reset()
-        valid_loss.reset()
 
     return model
 
@@ -458,7 +465,7 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
 
 def test_loading_time(input_filenames, output_filenames, iter=10):
     logger.info('Test Loading time started...')
-    dataset = get_column_data_with_disk_cache(input_filenames, output_filenames, shuffle=True)
+    dataset = get_column_data_with_disk_cache(input_filenames, output_filenames, shuffle=True, num_workers=args.num_workers)
         
     for it in range(iter):
         t1 = time.perf_counter(), time.process_time()
@@ -471,7 +478,7 @@ def test_loading_time(input_filenames, output_filenames, iter=10):
         gc.collect()    
         
         
-def get_column_data_with_disk_cache(input_filenames, output_filenames, subsample=args.subsample, shuffle=False, num_workers=0):
+def get_column_data_with_disk_cache(input_filenames, output_filenames, subsample=args.subsample, shuffle=False, num_workers=args.num_workers):
     
     icon_data = IconTriangleColumnDataset_Tendency(triangle_id=args.triangle_id, 
                                                    division_factor=args.triangle_division_factor, 
@@ -608,27 +615,9 @@ def main():
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
 
-        train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=True)
-        val_loader = get_column_data_with_disk_cache(val_input_files, val_output_files, shuffle=False, subsample=1.0)
-        
-        
-        # Check if train_target_mean already exists
-        train_target_mean_file = join(test_path, 'target_stats.pickle')
-        if isfile(train_target_mean_file):
-            print(f'Loading existing train_target_mean from {train_target_mean_file}')
-            with open(train_target_mean_file, 'rb') as handle:
-                train_target_mean = pickle.load(handle)
-        else:
-            print('Computing train_target_mean from training data...')
-            train_target_mean = precompute_train_target_mean(train_loader)
-            
-            # Save train_target_mean for later use during testing
-            with open(train_target_mean_file, 'wb') as handle:
-                pickle.dump(train_target_mean, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            print(f'Saved train_target_mean to {train_target_mean_file}')
-        
-        
-   
+        train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=True, num_workers=args.num_workers)
+        val_loader = get_column_data_with_disk_cache(val_input_files, val_output_files, shuffle=False, subsample=1.0, num_workers=args.num_workers)
+         
         train_model(model, train_loader, val_loader, normalizer, target_means, target_vars)
 
         tr2 = time.perf_counter(), time.process_time()
@@ -636,7 +625,7 @@ def main():
               
     
     if args.test:
-        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False)
+        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False, num_workers=args.num_workers)
         test_model(model, test_loader, normalizer, target_means, target_vars)
         
         print("\nTesting completed. Run the evaluation script to see detailed metrics:")

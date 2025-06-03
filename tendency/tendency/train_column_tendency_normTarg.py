@@ -328,10 +328,10 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
         # Log basic metrics to W&B (single call per epoch)
         wandb.log({
             'epoch': epoch_number,
-            'loss': total_train_loss,
-            'val_loss': total_valid_loss,
-            'mean_absolute_error': total_train_mae,
-            'val_mean_absolute_error': total_valid_mae
+            'loss': total_train_loss.item(),
+            'val_loss': total_valid_loss.item(),
+            'mean_absolute_error': total_train_mae.item(),
+            'val_mean_absolute_error': total_valid_mae.item()
         })
 
         # Print epoch summary

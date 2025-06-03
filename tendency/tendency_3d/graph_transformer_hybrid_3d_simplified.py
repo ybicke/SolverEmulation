@@ -9,9 +9,17 @@ class HybridNeighborhoodAttention(nn.Module):
     """
     Hybrid attention mechanism that combines:
     1. Full vertical attention within each column (atmospheric physics)
-    2. k-hop horizontal attention respecting spherical geometry
+    2. k-hop horizontal attention to same-height neighbors only
     
-    This approach is physically motivated for atmospheric modeling.
+    This approach is physically motivated and computationally efficient:
+    - Vertical: Full atmospheric column interaction (convection, radiation)
+    - Horizontal: Same-level transport (pressure systems, advection)
+    
+    Neighborhood size: num_height_levels + k_hop_horizontal_neighbors
+    vs original: num_height_levels × (1 + k_hop_neighboring_columns)
+    
+    This represents a ~4-6x reduction in attention complexity while maintaining
+    the essential atmospheric physics interactions.
     """
     def __init__(self, dim, heads, dim_head, dropout, max_hops):
         super().__init__()
@@ -48,7 +56,10 @@ class HybridNeighborhoodAttention(nn.Module):
         
         For each node, the neighborhood includes:
         1. All nodes in the same column (full vertical attention)
-        2. All nodes in k-hop neighboring columns (horizontal + their vertical extent)
+        2. Same-height nodes in k-hop neighboring columns (horizontal neighbors at same level only)
+        
+        This is more efficient and physically motivated than including full vertical
+        extent of neighboring columns.
         
         Returns: dict mapping node_id -> list of neighbor node_ids
         """
@@ -62,16 +73,16 @@ class HybridNeighborhoodAttention(nn.Module):
         for i in range(edge_index.size(1)): # Loop through all 557,952 edges
             src, dst = edge_index[:, i].tolist()
             if 0 <= src < num_nodes and 0 <= dst < num_nodes:
-                src_col = src // num_height_levels # Which column is source in
-                dst_col = dst // num_height_levels # Which column is destination in
+                src_col = src // num_height_levels
+                dst_col = dst // num_height_levels
                 
                 # Only store column-to-column connections
-                if src_col != dst_col: # Searches for horizontal edges
+                if src_col != dst_col:
                     adj_list[src_col].add(dst_col)
         
         # For each column, find k-hop neighboring columns
         column_neighborhoods = {}
-        for col_id in range(num_columns): # Loop through all 1024 columns
+        for col_id in range(num_columns):
             current_hop = {col_id}
             all_neighbor_cols = {col_id}
             
@@ -91,15 +102,23 @@ class HybridNeighborhoodAttention(nn.Module):
         node_neighborhoods = {}
         for node_id in range(num_nodes):
             col_id = node_id // num_height_levels
+            height_level = node_id % num_height_levels
             neighbor_cols = column_neighborhoods[col_id]
             
-            # All nodes in neighboring columns (includes full vertical extent)
             neighbors = set()
+            
+            # Add all nodes in the same column (full vertical attention)
+            for h in range(num_height_levels):
+                same_col_node = col_id * num_height_levels + h
+                if same_col_node < num_nodes:
+                    neighbors.add(same_col_node)
+            
+            # Add same-height neighbors in k-hop neighboring columns
             for neighbor_col in neighbor_cols:
-                for h in range(num_height_levels):
-                    neighbor_node = neighbor_col * num_height_levels + h
-                    if neighbor_node < num_nodes:
-                        neighbors.add(neighbor_node)
+                if neighbor_col != col_id:  # Skip self-column (already added above)
+                    same_height_neighbor = neighbor_col * num_height_levels + height_level
+                    if same_height_neighbor < num_nodes:
+                        neighbors.add(same_height_neighbor)
             
             node_neighborhoods[node_id] = sorted(list(neighbors))
         
@@ -109,12 +128,6 @@ class HybridNeighborhoodAttention(nn.Module):
         """
         Build efficient attention mask for vectorized computation.
         Returns padded neighbor indices and mask.
-        - Neighborhoods have different sizes. For vectorized attention, we need fixed-size tensors.
-        - padded_neighbors: [71680, 280]
-        - node_neighborhoods[0]: 140 neighbors
-        - node_neighborhoods[71]: 210 neighbors
-        - padded_neighbors[0] = [n0, n1, n2, ..., n139, 0, 0, 0, ..., 0]     # 140 real + 140 padding
-        - neighbor_mask[0]    = [T,  T,  T,  ..., T,    F, F, F, ..., F]     # 140 True + 140 False
         """
         # Find maximum neighborhood size
         max_neighbors = max(len(neighbors) for neighbors in neighborhoods.values())
@@ -180,18 +193,18 @@ class HybridNeighborhoodAttention(nn.Module):
             raise ValueError("shared_cache must be provided for efficiency")
         
         # Project to Q, K, V
-        q = self.to_q(x).view(B, N_per_batch, self.heads, self.dim_head) # eg. [1, 71680, 8, 8]
+        q = self.to_q(x).view(B, N_per_batch, self.heads, self.dim_head)
         k = self.to_k(x).view(B, N_per_batch, self.heads, self.dim_head)
         v = self.to_v(x).view(B, N_per_batch, self.heads, self.dim_head)
         
-        # Vectorized neighbor gathering, eg. all shape # [1, 71680, 8, 280]
-        neighbor_indices = padded_neighbors.unsqueeze(2).expand(-1, -1, self.heads, -1) # which neighbor to look at
-        batch_indices = torch.arange(B, device=device).view(B, 1, 1, 1).expand(B, N_per_batch, self.heads, max_neighbors) # which batch to look at, eg all 0 for bs 1
-        head_indices = torch.arange(self.heads, device=device).view(1, 1, self.heads, 1).expand(B, N_per_batch, self.heads, max_neighbors) # which head to look at
+        # Vectorized neighbor gathering
+        neighbor_indices = padded_neighbors.unsqueeze(2).expand(-1, -1, self.heads, -1)
+        batch_indices = torch.arange(B, device=device).view(B, 1, 1, 1).expand(B, N_per_batch, self.heads, max_neighbors)
+        head_indices = torch.arange(self.heads, device=device).view(1, 1, self.heads, 1).expand(B, N_per_batch, self.heads, max_neighbors)
         
         # Gather neighbor K, V
-        k_neighbors = k[batch_indices, neighbor_indices, head_indices] # eg. [1, 71680, 8, 280]
-        v_neighbors = v[batch_indices, neighbor_indices, head_indices] 
+        k_neighbors = k[batch_indices, neighbor_indices, head_indices]
+        v_neighbors = v[batch_indices, neighbor_indices, head_indices]
         
         # Compute attention scores
         q_expanded = q.unsqueeze(3)  # [B, N, heads, 1, dim_head]
@@ -233,7 +246,7 @@ class HybridTransformerLayer(nn.Module):
         # Feed-forward network
         self.mlp = nn.Sequential(
             nn.Linear(dim, mlp_dim),
-            nn.GELU(),
+            nn.SiLU(), 
             nn.Dropout(dropout),
             nn.Linear(mlp_dim, dim),
             nn.Dropout(dropout)

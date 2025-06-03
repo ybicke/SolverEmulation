@@ -23,7 +23,7 @@ python train_column_tendency_1d_tringle.py \
     --model gnn \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle \
+    --save /mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected \
     --percent 1 \
     --subsample 1 \
     --num-workers 4 \
@@ -35,7 +35,7 @@ python train_column_tendency_1d_tringle.py \
     --train \
     --test \
     --shuffle \
-    --batch-size 2048 \
+    --batch-size 1024 \
     --optimizer adamw \
     --clip 1 \
     --num-epoch 100 \
@@ -45,5 +45,6 @@ python train_column_tendency_1d_tringle.py \
     --dropout 0.0 \
     --triangle-id 39 \
     --triangle-division-factor 4 \
+    --fully-connected \
     --edge-channels-in 1 \
     --wandb-mode online 

@@ -86,7 +86,7 @@ parser.add_argument('--heads', type=int, default=8, help='Number of attention he
 parser.add_argument('--dim-head', type=int, default=64, help='Dimension of each attention head')
 parser.add_argument('--mlp-ratio', type=float, default=4.0, help='Ratio of MLP hidden dim to embedding dim')
 parser.add_argument('--emb-dropout', type=float, default=0.0, help='Dropout rate for embeddings')
-parser.add_argument('--max-hops', type=int, default=2, help='Maximum hops for graph transformer')
+parser.add_argument('--max-hops', type=int, default=1, help='Maximum hops for graph transformer')
 
 parser.add_argument('--model', type=str, default='gnn_3d_tendency', 
                     help='Model type to use for training')
@@ -206,6 +206,63 @@ def get_model():
             disable_horizontal=args.disable_horizontal,
             max_hops=args.max_hops
         ).to(device)
+        
+    elif args.model == 'graph_transformer_hybrid_simplified':  
+        from graph_transformer_hybrid_3d_simplified import HybridGraphTransformer3D
+        
+        # Use hidden_dim as embed_dim for transformer models
+        embed_dim = args.hidden_dim if hasattr(args, 'hidden_dim') else args.embed_dim
+        
+        model = HybridGraphTransformer3D(
+            total_cols=args.num_cells,
+            grid_file_path=args.grid_file_path,
+            triangle_id=args.triangle_id,
+            embed_dim=embed_dim,
+            depth=args.layers,
+            dropout=args.dropout,
+            channels_in_3d=args.channel_3d,
+            channels_in_2d=args.channel_2d,
+            channels_out=args.channels_out,
+            num_height_levels=args.height_in,
+            device=device,
+            division_factor=args.triangle_division_factor,
+            heads=args.heads,
+            dim_head=args.dim_head,
+            mlp_ratio=args.mlp_ratio,
+            emb_dropout=args.emb_dropout,
+            fully_connected=args.fully_connected,
+            disable_horizontal=args.disable_horizontal,
+            max_hops=args.max_hops
+        ).to(device)
+        
+    elif args.model == 'enhanced_graph_transformer_hybrid_3d':  
+        from enhanced_graph_transformer_hybrid_3d import EnhancedHybridGraphTransformer3D
+        
+        # Use hidden_dim as embed_dim for transformer models
+        embed_dim = args.hidden_dim if hasattr(args, 'hidden_dim') else args.embed_dim
+        
+        model = EnhancedHybridGraphTransformer3D(
+            total_cols=args.num_cells,
+            grid_file_path=args.grid_file_path,
+            triangle_id=args.triangle_id,
+            embed_dim=embed_dim,
+            depth=args.layers,
+            dropout=args.dropout,
+            channels_in_3d=args.channel_3d,
+            channels_in_2d=args.channel_2d,
+            channels_out=args.channels_out,
+            num_height_levels=args.height_in,
+            device=device,
+            division_factor=args.triangle_division_factor,
+            heads=args.heads,
+            dim_head=args.dim_head,
+            mlp_ratio=args.mlp_ratio,
+            emb_dropout=args.emb_dropout,
+            fully_connected=args.fully_connected,
+            disable_horizontal=args.disable_horizontal,
+            max_hops=args.max_hops
+        ).to(device)
+    
     
     
     else:
@@ -362,6 +419,7 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
         logger.info(f'Training will continue from epoch: {init_epoch}/{args.num_epoch}')
     else:
         init_epoch = 0
+        logger.info('No checkpoint found. Starting training from scratch.')
 
     epoch_number = init_epoch
     best_loss = 1e9999999 
@@ -370,6 +428,12 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
+        
+        # Reset metrics at the start of each epoch (important for consistent tracking)
+        train_mae.reset()
+        valid_mae.reset()
+        train_loss.reset()
+        valid_loss.reset()
         
         # Training step
         model.train(True)        
@@ -463,7 +527,14 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
             'epoch': epoch + 1,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'loss': valid_loss,
+            'loss': total_valid_loss,  # Store the computed loss value
+            'torch_rng_state': torch.get_rng_state(),
+            'numpy_rng_state': np.random.get_state(),
+            'random_rng_state': random.getstate(),
+            'total_train_loss': total_train_loss,
+            'total_valid_loss': total_valid_loss,
+            'total_train_mae': total_train_mae,
+            'total_valid_mae': total_valid_mae
         }
         torch.save(
             checkpoint, 
@@ -473,12 +544,6 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
             torch.save(checkpoint, join(checkpoint_path, 'best_model.pth'))
             best_loss = total_valid_loss
             
-        # Reset metrics for the next epoch
-        train_mae.reset()
-        valid_mae.reset()
-        train_loss.reset()
-        valid_loss.reset()
-        
     return model
 
 def test_model(model, test_set, normalizer, target_means, target_vars):
