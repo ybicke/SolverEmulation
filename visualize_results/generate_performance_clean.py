@@ -7,22 +7,15 @@ from tabulate import tabulate
 
 # Models to compare
 models = [
-    {
-        'name': 'AFNO',
-        'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
-    },
-    {
-        'name': 'GNN-32-L2',
-        'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
-    },
-    {
-        'name': 'GNN-64-L3',
-        'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
-    },
-    {
-        'name': 'GNN-128-L2',
-        'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'
-    }
+    #{'name': 'AFNO', 'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'},
+    #{'name': 'GNN-32-L2','path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'},
+    #{'name': 'GNN-64-L2', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_normTarg/test'},
+    #{'name': 'GNN-128-L2', 'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'},
+    
+    
+    {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100/test'},
+    # {'name': 'GNN-3D-64-L2-100-Indep','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100/test'},
+    {'name': 'GNN-1D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle/test'},
 ]
 
 # Define target names and units
@@ -64,20 +57,21 @@ def calculate_core_metrics(y_true, y_pred):
         y_pred_2d = y_pred
     
     metrics = {}
-    epsilon = 1e-10
+    
+    # Calculate standard deviation first as we'll need it multiple times
+    y_std = torch.std(y_true_2d, dim=0)
     
     # 1. R² - PRIMARY METRIC (uses mean of your test data)
     y_mean = torch.mean(y_true_2d, dim=0)
     ss_tot = torch.sum((y_true_2d - y_mean.unsqueeze(0)) ** 2, dim=0)
     ss_res = torch.sum((y_true_2d - y_pred_2d) ** 2, dim=0)
-    r2 = 1 - (ss_res / (ss_tot + epsilon))
+    r2 = 1 - (ss_res / ss_tot)
     metrics['R2'] = r2
     
     # 2. NRMSE - Scale-independent error (normalized by your test data std)
     mse_model = torch.mean((y_true_2d - y_pred_2d) ** 2, dim=0)
     rmse_model = torch.sqrt(mse_model)
-    y_std = torch.std(y_true_2d, dim=0)
-    nrmse = rmse_model / (y_std + epsilon)
+    nrmse = rmse_model / y_std
     metrics['NRMSE'] = nrmse
     
     # 3. ACC - Pattern correlation (anomalies from your test data mean)
@@ -88,20 +82,21 @@ def calculate_core_metrics(y_true, y_pred):
     for i in range(y_true_2d.shape[1]):
         numerator = torch.sum(y_true_anom[:, i] * y_pred_anom[:, i])
         denominator = torch.sqrt(torch.sum(y_true_anom[:, i] ** 2) * torch.sum(y_pred_anom[:, i] ** 2))
-        if denominator > epsilon:
-            acc[i] = numerator / denominator
-        else:
-            acc[i] = 0.0
+        acc[i] = numerator / denominator
     metrics['ACC'] = acc
     
     # 4. MAE - Direct physical error in atmospheric units
     mae_model = torch.mean(torch.abs(y_true_2d - y_pred_2d), dim=0)
     metrics['MAE'] = mae_model
     
+    # 4b. NMAE - Normalized Mean Absolute Error (scale-independent like NRMSE)
+    nmae = mae_model / y_std  # Normalize by same std as NRMSE
+    metrics['NMAE'] = nmae
+    
     # 5. Additional useful baseline-independent metrics
     
     # Explained Variance (alternative to R²)
-    explained_var = 1 - torch.var(y_true_2d - y_pred_2d, dim=0) / (torch.var(y_true_2d, dim=0) + epsilon)
+    explained_var = 1 - torch.var(y_true_2d - y_pred_2d, dim=0) / torch.var(y_true_2d, dim=0)
     metrics['Explained_Variance'] = explained_var
     
     # Pearson correlation coefficient
@@ -113,16 +108,14 @@ def calculate_core_metrics(y_true, y_pred):
     
     return metrics
 
-def calculate_baseline_metrics(y_true, y_pred, baseline_mean, baseline_type='mean'):
+def calculate_baseline_metrics(y_true, y_pred, baseline_mean):
     """
-    Calculate baseline-dependent metrics like Skill Score.
-    Call this function when you have a proper training baseline.
+    Calculate baseline-dependent metrics like Skill Score using train target mean baseline.
     
     Args:
         y_true: True tendency values
         y_pred: Model predicted tendencies
-        baseline_mean: Baseline values (from full training data)
-        baseline_type: 'mean', 'zero', or 'custom'
+        baseline_mean: Train target mean baseline values
     
     Returns:
         Dictionary with baseline-dependent metrics
@@ -132,6 +125,8 @@ def calculate_baseline_metrics(y_true, y_pred, baseline_mean, baseline_type='mea
         y_true = torch.tensor(y_true)
     if isinstance(y_pred, np.ndarray):
         y_pred = torch.tensor(y_pred)
+    if isinstance(baseline_mean, np.ndarray):
+        baseline_mean = torch.tensor(baseline_mean)
     
     # Reshape to 2D
     original_shape = y_true.shape
@@ -145,20 +140,8 @@ def calculate_baseline_metrics(y_true, y_pred, baseline_mean, baseline_type='mea
     metrics = {}
     epsilon = 1e-10
     
-    # Create baseline predictions
-    if baseline_type == 'zero':
-        baseline_pred = torch.zeros_like(y_true_2d)
-        baseline_name = "Zero Tendency"
-    elif baseline_type == 'mean':
-        # Expand baseline_mean to match y_true shape
-        if isinstance(baseline_mean, np.ndarray):
-            baseline_mean = torch.tensor(baseline_mean)
-        baseline_pred = baseline_mean.unsqueeze(0).expand_as(y_true_2d)
-        baseline_name = "Full Training Mean"
-    else:
-        # Custom baseline
-        baseline_pred = baseline_mean.expand_as(y_true_2d) if baseline_mean is not None else torch.zeros_like(y_true_2d)
-        baseline_name = "Custom Baseline"
+    # Create baseline predictions using train target mean
+    baseline_pred = baseline_mean.unsqueeze(0).expand_as(y_true_2d)
     
     # Calculate baseline errors
     mse_model = torch.mean((y_true_2d - y_pred_2d) ** 2, dim=0)
@@ -176,7 +159,7 @@ def calculate_baseline_metrics(y_true, y_pred, baseline_mean, baseline_type='mea
     metrics['MSE_Improvement'] = mse_improvement    
     
     # Store baseline info
-    metrics['Baseline_Type'] = baseline_name
+    metrics['Baseline_Type'] = "Train Target Mean"
     metrics['Baseline_RMSE'] = rmse_baseline
     metrics['Model_RMSE'] = rmse_model
     
@@ -184,15 +167,14 @@ def calculate_baseline_metrics(y_true, y_pred, baseline_mean, baseline_type='mea
 
 def format_scientific_notation(value, precision=2):
     """Format small values in scientific notation for better readability."""
-    if abs(value) < 1e-6:
+    if abs(value) < 1e-4:  # Use scientific notation for values smaller than 0.0001
         return f"{value:.{precision}e}"
     else:
         return f"{value:.{precision+2}f}"
 
 # Configuration options
-CALCULATE_BASELINE_METRICS = False  # Set to True when you have full training baseline
-BASELINE_TYPE = 'mean'  # Options: 'mean', 'zero', 'custom'
-FULL_TRAINING_BASELINE_PATH = None  # Path to full training baseline pickle file
+CALCULATE_BASELINE_METRICS = True  # Set to True when you have full training baseline
+FULL_TRAINING_BASELINE_PATH = '/mydata/deepcloud/yves/h5_tendency_data_all/train_target_statistics.pickle'  # Path to full training baseline pickle file
 
 # Store results for each model
 model_results = {}
@@ -226,10 +208,32 @@ for model in models:
     if CALCULATE_BASELINE_METRICS and FULL_TRAINING_BASELINE_PATH:
         if exists(FULL_TRAINING_BASELINE_PATH):
             with open(FULL_TRAINING_BASELINE_PATH, 'rb') as f:
-                baseline_mean = pickle.load(f)
+                baseline_stats = pickle.load(f)
             print(f"  Using full training baseline from: {FULL_TRAINING_BASELINE_PATH}")
             
-            baseline_metrics = calculate_baseline_metrics(y_true, y_pred, baseline_mean, BASELINE_TYPE)
+            # Handle different formats of baseline data
+            if isinstance(baseline_stats, dict):
+                # Extract mean from statistics dictionary
+                if 'mean' in baseline_stats:
+                    baseline_mean = baseline_stats['mean']
+                elif 'target_mean' in baseline_stats:
+                    baseline_mean = baseline_stats['target_mean']
+                else:
+                    # Print available keys to help debug
+                    print(f"  Available keys in baseline file: {list(baseline_stats.keys())}")
+                    # Try to find a key that might contain the mean
+                    possible_mean_keys = [k for k in baseline_stats.keys() if 'mean' in k.lower()]
+                    if possible_mean_keys:
+                        baseline_mean = baseline_stats[possible_mean_keys[0]]
+                        print(f"  Using key '{possible_mean_keys[0]}' as baseline mean")
+                    else:
+                        print(f"  ERROR: Could not find mean in baseline statistics")
+                        continue
+            else:
+                # Assume it's directly the mean tensor/array
+                baseline_mean = baseline_stats
+            
+            baseline_metrics = calculate_baseline_metrics(y_true, y_pred, baseline_mean)
             model_results[model['name']]['baseline'] = baseline_metrics
         else:
             print(f"  WARNING: Baseline file not found: {FULL_TRAINING_BASELINE_PATH}")
@@ -239,7 +243,7 @@ target_names = list(target_units.keys())
 model_names = [model['name'] for model in models]
 
 # Core metrics (most important, baseline-independent)
-core_metric_names = ['R2', 'ACC', 'NRMSE', 'MAE']
+core_metric_names = ['R2', 'ACC', 'NRMSE', 'NMAE', 'MAE']
 
 def create_clean_summary():
     output_text = """# Physics Emulation Model Evaluation
@@ -275,6 +279,12 @@ These metrics use only your own data statistics and are the most important for p
 - **Range**: 0 to ∞ (0 = perfect, <1.0 = better than natural variability)
 - **Interpretation**: NRMSE = 0.3 means errors are 30% of natural variability in your test data
 
+### NMAE (Normalized Mean Absolute Error) - SCALE-INDEPENDENT ERROR
+- **Physical meaning**: Absolute error relative to natural atmospheric variability
+- **Formula**: NMAE = MAE / σ_test_data  
+- **Range**: 0 to ∞ (0 = perfect, <1.0 = better than natural variability)
+- **Interpretation**: NMAE = 0.3 means absolute errors are 30% of natural variability
+
 ### MAE (Mean Absolute Error) - PHYSICAL UNITS
 - **Physical meaning**: Average error in actual atmospheric units (K/s, m/s², etc.)
 - **Range**: 0 to ∞ (0 = perfect)
@@ -306,6 +316,8 @@ These metrics use only your own data statistics and are the most important for p
         elif metric_name == 'ACC':
             output_text += f"\n## {metric_name} - Pattern Recognition (Higher = Better)\n\n"
         elif metric_name == 'NRMSE':
+            output_text += f"\n## {metric_name} - Normalized Error (Lower = Better)\n\n"
+        elif metric_name == 'NMAE':
             output_text += f"\n## {metric_name} - Normalized Error (Lower = Better)\n\n"
         elif metric_name == 'MAE':
             output_text += f"\n## {metric_name} - Physical Error (Lower = Better)\n\n"
@@ -341,7 +353,7 @@ These metrics use only your own data statistics and are the most important for p
                 # Highlight best (except overall average)
                 if (target != 'OVERALL AVERAGE' and 
                     ((metric_name in ['R2', 'ACC'] and value == best_value) or 
-                     (metric_name in ['NRMSE', 'MAE'] and value == best_value))):
+                     (metric_name in ['NRMSE', 'NMAE', 'MAE'] and value == best_value))):
                     row.append(f"**{formatted_value}**")
                 else:
                     row.append(formatted_value)
@@ -429,7 +441,7 @@ Ranking based on three most important baseline-independent metrics:
 
 ## Baseline-Dependent Metrics
 
-*These metrics compare your model to full training baseline ({BASELINE_TYPE})*
+*These metrics compare your model to train target mean baseline*
 
 ### Skill Score (Higher = Better)
 
@@ -530,7 +542,7 @@ To add Skill Score and other baseline-dependent metrics:
 output_text = create_clean_summary()
 
 # Save the analysis
-output_path = '/mydata/deepcloud/yves/results-temp/physics_evaluation_clean.md'
+output_path = '/mydata/deepcloud/yves/final_results/3D_tendency_evaluation_baseline.md'
 with open(output_path, 'w') as f:
     f.write(output_text)
 
@@ -540,7 +552,8 @@ print("\nFocus on these baseline-independent metrics:")
 print("1. R² (primary) - fraction of atmospheric variance explained") 
 print("2. ACC (critical) - pattern recognition for tiny tendencies")
 print("3. NRMSE (essential) - error relative to natural variability")
-print("4. MAE (interpretable) - direct physical error in atmospheric units (scientific notation)")
+print("4. NMAE (essential) - error relative to natural variability")
+print("5. MAE (interpretable) - direct physical error in atmospheric units (scientific notation)")
 
 if not CALCULATE_BASELINE_METRICS:
     print("\nTo add Skill Score and baseline metrics:")

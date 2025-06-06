@@ -9,22 +9,8 @@ import seaborn as sns
 
 # Models to compare
 models = [
-    {
-        'name': 'AFNO',
-        'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
-    },
-    {
-        'name': 'GNN-32-L2',
-        'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
-    },
-    {
-        'name': 'GNN-64-L3',
-        'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
-    },
-    {
-        'name': 'GNN-128-L2',
-        'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'
-    }
+    {'name': 'GNN-3D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100/test'},
+    {'name': 'GNN-1D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
 ]
 
 # Define target names and units
@@ -344,7 +330,7 @@ best_models_table = tabulate([best_models_headers, ['---']*3] + best_models, tab
 output_text += best_models_table
 
 # Save the text file
-with open('/mydata/deepcloud/yves/results-temp/model_performance_new.md', 'w') as f:
+with open('/mydata/deepcloud/yves/final_results/3D_vs_1D_tendency_eval_old.md', 'w') as f:
     f.write(output_text)
 
 # Create a heatmap of the ranking (for visual comparison) - fixed for proper numeric data
@@ -357,7 +343,7 @@ try:
                 linewidths=.5, cbar_kws={'label': 'Average Rank (lower is better)'})
     plt.title('Model Ranking by Target Variable (lower is better)', fontsize=16)
     plt.tight_layout()
-    plt.savefig('/mydata/deepcloud/yves/results-temp/model_ranking.png', 
+    plt.savefig('/mydata/deepcloud/yves/final_results/3D_vs_1D_tendency_eval.png', 
                 bbox_inches='tight', dpi=300)
     print("Ranking heatmap saved successfully.")
 except Exception as e:

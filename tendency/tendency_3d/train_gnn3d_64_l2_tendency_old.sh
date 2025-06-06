@@ -3,29 +3,26 @@
 # Set to fail on error
 set -e
 
-# Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
+# Source setup script (optional, in case you want to load a specific conda environment)
 source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.sh
 
 # Check if GPU available
-#nvidia-smi
+# nvidia-smi
 
 myproject="deepcloud"
 myusername="yves"
 myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency_3d/
 
-
-# run script
-
+# Run script
 cd $myfolder
-echo "Graph Transformer 3D training started!"
-
+echo "GNN3d tendency training started!"
 
 # Run the training script with all required parameters
 python train_models_3d_tendency.py \
-    --model graph_transformer_hybrid_simplified   \
+    --model gnn_3d_tendency \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/yves/results-temp/graph_transformer_hybrid_3d_64_l4_k2_drop03_simplified_100\
+    --save /mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new \
     --percent 1 \
     --num-workers 4 \
     --prefetch-factor 2 \
@@ -33,25 +30,23 @@ python train_models_3d_tendency.py \
     --height-in 70 \
     --channel-3d 10 \
     --channel-2d 3 \
-    --channel-out 7 \
+    --channels-out 7 \
     --train \
     --test \
     --shuffle \
-    --batch-size 1 \
+    --batch-size 2 \
     --optimizer adamw \
-    --clip 1 \
+    --clip 1.0 \
     --num-epoch 100 \
     --learning-rate 0.0005 \
-    --hidden-dim 64 \
-    --layers 4 \
-    --dropout 0.3 \
-    --heads 8 \
-    --dim-head 8 \
-    --mlp-ratio 3.0 \
+    --embed-dim 64 \
+    --layers 2 \
+    --dropout 0.0 \
+    --edge-channels-in 1 \
     --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
     --triangle-id 39 \
     --triangle-division-factor 4 \
-    --no-fully-connected \
-    --no-disable-horizontal \
-    --max-hops 2 \
-    --wandb-mode online 
+    --fully-connected \
+    --wandb-mode online
+
+echo "Training completed!" 

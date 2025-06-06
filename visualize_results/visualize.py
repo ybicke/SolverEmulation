@@ -165,10 +165,10 @@ models = [
     
     {'name': 'AFNO-256-100eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/afno_256_l4_b8/test'},
 
-    # {'name': 'GNN-512-l3-30eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_medium/test'},
+    {'name': 'GNN-512-l3-80eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_medium/test'},
     {'name': 'BiLSTM-128-265-80eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/rnn_medium/test'},
     {'name': 'Unet-1024-80eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/unet_test/test'},
-    {'name': 'UViT-medium-60eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/uvit_test/test'},
+    {'name': 'UViT-medium-80eps','path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/uvit_test/test'},
 
 
 ]
@@ -255,4 +255,4 @@ ax0 = add_supplot(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], id=(2, 3, 5)
 add_supplot(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], id=(2, 3, 6), models_name=models_name, xlabel='MAE [K/day]', mask=mask)
 ax00.legend(fontsize="10", loc='lower left')
 
-plt.savefig('/mydata/deepcloud/yves/Best_Performing_Models.png', bbox_inches='tight', dpi=300)
+plt.savefig('/mydata/deepcloud/yves/final_results/Flux_1D_Best_Performing_Models.png', bbox_inches='tight', dpi=300)

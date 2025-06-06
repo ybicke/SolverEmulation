@@ -11,47 +11,40 @@ source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency_3d/
-
+myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency
 
 # run script
 
 cd $myfolder
-echo "Graph Transformer 3D training started!"
-
+echo "GNN tendency triangle training started!"
 
 # Run the training script with all required parameters
-python train_models_3d_tendency.py \
-    --model graph_transformer_hybrid_simplified   \
+python train_column_tendency_1d_tringle_old.py \
+    --model gnn \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/yves/results-temp/graph_transformer_hybrid_3d_64_l4_k2_drop03_simplified_100\
+    --save /mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_old \
     --percent 1 \
+    --subsample 1 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --height-in 70 \
     --channel-3d 10 \
     --channel-2d 3 \
-    --channel-out 7 \
+    --channels-out 7 \
     --train \
     --test \
     --shuffle \
-    --batch-size 1 \
+    --batch-size 1024 \
     --optimizer adamw \
     --clip 1 \
     --num-epoch 100 \
     --learning-rate 0.0005 \
     --hidden-dim 64 \
-    --layers 4 \
-    --dropout 0.3 \
-    --heads 8 \
-    --dim-head 8 \
-    --mlp-ratio 3.0 \
-    --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
+    --layers 2 \
+    --dropout 0.0 \
     --triangle-id 39 \
     --triangle-division-factor 4 \
-    --no-fully-connected \
-    --no-disable-horizontal \
-    --max-hops 2 \
+    --fully-connected \
+    --edge-channels-in 1 \
     --wandb-mode online 

@@ -7,11 +7,20 @@ import matplotlib.ticker as ticker
 import os
 
 models = [
-    {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100/test'},
+    #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100/test'},
+    #{'name': 'GNN-3D-64-L2-100-new', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
     #{'name': 'GNN-3D-64-L2-100-Indep','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100/test'},
-    {'name': 'GNN-64-l2-100eps-noFully','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_nofully/test'},
-    {'name': 'GNN-1D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle/test'},
+    #{'name': 'GNN-64-l2-100eps-noFully','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_nofully/test'},
+    #{'name': 'GNN-1D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle/test'},
 
+
+    #{'name': 'GNN-3D-64-L2-100-Indep','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100/test'},
+    {'name': 'GNN-3D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
+    
+    #{'name': 'AFNO-1D-128','path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'},
+    #{'name': 'GNN-1D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
+    
+    {'name': 'GT-3D-64-L4-K2-Drop03-100','path': '/mydata/deepcloud/yves/results-temp/graph_transformer_hybrid_3d_64_l4_k2_drop03_simplified_100/test'},
 ]
 
 y_mae_hs = []
@@ -103,7 +112,7 @@ for i, (label, units) in enumerate(target_units.items()):
 ax_list_mae[0].legend(fontsize=12, loc='best')
 
 plt.tight_layout()
-plt.savefig('/mydata/deepcloud/yves/3D-Tendency-64-nonFully-vs-horizontal-mae.png',
+plt.savefig('/mydata/deepcloud/yves/final_results/3D_Tendency_GNN_vs_GT_MAE.png',
             bbox_inches='tight', dpi=300)
 
 plt.show()

@@ -22,7 +22,7 @@ python train_models_3d_tendency.py \
     --model gnn_3d_tendency \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100 \
+    --save /mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100_new \
     --percent 1 \
     --num-workers 4 \
     --prefetch-factor 2 \

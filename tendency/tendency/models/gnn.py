@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from torch_geometric.nn import MessagePassing
 
-# from .base_methods import BaseRadiationModel
 
 # Global cache for edge indices to avoid recomputing for identical parameters
 _EDGE_INDEX_CACHE = {}
