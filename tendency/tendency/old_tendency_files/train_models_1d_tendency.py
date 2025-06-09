@@ -3,10 +3,10 @@ import re
 import sys
 import time
 import glob
+import yaml
 import pickle
 import logging
 import random
-import yaml
 
 import argparse
 from os.path import join, dirname, basename, normpath, isfile
@@ -18,9 +18,11 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
+from data_loaders_tendency import IconColumnIterableDataset
 from data_utils import DataNormalizer
-from data_loader_1d_tendency import IconColumnDataset_Tendency
 
+
+from memory_efficient_baseline_function import precompute_train_target_mean
 
 
 
@@ -50,8 +52,8 @@ torch.backends.cudnn.benchmark = False
 
 parser = argparse.ArgumentParser(description='Train Transformer models.')
 parser.add_argument('--model', type=str, default='vit', help='Name of the model to be trained')
-parser.add_argument('--dataset-input', type=str, help='Path to the input dataset')
-parser.add_argument('--dataset-output', type=str, help='Path to the output dataset')
+parser.add_argument('--dataset_input', type=str, help='Path to the input dataset')
+parser.add_argument('--dataset_output', type=str, help='Path to the output dataset')
 parser.add_argument('--save', type=str, required=True, help='Path to save the result')
 parser.add_argument('--percent', type=float, default=None, help='Percentage of data to use')
 parser.add_argument('--subsample', type=float, default=None, help='Subsampling rate')
@@ -68,11 +70,10 @@ parser.add_argument('--optimizer', type=str, default='adamw', help='Optimizer')
 parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of epochs')
 parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
-parser.add_argument('--patch-size', type=int, default=1, help='Patch size')
+parser.add_argument('--patch-size', type=int, default=2, help='Patch size')
 parser.add_argument('--hidden-dim', type=int, default=256, help='hidden dimension')
 parser.add_argument('--layers', type=int, default=4, help='layers')
 parser.add_argument('--heads', type=int, default=6, help='heads')
-parser.add_argument('--dim-head', type=int, default=32, help='dim head')
 parser.add_argument('--dropout', type=float, default=0.0, help='dropout')
 parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='Sparsity threshold for AFNO')
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='hard thresholding fraction AFNO')
@@ -85,20 +86,14 @@ parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, he
 parser.add_argument('--max-skip', type=int, default=3, help='Maximum skip distance for hierarchical edges in GNN')
 parser.add_argument('--fully-connected', action=argparse.BooleanOptionalAction, default=False, help='Use fully connected graph for GNN')
 parser.add_argument('--edge-channels-in', type=int, default=1, help='Number of edge feature channels for GNN')
+parser.add_argument('--emb-dropout', type=float, default=0.0, help='Dropout rate for embeddings')
 parser.add_argument('--channel-3d', type=int, default=14, help='Number of 3D input channels (13 + 1 for w)')
 parser.add_argument('--channel-2d', type=int, default=3, help='Number of 2D input channels')
 parser.add_argument('--channels-out', type=int, default=7, help='Number of output channels')
 parser.add_argument('--height', type=int, default=70, help='Height dimension')
 parser.add_argument('--mlp-ratio', type=float, default=4.0, help='MLP ratio for hidden dimension expansion')
-parser.add_argument('--emb-dropout', type=float, default=0.0, help='Dropout rate for patch embeddings')
-
 parser.add_argument('--fno-blocks', type=int, default=8, help='Number of FNO blocks for AFNO')
 parser.add_argument('--hidden-size-factor', type=int, default=1, help='Hidden size factor for AFNO')
-
-parser.add_argument('--triangle-id', type=int, default=39, help='Triangle ID')
-parser.add_argument('--triangle-division-factor', type=int, default=4, help='Triangle division factor')
-parser.add_argument('--dataset-type', type=str, default='triangle', choices=['triangle', 'full'], help='Dataset type: triangle (specific region) or full (all columns)')
-
 
 args = parser.parse_args()
 
@@ -151,13 +146,13 @@ def get_model(model_name, is_test):
             depth=args.layers,
             dropout=args.dropout,
             emb_dropout=args.emb_dropout,
-            channels_in_3D=args.channel_3d,
+            channels_in=args.channel_3d,
             channels_in_2D=args.channel_2d,
             channels_out=args.channels_out,
             height=args.height,
             mlp_ratio=args.mlp_ratio,
             hard_thresholding_fraction=args.hard_thresholding_fraction,
-            sparsity_threshold=args.afno_sparsity_threshold,
+            sparsity_threshold=args.afno_sparsity_threshold,  
             fno_blocks=args.fno_blocks,
             hidden_size_factor=args.hidden_size_factor,
         ).to(device)
@@ -177,10 +172,10 @@ def get_model(model_name, is_test):
             channels_out=args.channels_out,
             height=args.height,
             mlp_ratio=args.mlp_ratio,
-            dim_head=args.dim_head, # args.hidden_dim // args.heads
+            dim_head=args.hidden_dim // args.heads,
         ).to(device)
     
-    elif model_name == 'gnn':
+    elif model_name == 'gnn_tendency':
         from gnn import AtmosphericColumnGNN
         
         model = AtmosphericColumnGNN(
@@ -222,18 +217,6 @@ def interpolate_w_to_full_levels_tensor(w):
     return w_full
 
 
-def precompute_train_target_mean(train_set):
-    """
-    Compute mean of target variables from training data for baseline comparison.
-    This serves as a simple 'predict-the-mean' baseline model.
-    """
-    logger.info('Computing target statistics from training data...')
-    train_targets = []
-    for _, _, batch_y, _ in train_set:
-        train_targets.append(batch_y.cpu())
-    train_targets = torch.cat(train_targets, dim=0)
-    train_target_mean = torch.mean(train_targets, dim=0)  # Compute mean along batch dimension
-    return train_target_mean
 
 
 def train_model(model, train_set, valid_set, normalizer, target_means, target_vars):
@@ -287,8 +270,8 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
         logger.info(f'Training will continue from epoch: {init_epoch}/{args.num_epoch}')
     else:
         init_epoch = 0
-        logger.info('No checkpoint found. Starting training from scratch.')
 
+    vbatch = args.vbatch
     epoch_number = init_epoch
     best_loss = 1e9999999 
       
@@ -297,12 +280,6 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
     for epoch in range(init_epoch, args.num_epoch):
         t1 = time.perf_counter()
         epoch_number += 1
-        
-        # Reset metrics at the start of each epoch (important for consistent tracking)
-        train_mae.reset()
-        valid_mae.reset()
-        train_loss.reset()
-        valid_loss.reset()
         
         # Training step
         model.train(True)        
@@ -330,7 +307,7 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
             batch_mae = train_mae(outputs, batch_y_transformed)
             
             
-            if i >= 0:
+            if i > 0:
                 optimizer.zero_grad()
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
@@ -378,10 +355,10 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
         # Log basic metrics to W&B (single call per epoch)
         wandb.log({
             'epoch': epoch_number,
-            'loss': total_train_loss,
-            'val_loss': total_valid_loss,
-            'mean_absolute_error': total_train_mae,
-            'val_mean_absolute_error': total_valid_mae
+            'loss': total_train_loss.item(),
+            'val_loss': total_valid_loss.item(),
+            'mean_absolute_error': total_train_mae.item(),
+            'val_mean_absolute_error': total_valid_mae.item()
         })
 
         # Print epoch summary
@@ -392,19 +369,12 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
               f'val_loss: {total_valid_loss:.4f}, ',
               f'val_mean_absolute_error: {total_valid_mae:.4f}')
 
-        # Save checkpoints with enhanced state information
+        # Save checkpoints
         checkpoint = {
             'epoch': epoch + 1,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'loss': total_valid_loss,  # Store the computed loss value
-            'torch_rng_state': torch.get_rng_state(),
-            'numpy_rng_state': np.random.get_state(),
-            'random_rng_state': random.getstate(),
-            'total_train_loss': total_train_loss,
-            'total_valid_loss': total_valid_loss,
-            'total_train_mae': total_train_mae,
-            'total_valid_mae': total_valid_mae
+            'loss': valid_loss,
         }
         torch.save(
             checkpoint, 
@@ -413,6 +383,12 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
         if total_valid_loss < best_loss:
             torch.save(checkpoint, join(checkpoint_path, 'best_model.pth'))
             best_loss = total_valid_loss
+            
+        # Reset metrics for the next epoch
+        train_mae.reset()
+        valid_mae.reset()
+        train_loss.reset()
+        valid_loss.reset()
 
     return model
 
@@ -496,7 +472,7 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
 
 def test_loading_time(input_filenames, output_filenames, iter=10):
     logger.info('Test Loading time started...')
-    dataset = get_column_data_with_disk_cache(input_filenames, output_filenames, shuffle=True, num_workers=args.num_workers)
+    dataset = get_column_data_with_disk_cache(input_filenames, output_filenames, shuffle=True)
         
     for it in range(iter):
         t1 = time.perf_counter(), time.process_time()
@@ -509,19 +485,8 @@ def test_loading_time(input_filenames, output_filenames, iter=10):
         gc.collect()    
         
         
-def get_column_data_with_disk_cache(input_filenames, output_filenames, subsample=args.subsample, shuffle=False, num_workers=args.num_workers):
-    
-    
-    icon_data = IconColumnDataset_Tendency(
-        input_filenames=input_filenames,
-        output_filenames=output_filenames,
-        dataset_type=args.dataset_type,
-        triangle_id=args.triangle_id,
-        division_factor=args.triangle_division_factor,
-        subsample=subsample,
-        cache_dir='/tmp',
-        shuffle=shuffle
-    )
+def get_column_data_with_disk_cache(input_filenames, output_filenames, subsample=args.subsample, shuffle=False, num_workers=0):
+    icon_data = IconColumnIterableDataset(input_filenames, output_filenames, subsample=subsample, cache_dir='/tmp', shuffle=shuffle)
 
     # Prepare arguments for DataLoader
     dataloader_args = {
@@ -651,8 +616,10 @@ def main():
     if args.train:
         tr1 = time.perf_counter(), time.process_time()                        
 
-        train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=True, num_workers=args.num_workers)
-        val_loader = get_column_data_with_disk_cache(val_input_files, val_output_files, shuffle=False, subsample=1.0, num_workers=args.num_workers)
+        train_loader = get_column_data_with_disk_cache(train_input_files, train_output_files, shuffle=True)
+        val_loader = get_column_data_with_disk_cache(val_input_files, val_output_files, shuffle=False, subsample=1.0)
+            
+   
         train_model(model, train_loader, val_loader, normalizer, target_means, target_vars)
 
         tr2 = time.perf_counter(), time.process_time()
@@ -660,7 +627,7 @@ def main():
               
     
     if args.test:
-        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False, num_workers=args.num_workers)
+        test_loader = get_column_data_with_disk_cache(test_input_files, test_output_files, shuffle=False)
         test_model(model, test_loader, normalizer, target_means, target_vars)
         
         print("\nTesting completed. Run the evaluation script to see detailed metrics:")

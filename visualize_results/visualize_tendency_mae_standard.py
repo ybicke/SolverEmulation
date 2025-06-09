@@ -21,6 +21,7 @@ models = [
     #{'name': 'GNN-1D-64-L2-100','path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
     
     {'name': 'GT-3D-64-L4-K2-Drop03-100','path': '/mydata/deepcloud/yves/results-temp/graph_transformer_hybrid_3d_64_l4_k2_drop03_simplified_100/test'},
+    
 ]
 
 y_mae_hs = []
