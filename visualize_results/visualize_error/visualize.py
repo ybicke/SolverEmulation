@@ -175,22 +175,26 @@ models = [
 ]
 
 
+import sys
+sys.path.append('/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux')
+from utils.load_test_results import load_test_results
+
 y_mae_gs, y_mae_hs, h_mae_gs, h_mae_hs = list(), list(), list(), list()
 for model in models:
     test_path = model['path']
 
     print(f'loading test files... ({test_path})')
-    with open(join(test_path, 'y_true.pickle'), 'rb') as handle:
-        y_true = pickle.load(handle)
+    
+    # Load results (handles both chunked and non-chunked automatically)
+    results = load_test_results(test_path, verbose=True)
+    y_true = results['y_true']
+    y_pred = results['y_pred']
+    h_true = results['h_true']
+    h_pred = results['h_pred']
+    
     print(f'y_true: {y_true.shape}')
-    with open(join(test_path, 'y_pred.pickle'), 'rb') as handle:
-        y_pred = pickle.load(handle)
     print(f'y_pred: {y_pred.shape}')
-    with open(join(test_path, 'h_true.pickle'), 'rb') as handle:
-        h_true = pickle.load(handle)
     print(f'h_true: {h_true.shape}')
-    with open(join(test_path, 'h_pred.pickle'), 'rb') as handle:
-        h_pred = pickle.load(handle)
     print(f'h_pred: {h_pred.shape}')
 
 

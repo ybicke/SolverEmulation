@@ -3,48 +3,48 @@
 # Set to fail on error
 set -e
 
-# Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
-source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.sh
+# Source setup script
+source /mydata/deepcloud/yves/SolverEmulation/B_Tendency/run_scripts/setup.sh
 
 # Check if GPU available
-#nvidia-smi
+nvidia-smi
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency_3d/
-
+myfolder=/mydata/deepcloud/yves/SolverEmulation/B_Tendency/
 
 # run script
-
 cd $myfolder
-echo "Graph Transformer 3D training started!"
-
+echo "Graph Transformer 3D Simplified training started!"
 
 # Run the training script with all required parameters
-python train_models_3d_tendency.py \
-    --model graph_transformer_hybrid_clean   \
+python train_tendency.py \
+    --model gt_simplified \
+    --mode 3d \
+    --dataset-type triangle \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
-    --save /mydata/deepcloud/yves/results-temp/graph_transformer_3d_64_l3_drop03_notSimplified\
-    --percent 1 \
-    --subsample 1 \
+    --input-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_updated.pickle \
+    --target-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_y2_no_temp.pickle \
+    --save /mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k1 \
+    --percent 1.0 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --height-in 70 \
+    --height 70 \
     --channel-3d 10 \
     --channel-2d 3 \
-    --channel-out 7 \
+    --channels-out 7 \
     --train \
     --test \
     --shuffle \
     --batch-size 1 \
     --optimizer adamw \
-    --clip 1 \
+    --clip 1.0 \
     --num-epoch 100 \
     --learning-rate 0.0005 \
     --hidden-dim 64 \
-    --layers 3 \
+    --layers 4 \
     --dropout 0.3 \
     --heads 8 \
     --dim-head 8 \
@@ -55,5 +55,5 @@ python train_models_3d_tendency.py \
     --triangle-division-factor 4 \
     --no-fully-connected \
     --no-disable-horizontal \
-    --max-hops 1 \
+    --max-hops 2 \
     --wandb-mode online 

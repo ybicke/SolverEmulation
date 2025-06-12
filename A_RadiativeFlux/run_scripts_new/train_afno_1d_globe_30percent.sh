@@ -24,7 +24,9 @@ python train_flux.py \
     --mode 1d \
     --dataset-type full \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/afno_1d_full_30percent \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results-new/afno_1d_full_30percent_new \
+    --memory-efficient-test \
+    --test-chunk-size 500 \
     --percent 0.5 \
     --subsample 0.6 \
     --num-workers 8 \
@@ -43,11 +45,11 @@ python train_flux.py \
     --num-epoch 30 \
     --learning-rate 0.0007 \
     --hidden-dim 256 \
-    --layers 8 \
+    --layers 6 \
     --dropout 0.0 \
     --patch-size 1 \
-    --mlp-ratio 3.5 \
-    --fno-blocks 8 \
+    --mlp-ratio 2 \
+    --fno-blocks 4 \
     --afno-sparsity-threshold 0.01 \
     --hard-thresholding-fraction 1.0 \
     --hidden-size-factor 2 \

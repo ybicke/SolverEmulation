@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from graph_3d_full import get_3d_graph
-from data_utils import get_triangle_indices
+from utils.graph_3d import get_3d_graph
+from utils.data_utils import get_triangle_indices
 
 
-class HybridNeighborhoodAttention(nn.Module):
+class LargeNeighborhoodAttention(nn.Module):
     """
     Hybrid attention mechanism that combines:
     1. Full vertical attention within each column (atmospheric physics)
@@ -29,7 +29,7 @@ class HybridNeighborhoodAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.to_out = nn.Linear(inner_dim, dim)
       
-    def get_hybrid_neighborhoods(self, edge_index, num_nodes, num_columns, num_height_levels, cached_neighborhoods=None):
+    def get_large_neighborhoods(self, edge_index, num_nodes, num_columns, num_height_levels, cached_neighborhoods=None):
         """
         Compute hybrid neighborhoods efficiently.
         
@@ -150,7 +150,7 @@ class HybridNeighborhoodAttention(nn.Module):
             if shared_cache['neighborhoods'] is None:
                 # Only compute on single batch edge index
                 single_batch_edges = edge_index[:, :edge_index.shape[1] // B] if B > 1 else edge_index
-                neighborhoods = self.get_hybrid_neighborhoods(
+                neighborhoods = self.get_large_neighborhoods(
                     single_batch_edges, N_per_batch, num_columns, num_height_levels
                 )
                 shared_cache['neighborhoods'] = neighborhoods
@@ -203,7 +203,7 @@ class HybridNeighborhoodAttention(nn.Module):
         return self.to_out(out)
 
 
-class HybridTransformerLayer(nn.Module):
+class LargeTransformerLayer(nn.Module):
     """
     Transformer layer with hybrid attention and feed-forward network.
     Uses pre-normalization for better gradient flow.
@@ -215,7 +215,7 @@ class HybridTransformerLayer(nn.Module):
         self.norm2 = nn.LayerNorm(dim)
         
         # Hybrid attention
-        self.attn = HybridNeighborhoodAttention(dim, heads, dim_head, dropout, max_hops)
+        self.attn = LargeNeighborhoodAttention(dim, heads, dim_head, dropout, max_hops)
         
         # Feed-forward network
         self.mlp = nn.Sequential(
@@ -300,7 +300,7 @@ class HybridGraphTransformer3D(nn.Module):
         # Hybrid transformer layers
         mlp_dim = int(embed_dim * mlp_ratio)
         self.layers = nn.ModuleList([
-            HybridTransformerLayer(embed_dim, heads, dim_head, mlp_dim, dropout, max_hops)
+            LargeTransformerLayer(embed_dim, heads, dim_head, mlp_dim, dropout, max_hops)
             for _ in range(depth)
         ])
         

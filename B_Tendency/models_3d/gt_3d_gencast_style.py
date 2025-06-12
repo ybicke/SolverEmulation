@@ -1,25 +1,22 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from graph_3d_full import get_3d_graph
-from data_utils import get_triangle_indices
+from utils.graph_3d import get_3d_graph
+from utils.data_utils import get_triangle_indices
 
 
-class HybridNeighborhoodAttention(nn.Module):
+class GenCastStyleAttention(nn.Module):
     """
-    Hybrid attention mechanism that combines:
-    1. Full vertical attention within each column (atmospheric physics)
-    2. k-hop horizontal attention to same-height neighbors only
+    GenCast-style attention mechanism for ICON triangular grid.
     
-    This approach is physically motivated and computationally efficient:
-    - Vertical: Full atmospheric column interaction (convection, radiation)
-    - Horizontal: Same-level transport (pressure systems, advection)
+    Key features:
+    1. Pure 2D attention on triangular grid (no explicit vertical dimension)
+    2. All height levels are encoded in node features
+    3. k-hop neighborhood attention respecting triangular connectivity
+    4. Similar to GenCast but on triangular instead of icosahedral geometry
     
-    Neighborhood size: num_height_levels + k_hop_horizontal_neighbors
-    vs original: num_height_levels × (1 + k_hop_neighboring_columns)
-    
-    This represents a ~4-6x reduction in attention complexity while maintaining
-    the essential atmospheric physics interactions.
+    This approach treats each atmospheric column as a single node with
+    rich feature representation encompassing all vertical levels.
     """
     def __init__(self, dim, heads, dim_head, dropout, max_hops):
         super().__init__()
@@ -29,6 +26,13 @@ class HybridNeighborhoodAttention(nn.Module):
         self.max_hops = max_hops
         inner_dim = dim_head * heads
         
+        # Ensure inner dimension matches embedding dimension
+        # This is a requirement for the attention mechanism to work correctly
+        assert inner_dim == dim, (
+            f"Inner dimension (heads × dim_head = {heads} × {dim_head} = {inner_dim}) "
+            f"must match embedding dimension ({dim})"
+        )
+        
         # Node feature projections
         self.to_q = nn.Linear(dim, inner_dim, bias=False)
         self.to_k = nn.Linear(dim, inner_dim, bias=False)
@@ -36,36 +40,36 @@ class HybridNeighborhoodAttention(nn.Module):
         
         self.dropout = nn.Dropout(dropout)
         self.to_out = nn.Linear(inner_dim, dim)
+        
+
     
-    def get_hybrid_neighborhoods(self, edge_index, num_nodes, num_columns, num_height_levels, cached_neighborhoods=None):
+    def get_2d_neighborhoods(self, edge_index, num_columns, num_height_levels, cached_neighborhoods=None):
         """
-        Compute hybrid neighborhoods efficiently.
+        Compute k-hop neighborhoods on 2D triangular grid.
         
-        For each node, the neighborhood includes:
-        1. All nodes in the same column (full vertical attention)
-        2. Same-height nodes in k-hop neighboring columns (horizontal neighbors at same level only)
+        Each column is treated as a single node, and we find k-hop
+        neighbors based on triangular connectivity.
         
-        This is more efficient and physically motivated than including full vertical
-        extent of neighboring columns.
-        
-        Returns: dict mapping node_id -> list of neighbor node_ids
+        Returns: dict mapping column_id -> list of neighbor column_ids
         """
         if cached_neighborhoods is not None:
             return cached_neighborhoods
             
-        # Build adjacency list from edge index (only need horizontal connectivity)
+        # Build adjacency list from edge index (column-to-column connections)
         adj_list = {i: set() for i in range(num_columns)}
         
         # Extract horizontal connections between columns
-        for i in range(edge_index.size(1)): # Loop through all 557,952 edges
+        # Note: edge_index contains 3D edges, we need to extract 2D column connectivity
+        for i in range(edge_index.size(1)):
             src, dst = edge_index[:, i].tolist()
-            if 0 <= src < num_nodes and 0 <= dst < num_nodes:
-                src_col = src // num_height_levels
-                dst_col = dst // num_height_levels
-                
-                # Only store column-to-column connections
-                if src_col != dst_col:
-                    adj_list[src_col].add(dst_col)
+            # Convert node indices to column indices
+            # (assuming nodes are ordered as: col0_h0, col0_h1, ..., col1_h0, col1_h1, ...)
+            src_col = src // num_height_levels
+            dst_col = dst // num_height_levels
+            
+            # Only store column-to-column connections
+            if src_col != dst_col and src_col < num_columns and dst_col < num_columns:
+                adj_list[src_col].add(dst_col)
         
         # For each column, find k-hop neighboring columns
         column_neighborhoods = {}
@@ -76,7 +80,8 @@ class HybridNeighborhoodAttention(nn.Module):
             for hop in range(self.max_hops):
                 next_hop = set()
                 for col in current_hop:
-                    next_hop.update(adj_list[col])
+                    if col in adj_list:
+                        next_hop.update(adj_list[col])
                 current_hop = next_hop - all_neighbor_cols
                 all_neighbor_cols.update(current_hop)
                 
@@ -85,58 +90,35 @@ class HybridNeighborhoodAttention(nn.Module):
             
             column_neighborhoods[col_id] = sorted(list(all_neighbor_cols))
         
-        # Create node-level neighborhoods from column neighborhoods
-        node_neighborhoods = {}
-        for node_id in range(num_nodes):
-            col_id = node_id // num_height_levels
-            height_level = node_id % num_height_levels
-            neighbor_cols = column_neighborhoods[col_id]
-            
-            neighbors = set()
-            
-            # Add all nodes in the same column (full vertical attention)
-            for h in range(num_height_levels):
-                same_col_node = col_id * num_height_levels + h
-                if same_col_node < num_nodes:
-                    neighbors.add(same_col_node)
-            
-            # Add same-height neighbors in k-hop neighboring columns
-            for neighbor_col in neighbor_cols:
-                if neighbor_col != col_id:  # Skip self-column (already added above)
-                    same_height_neighbor = neighbor_col * num_height_levels + height_level
-                    if same_height_neighbor < num_nodes:
-                        neighbors.add(same_height_neighbor)
-            
-            node_neighborhoods[node_id] = sorted(list(neighbors))
-        
-        return node_neighborhoods
+        return column_neighborhoods
     
-    def build_attention_mask(self, neighborhoods, B, N_per_batch, device):
+    def build_attention_mask(self, neighborhoods, B, num_columns, device):
         """
-        Build efficient attention mask for vectorized computation.
-        Returns padded neighbor indices and mask.
+        Build efficient attention mask for vectorized computation. 
+        Padding nescessary because of different neighborhood sizes.
+        Returns padded neighbor indices and mask for 2D grid.
         """
         # Find maximum neighborhood size
         max_neighbors = max(len(neighbors) for neighbors in neighborhoods.values())
         
         # Build padded neighbor tensor
-        padded_neighbors = torch.zeros(N_per_batch, max_neighbors, dtype=torch.long, device=device)
-        neighbor_mask = torch.zeros(N_per_batch, max_neighbors, dtype=torch.bool, device=device)
+        padded_neighbors = torch.zeros(num_columns, max_neighbors, dtype=torch.long, device=device)
+        neighbor_mask = torch.zeros(num_columns, max_neighbors, dtype=torch.bool, device=device)
         
-        for node_idx in range(N_per_batch):
-            neighbors = neighborhoods.get(node_idx, [node_idx])
+        for col_idx in range(num_columns):
+            neighbors = neighborhoods.get(col_idx, [col_idx])
             if not neighbors:
-                neighbors = [node_idx]
+                neighbors = [col_idx]
                 
             num_neighbors = len(neighbors)
             
             # Fill neighbor indices
-            padded_neighbors[node_idx, :num_neighbors] = torch.tensor(neighbors, device=device)
-            neighbor_mask[node_idx, :num_neighbors] = True
+            padded_neighbors[col_idx, :num_neighbors] = torch.tensor(neighbors, device=device)
+            neighbor_mask[col_idx, :num_neighbors] = True
             
             # Pad remaining positions with self-reference (safe fallback)
             if num_neighbors < max_neighbors:
-                padded_neighbors[node_idx, num_neighbors:] = node_idx
+                padded_neighbors[col_idx, num_neighbors:] = col_idx
         
         # Expand for batch dimension
         padded_neighbors = padded_neighbors.unsqueeze(0).expand(B, -1, -1).contiguous()
@@ -144,34 +126,30 @@ class HybridNeighborhoodAttention(nn.Module):
         
         return padded_neighbors, neighbor_mask, max_neighbors
     
-    def forward(self, x, edge_index, num_columns, shared_cache=None):
+    def forward(self, x, edge_index, num_columns, num_height_levels, shared_cache=None):
         """
-        Forward pass with efficient vectorized attention.
+        Forward pass with efficient vectorized attention on 2D grid.
         
         Args:
-            x: [batch, num_nodes, dim] node features
-            edge_index: [2, num_edges] edge connectivity
+            x: [batch, num_columns, dim] node features (flattened vertical)
+            edge_index: [2, num_edges] edge connectivity (3D edges)
             num_columns: number of columns in the grid
+            num_height_levels: number of height levels (for converting 3D edges to 2D)
             shared_cache: shared caching for efficiency
         """
-        B, N_per_batch, D = x.shape
+        B, N_columns, D = x.shape
         device = x.device
-        num_height_levels = N_per_batch // num_columns
         
         # Use shared cache for neighborhoods (expensive computation)
         if shared_cache is not None:
             if shared_cache['neighborhoods'] is None:
-                # Only compute on single batch edge index
-                single_batch_edges = edge_index[:, :edge_index.shape[1] // B] if B > 1 else edge_index
-                neighborhoods = self.get_hybrid_neighborhoods(
-                    single_batch_edges, N_per_batch, num_columns, num_height_levels
-                )
+                neighborhoods = self.get_2d_neighborhoods(edge_index, num_columns, num_height_levels)
                 shared_cache['neighborhoods'] = neighborhoods
             
             if shared_cache['attention_mask'] is None:
                 neighborhoods = shared_cache['neighborhoods']
                 padded_neighbors, neighbor_mask, max_neighbors = self.build_attention_mask(
-                    neighborhoods, B, N_per_batch, device
+                    neighborhoods, B, num_columns, device
                 )
                 shared_cache['attention_mask'] = (padded_neighbors, neighbor_mask, max_neighbors)
             
@@ -180,23 +158,23 @@ class HybridNeighborhoodAttention(nn.Module):
             raise ValueError("shared_cache must be provided for efficiency")
         
         # Project to Q, K, V
-        q = self.to_q(x).view(B, N_per_batch, self.heads, self.dim_head)
-        k = self.to_k(x).view(B, N_per_batch, self.heads, self.dim_head)
-        v = self.to_v(x).view(B, N_per_batch, self.heads, self.dim_head)
+        q = self.to_q(x).view(B, N_columns, self.heads, self.dim_head)
+        k = self.to_k(x).view(B, N_columns, self.heads, self.dim_head)
+        v = self.to_v(x).view(B, N_columns, self.heads, self.dim_head)
         
         # Vectorized neighbor gathering
         neighbor_indices = padded_neighbors.unsqueeze(2).expand(-1, -1, self.heads, -1)
-        batch_indices = torch.arange(B, device=device).view(B, 1, 1, 1).expand(B, N_per_batch, self.heads, max_neighbors)
-        head_indices = torch.arange(self.heads, device=device).view(1, 1, self.heads, 1).expand(B, N_per_batch, self.heads, max_neighbors)
+        batch_indices = torch.arange(B, device=device).view(B, 1, 1, 1).expand(B, N_columns, self.heads, max_neighbors)
+        head_indices = torch.arange(self.heads, device=device).view(1, 1, self.heads, 1).expand(B, N_columns, self.heads, max_neighbors)
         
         # Gather neighbor K, V
         k_neighbors = k[batch_indices, neighbor_indices, head_indices]
         v_neighbors = v[batch_indices, neighbor_indices, head_indices]
         
         # Compute attention scores
-        q_expanded = q.unsqueeze(3)  # [B, N, heads, 1, dim_head]
+        q_expanded = q.unsqueeze(3)  # [B, N_columns, heads, 1, dim_head]
         scores = torch.matmul(q_expanded, k_neighbors.transpose(-2, -1)) * self.scale
-        scores = scores.squeeze(3)  # [B, N, heads, max_neighbors]
+        scores = scores.squeeze(3)  # [B, N_columns, heads, max_neighbors]
         
         # Apply mask
         mask_value = -1e9
@@ -212,13 +190,13 @@ class HybridNeighborhoodAttention(nn.Module):
         out = torch.sum(attn_weights_expanded * v_neighbors, dim=3)
         
         # Reshape and project output
-        out = out.view(B, N_per_batch, -1)
+        out = out.view(B, N_columns, -1)
         return self.to_out(out)
 
 
-class HybridTransformerLayer(nn.Module):
+class GenCastStyleTransformerLayer(nn.Module):
     """
-    Transformer layer with hybrid attention and feed-forward network.
+    GenCast-style transformer layer for 2D grid attention.
     Uses pre-normalization for better gradient flow.
     """
     def __init__(self, dim, heads, dim_head, mlp_dim, dropout, max_hops):
@@ -227,21 +205,22 @@ class HybridTransformerLayer(nn.Module):
         self.norm1 = nn.LayerNorm(dim)
         self.norm2 = nn.LayerNorm(dim)
         
-        # Hybrid attention
-        self.attn = HybridNeighborhoodAttention(dim, heads, dim_head, dropout, max_hops)
+        # GenCast-style attention
+        self.attn = GenCastStyleAttention(dim, heads, dim_head, dropout, max_hops)
         
         # Feed-forward network
         self.mlp = nn.Sequential(
             nn.Linear(dim, mlp_dim),
-            nn.SiLU(), 
+            nn.SiLU(),  
             nn.Dropout(dropout),
             nn.Linear(mlp_dim, dim),
             nn.Dropout(dropout)
         )
+        
     
-    def forward(self, x, edge_index, num_columns, shared_cache=None):
+    def forward(self, x, edge_index, num_columns, num_height_levels, shared_cache=None):
         # Pre-norm + attention + residual
-        x = x + self.attn(self.norm1(x), edge_index, num_columns, shared_cache)
+        x = x + self.attn(self.norm1(x), edge_index, num_columns, num_height_levels, shared_cache)
         
         # Pre-norm + MLP + residual
         x = x + self.mlp(self.norm2(x))
@@ -249,15 +228,18 @@ class HybridTransformerLayer(nn.Module):
         return x
 
 
-class HybridGraphTransformer3D(nn.Module):
+class GenCastStyleGraphTransformer3D(nn.Module):
     """
-    Hybrid Graph Transformer for 3D atmospheric data on ICON grid.
+    GenCast-style Graph Transformer for 3D atmospheric data on ICON triangular grid.
     
     Key features:
-    1. Physically-motivated hybrid attention (full vertical + k-hop horizontal)
-    2. Efficient vectorized implementation
-    3. Proper caching for repeated computations
+    1. Flattens all height levels into node features (no explicit vertical dimension)
+    2. Pure 2D attention on triangular grid with k-hop neighborhoods
+    3. Similar to GenCast architecture but on ICON instead of icosahedral geometry
     4. Training pipeline compatibility
+    
+    This approach provides a direct comparison to the hybrid methods by treating
+    atmospheric columns as single nodes with rich vertical feature encoding.
     """
     def __init__(self,
                  total_cols,
@@ -296,37 +278,45 @@ class HybridGraphTransformer3D(nn.Module):
         self.disable_horizontal = disable_horizontal
         self.max_hops = max_hops
         
-        # Input projection
-        total_channels = channels_in_3d + channels_in_2d
-        self.input_proj = nn.Linear(total_channels, embed_dim)
+        # Calculate flattened input size
+        # All height levels are concatenated into a single feature vector per column
+        total_3d_features = channels_in_3d * num_height_levels
+        total_input_features = total_3d_features + channels_in_2d
+        
+        # Input projection from flattened features to embedding dimension
+        self.input_proj = nn.Linear(total_input_features, embed_dim)
         
         # Get actual number of columns
         triangle_indices = get_triangle_indices(triangle_id, division_factor, total_cols)
         actual_num_columns = len(triangle_indices)
         
-        # Position embeddings with proper initialization
-        self.pos_embedding_3d = nn.Parameter(
-            torch.randn(1, actual_num_columns * num_height_levels, embed_dim) * 0.02
+        # 2D position embeddings (one per column)
+        self.pos_embedding_2d = nn.Parameter(
+            torch.randn(1, actual_num_columns, embed_dim) * 0.02
         )
         
-        # Hybrid transformer layers
+        # GenCast-style transformer layers
         mlp_dim = int(embed_dim * mlp_ratio)
         self.layers = nn.ModuleList([
-            HybridTransformerLayer(embed_dim, heads, dim_head, mlp_dim, dropout, max_hops)
+            GenCastStyleTransformerLayer(embed_dim, heads, dim_head, mlp_dim, dropout, max_hops)
             for _ in range(depth)
         ])
         
         # Output processing
         self.norm = nn.LayerNorm(embed_dim)
-        self.output_proj = nn.Linear(embed_dim, channels_out)
+        
+        # Output projection to flattened 3D output
+        total_output_features = channels_out * num_height_levels
+        self.output_proj = nn.Linear(embed_dim, total_output_features)
+        
         
         # Shared cache for efficiency
         self._shared_cache = {
             'neighborhoods': None,
             'attention_mask': None
         }
-    
 
+    
     def forward(self, x3d_norm, x2d_norm):
         """
         Forward pass compatible with training pipeline.
@@ -338,9 +328,10 @@ class HybridGraphTransformer3D(nn.Module):
         Returns:
             output: [batch, num_columns, num_levels, channels_out] predictions
         """
-        B, N, L, _ = x3d_norm.shape
+        B, N, L, C3d = x3d_norm.shape
+        _, _, C2d = x2d_norm.shape
         
-        # Get graph structure (cached)
+        # Get graph structure (cached) - we only need horizontal edges
         edge_index, num_columns = get_3d_graph(
             grid_file_path=self.grid_file_path,
             triangle_id=self.triangle_id,
@@ -353,29 +344,45 @@ class HybridGraphTransformer3D(nn.Module):
             disable_horizontal=self.disable_horizontal
         )
         
-        # Prepare features
-        x2d_repeated = x2d_norm.unsqueeze(2).repeat(1, 1, L, 1)
-        x_concat = torch.cat([x3d_norm, x2d_repeated], dim=-1)
+        # Flatten vertical dimension into features (GenCast-style)
+        x3d_flat = x3d_norm.view(B, N, L * C3d)  # [B, N, L*C3d]
+        
+        # Concatenate 3D and 2D features.
+        # GenCast-style approach treats 2D features as column-level context that gets concatenated once with the flattened 3D features
+        # 3d need repetition 2d accross height, because they maintain the 3D graph structure (each height level seperate node that needs access to the 2D feature)
+        x_concat = torch.cat([x3d_flat, x2d_norm], dim=-1)  # [B, N, L*C3d + C2d]
         
         # Project to embedding space
-        x = self.input_proj(x_concat)  # [B, N, L, embed_dim]
+        x = self.input_proj(x_concat)  # [B, N, embed_dim]
         
-        # Flatten for graph processing
-        x_flat = x.view(B, N * L, -1)  # [B, N*L, embed_dim]
+        # Add 2D position embeddings now only #of columns
+        pos_emb_size = min(x.size(1), self.pos_embedding_2d.size(1))
+        x[:, :pos_emb_size, :] += self.pos_embedding_2d[:, :pos_emb_size, :]
         
-        # Add position embeddings
-        pos_emb_size = min(x_flat.size(1), self.pos_embedding_3d.size(1))
-        x_flat[:, :pos_emb_size, :] += self.pos_embedding_3d[:, :pos_emb_size, :]
-        
-        # Process through hybrid transformer layers
+        # Process through GenCast-style transformer layers
         for layer in self.layers:
-            x_flat = layer(x_flat, edge_index, num_columns, self._shared_cache)
-        
-        # Reshape back to 3D structure
-        x = x_flat.view(B, N, L, -1)  # [B, N, L, embed_dim]
+            x = layer(x, edge_index, num_columns, self.num_height_levels, self._shared_cache)
         
         # Final processing
         x = self.norm(x)
-        x = self.output_proj(x)
+        x_out = self.output_proj(x)  # [B, N, L*channels_out]
         
-        return x 
+        # Reshape back to 3D structure
+        output = x_out.view(B, N, L, self.channels_out)  # [B, N, L, channels_out]
+        
+        return output
+
+
+
+
+# Example usage and testing
+if __name__ == "__main__":
+    print("GenCast-Style Graph Transformer for ICON Triangular Grid")
+    print("=" * 60)
+    print("Key features:")
+    print("1. Flattens all height levels into node features")
+    print("2. Pure 2D attention on triangular grid")
+    print("3. k-hop neighborhood attention")
+    print("4. Similar to GenCast but on ICON geometry")
+    print()
+    

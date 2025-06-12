@@ -24,6 +24,8 @@ python train_flux.py \
     --dataset-type full \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
     --save /mydata/deepcloud/yves/A_RadiativeFlux/results-new/gnn_1d_full_30percent_64_l2 \
+    --memory-efficient-test \
+    --test-chunk-size 500 \
     --percent 0.5 \
     --subsample 0.6 \
     --num-workers 8 \
@@ -33,7 +35,7 @@ python train_flux.py \
     --channel-2d 6 \
     --channel-out 4 \
     --height-in 71 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 2048 \
@@ -48,6 +50,6 @@ python train_flux.py \
     --emb-dropout 0.0 \
     --edge-channels-in 1 \
     --fully-connected \
-    --wandb-mode online
+    --wandb-mode disabled
 
 echo "GNN 1D Full Globe training completed!" 
