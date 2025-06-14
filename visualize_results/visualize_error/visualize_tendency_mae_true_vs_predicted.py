@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.ticker as ticker
 from matplotlib.ticker import ScalarFormatter
+import os
 
 # -----------------------------------------------------------------------------
 #   Libraries & global matplotlib setup
@@ -14,13 +15,21 @@ from matplotlib.ticker import ScalarFormatter
 # Use a clean scientific style
 plt.style.use('seaborn-v0_8-whitegrid')  # requires Matplotlib >=3.7; fallback ok
 
-# Increase default font sizes a bit
+# Increase default font sizes for publication
 plt.rcParams.update({
-    'axes.titlesize': 13,
-    'axes.labelsize': 14,
-    'xtick.labelsize': 12,
-    'ytick.labelsize': 12,
-    'legend.fontsize': 12,
+    'axes.titlesize': 10,      # Reduced for publication
+    'axes.labelsize': 9,       # Reduced for publication
+    'xtick.labelsize': 8,      # Reduced for publication
+    'ytick.labelsize': 8,      # Reduced for publication
+    'legend.fontsize': 9,      # Reduced for publication
+    'figure.dpi': 150,         # Higher DPI for publication
+    'savefig.dpi': 300,        # High quality save
+    'font.family': 'sans-serif',
+    'font.sans-serif': ['Arial', 'DejaVu Sans'],
+    'grid.alpha': 1,         # Lighter grid
+    'grid.linewidth': 1,     # Thinner grid lines
+    'axes.grid': True,         # Enable grid by default
+    'axes.axisbelow': True,    # Grid behind plot elements
 })
 
 # Configuration options
@@ -31,21 +40,41 @@ use_all_samples = True  # Set to True to use all samples from the test set
 selected_samples = [112]  # List of sample indices to visualize
 
 # Set to True to save to the model's test directory
-save_to_test_path = True
-# Optional additional save path
-# additional_save_path = '/mydata/deepcloud/yves/Tendency-normTarget-true_vs_pred-sample.png'
+save_to_test_path = False  # Changed to False since we want to save to dedicated folder
+
+# === PLOT CONFIGURATION ===
+# Manually specify plot name and subfolder
+PLOT_NAME = "3D_GT_vs_GNN"  # Change this for each plot scenario
+SUBFOLDER = "true_vs_predicted"  # Options: "MAE", "true_vs_predicted", or any custom folder name
+
+# Examples of plot names for different scenarios:
+# "3D_vs_1D_GNN_comparison"
+# "transformer_variants_comparison" 
+# "best_models_final_comparison"
+# "ablation_study_results"
+
+# Dedicated final results path - MODIFY THIS TO YOUR PREFERRED PATH
+final_results_path = '/mydata/deepcloud/yves/final_results'
+plot_output_dir = join(final_results_path, SUBFOLDER)
+
+# Optional: create the directory if it doesn't exist
+os.makedirs(plot_output_dir, exist_ok=True)
 
 # Define models to evaluate
 models = [
-    {
-        #'path': '/mydata/deepcloud/yves/results-temp/afno_column_1percent_Emb128_clean_tendency_normTarg/test'
-        #'path': '/mydata/deepcloud/yves/results-temp/gnn_32_l2_tendency_normTarg/test'
-        #'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l3_tendency_normTarg/test'
-        #'path': '/mydata/deepcloud/yves/results-temp/gnn_128_l2_tendency_normTarg/test'
+    {'name': 'GNN-3D-64-L2-100-new', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
+    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
         
-
-
-    },
+        
+    # {'name': 'GNN-3D-64-L2-100-NoFully', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_nofully/test'},
+    #{'name': 'GNN-3D-64-L2-100-Indep', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100/test'},
+       
+       
+       
+   {'name': 'GT-3D-enha-64-L4-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_enhanced_64_l4_drop03_triangle39_k2/test'},
+   #{'name': 'GT-3D-simp-64-L4-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k1/test'},
+   {'name': 'GT-2D-genc-1024-L2-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},  
+    
     # Add more models as needed for comparison
     # {'name': 'Model2', 'path': '/path/to/model2/test'},
 ]
@@ -88,18 +117,30 @@ for model in models:
         print(f'Reshaped y_true: {y_true.shape}')
         print(f'Reshaped y_pred: {y_pred.shape}')
 
-    # ------------------------------------------------------------------
-    # Collapse the (optional) sample dimension so that we have one curve
-    # per height level. If several indices are given we take the mean over
-    # those selected samples; if only one index is given we simply squeeze
-    # that dimension.
-    # ------------------------------------------------------------------
-    if y_true.ndim == 3 and y_true.shape[0] > 1:
-        y_true_h_tmp = torch.mean(y_true, dim=0)  # (H, C)
-        y_pred_h_tmp = torch.mean(y_pred, dim=0)
+    # Handle different model architectures
+    # GNN-3D has shape [samples, spatial_points, height, features]
+    # GNN-1D has shape [samples, height, features]
+    if y_true.ndim == 4:  # GNN-3D case
+        print(f'Detected 4D tensor (GNN-3D), averaging over spatial dimension')
+        # Average over both sample and spatial dimensions
+        if y_true.shape[0] > 1:
+            y_true_h_tmp = torch.mean(y_true, dim=(0, 1))  # Average over samples and spatial points
+            y_pred_h_tmp = torch.mean(y_pred, dim=(0, 1))
+        else:
+            y_true_h_tmp = torch.mean(y_true.squeeze(0), dim=0)  # Remove sample dim, average over spatial
+            y_pred_h_tmp = torch.mean(y_pred.squeeze(0), dim=0)
+    elif y_true.ndim == 3:  # GNN-1D case
+        print(f'Detected 3D tensor (GNN-1D), processing normally')
+        if y_true.shape[0] > 1:
+            y_true_h_tmp = torch.mean(y_true, dim=0)  # Average over samples
+            y_pred_h_tmp = torch.mean(y_pred, dim=0)
+        else:
+            y_true_h_tmp = y_true.squeeze(0)  # Remove sample dimension
+            y_pred_h_tmp = y_pred.squeeze(0)
     else:
-        y_true_h_tmp = y_true.squeeze(0)  # (H, C)
-        y_pred_h_tmp = y_pred.squeeze(0)
+        raise ValueError(f"Unexpected tensor dimensions: {y_true.ndim}")
+
+    print(f'Final shape for plotting: {y_true_h_tmp.shape}')
 
     # store predictions; ground truth needs to be stored only once
     if y_true_h is None:
@@ -115,13 +156,37 @@ for model in models:
    
 
 target_units = {
-    "Sum of Temperature Tendency": "K s-1", 
-    "Dynamical Temperature Tendency": "K s-1",
-    "Sum of Zonal Wind Tendency": "m s-2",
-    "Sum of Meridional Wind Tendency": "m s-2",
-    "Convective Tend. Absolute Humidity": "kg m-3 s-1",
-    "Convective Tend. Cloud Water Mass Density": "kg m-3 s-1",
-    "Convective Tend. Cloud Ice Mass Density": "kg m-3 s-1"
+    "Temp. Tendency": "K s⁻¹", 
+    "Temp. Tend. (Dyn.)": "K s⁻¹",
+    "U-Wind Tendency": "m s⁻²",
+    "V-Wind Tendency": "m s⁻²",
+    "Humidity Tend.": "kg m⁻³ s⁻¹",
+    "Cloud Water Tend.": "kg m⁻³ s⁻¹",
+    "Cloud Ice Tend.": "kg m⁻³ s⁻¹"
+}
+
+# Optional: Full names for reference
+target_units_full = {
+    "Sum of Temperature Tendency": "K s⁻¹", 
+    "Dynamical Temperature Tendency": "K s⁻¹",
+    "Sum of Zonal Wind Tendency": "m s⁻²",
+    "Sum of Meridional Wind Tendency": "m s⁻²",
+    "Convective Tend. Absolute Humidity": "kg m⁻³ s⁻¹",
+    "Convective Tend. Cloud Water Mass Density": "kg m⁻³ s⁻¹",
+    "Convective Tend. Cloud Ice Mass Density": "kg m⁻³ s⁻¹"
+}
+
+# Height level to kilometer mapping (approximate values for 70 levels)
+# You may need to adjust these values based on your specific model's vertical grid
+height_km = {
+    0: 65,
+    10: 39,
+    20: 25,
+    30: 15,
+    40: 8,
+    50: 4,
+    60: 1,
+    70: 0,
 }
 
 # ------------------------------------------------------------------
@@ -136,9 +201,10 @@ colors = ['black']  # True value is always black
 pred_colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink']  # For predictions
 
 # Height indices (0 ... H-1)
-height_range = range(y_true_h.shape[0])
+height_range = np.arange(y_true_h.shape[0])
 
-fig = plt.figure(figsize=(12, 18))
+# Create figure with 2-row layout for publication
+fig = plt.figure(figsize=(8, 7.5))  # Match exact dimensions from MAE script
 
 def add_subplot_true_pred(
     fig,
@@ -153,9 +219,12 @@ def add_subplot_true_pred(
     xlabel=None
 ):
     """
-    Plots true vs predicted lines for each model on the same subplot.
+    Plots true vs predicted lines for each model on the same subplot with publication styling.
     """
     ax = fig.add_subplot(*subplot_pos)
+    
+    # Define colors for consistent plotting
+    colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink']
     
     # Plot TRUE (black solid)
     ax.plot(
@@ -163,8 +232,12 @@ def add_subplot_true_pred(
         height_vals,
         label='True' if channel_idx == 0 else None,
         color='black',
-        linewidth=2,
+        linewidth=1.5,  # Thinner lines
+        linestyle='-',  # Solid line for true values
     )
+
+    # Define line styles for different models
+    line_styles = ['-', '--', '-.', ':', '--', ':']  # Different styles for each model
 
     # Plot PREDICTIONS for each model
     for i, (pred_data, model_name) in enumerate(zip(pred_data_list, models_names)):
@@ -172,20 +245,42 @@ def add_subplot_true_pred(
             pred_data[:, channel_idx],
             height_vals,
             label=f'Pred • {model_name}' if channel_idx == 0 else None,
-            linestyle='--',
-            color=pred_colors[i % len(pred_colors)]  # Use consistent colors from list
+            color=colors[i % len(colors)],
+            linestyle=line_styles[i % len(line_styles)],  # Cycle through line styles
+            linewidth=1.5,  # Thinner lines
         )
 
-    ax.grid(True)
+    # Lighter grid
+    ax.grid(True, alpha=0.5, linewidth=0.5)  # Reduced alpha and linewidth for lighter grid
     ax.invert_yaxis()
-    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.tick_params(axis='both', which='major', labelsize=8)
     
+    # Only show y-axis ticks on leftmost plots (indices 0 and 4)
+    if channel_idx not in [0, 4]:
+        ax.set_yticklabels([])  # Remove y-axis tick labels
+        ax.tick_params(axis='y', which='both', length=0)  # Remove tick marks
+    else:
+        # Set custom y-axis labels with height level and km for leftmost plots
+        yticks = np.arange(0, 71, 10)  # 0, 10, 20, ..., 70
+        ax.set_yticks(yticks)
+        
+        # Create labels with format "level (km)"
+        yticklabels = []
+        for tick in yticks:
+            if tick in height_km:
+                yticklabels.append(f'{tick} ({height_km[tick]:.0f} km)')
+            else:
+                # Interpolate if exact value not in mapping
+                yticklabels.append(f'{tick}')
+        
+        ax.set_yticklabels(yticklabels, fontsize=8)
+
     if title:
-        ax.set_title(title, fontsize=13.5)
+        ax.set_title(title, fontsize=10, pad=2)
     if ylabel:
-        ax.set_ylabel(ylabel, fontsize=14)
+        ax.set_ylabel(ylabel, fontsize=9)
     if xlabel:
-        ax.set_xlabel(xlabel, fontsize=14)
+        ax.set_xlabel(xlabel, fontsize=9)
     
     # Setup scientific notation with proper formatting
     formatter = ScalarFormatter(useMathText=True)
@@ -193,8 +288,13 @@ def add_subplot_true_pred(
     formatter.set_powerlimits((-1, 1))
     ax.xaxis.set_major_formatter(formatter)
     
-    # Set appropriate number of ticks
-    ax.xaxis.set_major_locator(ticker.MaxNLocator(5))
+    # Adjust the offset text position
+    ax.xaxis.get_offset_text().set_fontsize(7)  # Smaller font for offset
+    ax.xaxis.labelpad = 10  # Extra padding for x-axis label
+    
+    # Set appropriate number of ticks for narrow plots
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
+    ax.yaxis.set_major_locator(ticker.MaxNLocator(8))
     
     # Calculate appropriate axis limits
     data_values = [true_data[:, channel_idx]]
@@ -214,11 +314,15 @@ def add_subplot_true_pred(
     
     return ax
 
-# Create one subplot for each of the 7 target channels in a 3 × 3 grid
+# Create one subplot for each of the 7 target channels in a 2-row layout
 ax_list = []
 
 for i, (label, units) in enumerate(target_units.items()):
-    subplot_idx = (3, 3, i + 1)
+    # First 4 plots in row 1, last 3 plots in row 2
+    if i < 4:
+        subplot_idx = (2, 4, i + 1)  # Row 1: 4 plots
+    else:
+        subplot_idx = (2, 4, i + 1)  # Row 2: continues numbering
 
     ax = add_subplot_true_pred(
         fig=fig,
@@ -229,8 +333,8 @@ for i, (label, units) in enumerate(target_units.items()):
         models_names=models_name,
         channel_idx=i,
         title=label,
-        ylabel='Height index' if i in [0, 3, 6] else None,
-        xlabel=f'[$\\mathrm{{{units}}}$]'
+        ylabel='Height index' if i in [0, 4] else None,  # Show ylabel on first plot of each row
+        xlabel=f'[{units}]'  # Match MAE script format
     )
     
     ax_list.append(ax)
@@ -247,10 +351,10 @@ for ax in ax_list:
 
 # Place legend below all subplots
 fig.legend(handles, labels, loc='lower center', ncol=len(labels),
-           bbox_to_anchor=(0.5, 0.0), frameon=False)
+           bbox_to_anchor=(0.5, -0.03), frameon=False, fontsize=9)
 
 # Tight layout with extra space at bottom for legend
-fig.tight_layout(rect=[0, 0.05, 1, 1])
+fig.tight_layout(rect=[0, 0.02, 1, 0.98], pad=0.1, h_pad=1, w_pad=0.5)
 
 # Save the figure
 # Create a descriptive sample suffix for filenames
@@ -266,10 +370,9 @@ if save_to_test_path:
         plt.savefig(output_path, bbox_inches='tight', dpi=300)
         print(f"Saved visualization to {output_path}")
 
-# Save to additional path if provided
-# if additional_save_path:
-#     plt.savefig(additional_save_path, bbox_inches='tight', dpi=300)
-#     print(f"Saved visualization to {additional_save_path}")
+output_path = join(plot_output_dir, f"{PLOT_NAME}.png")
+plt.savefig(output_path, bbox_inches='tight', dpi=300)
+print(f"Saved MAE visualization to {output_path}")
 
 plt.show()
 

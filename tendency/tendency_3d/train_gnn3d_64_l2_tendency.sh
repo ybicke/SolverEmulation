@@ -4,34 +4,38 @@
 set -e
 
 # Source setup script (optional, in case you want to load a specific conda environment)
-source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.sh
+source /mydata/deepcloud/yves/SolverEmulation/B_Tendency/run_scripts/setup.sh
 
 # Check if GPU available
 # nvidia-smi
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency_3d/
+myfolder=/mydata/deepcloud/yves/SolverEmulation/B_Tendency/
 
 # Run script
 cd $myfolder
 echo "GNN3d tendency training started!"
 
 # Run the training script with all required parameters
-python train_models_3d_tendency.py \
-    --model gnn_3d_tendency \
+python train_tendency.py \
+    --model gnn_3d \
+    --mode 3d \
+    --dataset-type triangle \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
+    --input-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_updated.pickle \
+    --target-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_y2_no_temp.pickle \
     --save /mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new \
     --percent 1 \
     --num-workers 4 \
     --prefetch-factor 2 \
     --num-cells 81920 \
-    --height-in 70 \
+    --height 70 \
     --channel-3d 10 \
     --channel-2d 3 \
     --channels-out 7 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 2 \
@@ -39,7 +43,7 @@ python train_models_3d_tendency.py \
     --clip 1.0 \
     --num-epoch 100 \
     --learning-rate 0.0005 \
-    --embed-dim 64 \
+    --hidden-dim 64 \
     --layers 2 \
     --dropout 0.0 \
     --edge-channels-in 1 \

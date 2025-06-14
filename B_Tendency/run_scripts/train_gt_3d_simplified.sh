@@ -35,7 +35,7 @@ python train_tendency.py \
     --channel-3d 10 \
     --channel-2d 3 \
     --channels-out 7 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 1 \

@@ -46,7 +46,7 @@ python train_tendency.py \
     --dropout 0.3 \
     --heads 8 \
     --dim-head 8 \
-    --mlp-ratio 2.0 \
+    --mlp-ratio 4.0 \
     --emb-dropout 0.3 \
     --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
     --triangle-id 39 \

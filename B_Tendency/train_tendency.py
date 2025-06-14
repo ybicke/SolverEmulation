@@ -34,6 +34,7 @@ from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
 from tendency_data_loader import TendencyDataset
 from utils.data_utils import DataNormalizer, interpolate_w_to_full_levels, transform_targets, inverse_transform_targets
+from utils.evaluation_utils import process_timing_statistics, warm_up_model, create_test_summary
 
 sys.path.append(dirname(__file__))
 
@@ -178,7 +179,7 @@ def get_model():
     # 1D Models
     if args.mode == '1d':
         if args.model == 'vit_tendency':
-            from models.vit import ViT
+            from models_1d.vit import ViT
             model = ViT(
                 patch_size=args.patch_size,
                 embed_dim=args.hidden_dim,
@@ -195,7 +196,7 @@ def get_model():
             ).to(device)
             
         elif args.model == 'afno_tendency':
-            from models.afno import AFNONet
+            from models_1d.afno import AFNONet
             model = AFNONet(
                 patch_size=args.patch_size,
                 num_cells=args.num_cells,
@@ -215,7 +216,7 @@ def get_model():
             ).to(device)
             
         elif args.model == 'gnn':
-            from gnn import AtmosphericColumnGNN
+            from models_1d.gnn import AtmosphericColumnGNN
             model = AtmosphericColumnGNN(
                 embed_dim=args.hidden_dim,
                 depth=args.layers,
@@ -562,7 +563,17 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
     test_mae = MeanAbsoluteError().to(device)
 
     y_true, y_pred = [], []
+    
+    # Timing configuration
+    num_timing_batches = 10 if args.mode == '3d' else 10
+    warmup_batches = 2 if args.mode == '3d' else 2
+    timing_data = []
+    
+    # Perform warmup
+    actual_warmup_batches = warm_up_model(model, test_set, normalizer, target_means, target_vars, device, args.mode, warmup_batches)
+    
     t1 = time.perf_counter()
+    total_batches = 0
 
     model.eval()
     with torch.no_grad():
@@ -579,8 +590,18 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
             batch_x3_norm, batch_x2_norm, _ = normalizer.normalize(batch_x3_with_w, batch_x2)
             batch_y_transformed = transform_targets(batch_y, target_means, target_vars, mode=args.mode)
 
-            # Forward pass
-            outputs = model(batch_x3_norm, batch_x2_norm)
+            # Time inference for subset of batches
+            if i < num_timing_batches:
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                start = time.perf_counter()
+                outputs = model(batch_x3_norm, batch_x2_norm)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                end = time.perf_counter()
+                timing_data.append(end - start)
+            else:
+                outputs = model(batch_x3_norm, batch_x2_norm)
 
             # Calculate metrics
             loss = test_loss(outputs, batch_y_transformed)
@@ -592,6 +613,8 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
             # Collect results
             y_true.append(batch_y.detach().cpu())
             y_pred.append(outputs_original.detach().cpu())
+            
+            total_batches += 1
 
             if i % 100 == 99:
                 print(f'batch {i+1}, loss: {loss:.4f}, mae: {mae:.4f}')
@@ -607,6 +630,7 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
     # Save results
     y_true = torch.cat(y_true, 0)
     y_pred = torch.cat(y_pred, 0)
+    total_samples = len(y_true)
 
     with open(join(test_path, 'y_true.pickle'), 'wb') as f:
         pickle.dump(y_true, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -619,6 +643,20 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
                    f, protocol=pickle.HIGHEST_PROTOCOL)
 
     logger.info(f'Results saved to {test_path}')
+    
+    # Process and save timing statistics
+    if timing_data:
+        timing_stats = process_timing_statistics(
+            timing_data, model, test_path, args, count_parameters,
+            test_loss=total_test_loss, test_mae=total_test_mae,
+            num_warmup_batches=actual_warmup_batches, total_test_batches=total_batches
+        )
+    
+    # Create comprehensive test summary
+    create_test_summary(
+        test_path, args, model, count_parameters, 
+        total_test_loss, total_test_mae, t2-t1, total_samples
+    )
 
 
 def main():

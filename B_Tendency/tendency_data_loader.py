@@ -6,6 +6,7 @@ import h5py
 from os.path import join, basename, exists
 from torch.utils.data import IterableDataset
 from utils.data_utils import get_triangle_indices
+import os
 
 
 class TendencyDataset(IterableDataset):
@@ -67,24 +68,28 @@ class TendencyDataset(IterableDataset):
 
     def read_file(self, input_filename, output_filename):
         """Read and preprocess H5 files, returning data from selected area"""
-        local_input_file = input_filename
-        local_output_file = output_filename
+        if not self.cache_dir:
+            raise ValueError("Cache directory must be specified - direct file access not allowed")
+            
+        local_input_file = join(self.cache_dir, basename(input_filename))
+        local_output_file = join(self.cache_dir, basename(output_filename))
         
-        # Optimize caching - only copy if not already cached
-        if self.cache_dir:
-            local_input_file = join(self.cache_dir, basename(input_filename))
-            local_output_file = join(self.cache_dir, basename(output_filename))
-            
-            # Check if both files need copying before starting
-            need_input_copy = not exists(local_input_file)
-            need_output_copy = not exists(local_output_file)
-            
-            if need_input_copy:
+        # Copy files to cache if they don't exist
+        if not exists(local_input_file):
+            try:
                 shutil.copy2(input_filename, local_input_file)
-            if need_output_copy:
-                shutil.copy2(output_filename, local_output_file)
+            except Exception as e:
+                raise RuntimeError(f"Failed to cache input file {input_filename}: {e}")
         
-        for _ in range(10):  # Try up to 10 times if there are file access issues
+        if not exists(local_output_file):
+            try:
+                shutil.copy2(output_filename, local_output_file)
+            except Exception as e:
+                raise RuntimeError(f"Failed to cache output file {output_filename}: {e}")
+        
+        # Try to read the cached files with limited retries
+        last_exception = None
+        for attempt in range(3):
             try:
                 with h5py.File(local_input_file, 'r') as h_input:
                     if self.is_triangle_mode:
@@ -126,16 +131,28 @@ class TendencyDataset(IterableDataset):
                 return x3d, x2d, y, w
                 
             except Exception as exc:
-                print(f"Error reading {local_input_file} or {local_output_file}: {exc}")
-                # Only re-copy on error, not every retry
-                if self.cache_dir:
-                    shutil.copy2(input_filename, local_input_file)
-                    shutil.copy2(output_filename, local_output_file)
+                last_exception = exc
+                print(f"Attempt {attempt + 1}/3 failed: {exc}")
+                
+                # On first error, try to re-copy the files
+                if attempt == 0:
+                    print("Re-copying files to cache...")
+                    try:
+                        # Remove potentially corrupted cache files
+                        if exists(local_input_file):
+                            os.remove(local_input_file)
+                        if exists(local_output_file):
+                            os.remove(local_output_file)
+                            
+                        # Re-copy files
+                        shutil.copy2(input_filename, local_input_file)
+                        shutil.copy2(output_filename, local_output_file)
+                    except Exception as copy_exc:
+                        raise RuntimeError(f"Failed to re-copy files to cache: {copy_exc}")
                 continue
-            break
             
         # If we reach here, all attempts failed
-        raise RuntimeError(f"Failed to read files {input_filename} and {output_filename} after multiple attempts")
+        raise RuntimeError(f"Failed to read cached files after 3 attempts. Last error: {last_exception}")
     
     def __iter__(self):
         """Iterator that yields data based on mode (1D or 3D)"""

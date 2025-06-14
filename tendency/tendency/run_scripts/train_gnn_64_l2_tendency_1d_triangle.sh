@@ -4,14 +4,14 @@
 set -e
 
 # Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
-source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.sh
+source /mydata/deepcloud/yves/SolverEmulation/B_Tendency/run_scripts/setup.sh
 
 # Check if GPU available
 #nvidia-smi
 
 myproject="deepcloud"
 myusername="yves"
-myfolder=/mydata/deepcloud/yves/SolverEmulation/tendency/tendency
+myfolder=/mydata/deepcloud/yves/SolverEmulation/B_Tendency
 
 # run script
 
@@ -19,10 +19,14 @@ cd $myfolder
 echo "GNN tendency triangle training started!"
 
 # Run the training script with all required parameters
-python train_column_tendency_1d_tringle.py \
+python train_tendency.py \
     --model gnn \
+    --mode 1d \
+    --dataset-type triangle \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
+    --input-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_updated.pickle \
+    --target-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_y2_no_temp.pickle \
     --save /mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected \
     --percent 1 \
     --subsample 1 \
@@ -32,7 +36,7 @@ python train_column_tendency_1d_tringle.py \
     --channel-3d 10 \
     --channel-2d 3 \
     --channels-out 7 \
-    --train \
+    --no-train \
     --test \
     --shuffle \
     --batch-size 1024 \

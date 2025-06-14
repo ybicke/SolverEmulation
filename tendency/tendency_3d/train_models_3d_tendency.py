@@ -129,6 +129,8 @@ def get_normalization_params(stats_file):
 def get_model():
     logger.info('Preparing the model...')
     
+    
+        
     if args.model == 'gnn_3d_tendency':
         from gnn_3d_tendency import GNN3dTendency   
         

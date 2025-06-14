@@ -15,18 +15,18 @@ myfolder=/mydata/deepcloud/yves/SolverEmulation/B_Tendency/
 
 # run script
 cd $myfolder
-echo "GNN 3D Tendency training started!"
+echo "Graph Transformer 3D Simplified training started!"
 
 # Run the training script with all required parameters
 python train_tendency.py \
-    --model gnn_3d \
+    --model gt_simplified \
     --mode 3d \
     --dataset-type triangle \
     --dataset-input /mydata/deepcloud/yves/h5_tendency_data_all/inputs \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
     --input-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_updated.pickle \
     --target-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_y2_no_temp.pickle \
-    --save /mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100 \
+    --save /mydata/deepcloud/yves/results-new/gt_simplified_large \
     --percent 1.0 \
     --num-workers 4 \
     --prefetch-factor 2 \
@@ -43,13 +43,17 @@ python train_tendency.py \
     --clip 1.0 \
     --num-epoch 100 \
     --learning-rate 0.0005 \
-    --hidden-dim 64 \
-    --layers 2 \
+    --hidden-dim 512 \
+    --layers 4 \
     --dropout 0.3 \
+    --heads 8 \
+    --dim-head 64 \
+    --mlp-ratio 2.0 \
+    --emb-dropout 0.3 \
     --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
     --triangle-id 39 \
     --triangle-division-factor 4 \
-    --fully-connected \
+    --no-fully-connected \
     --no-disable-horizontal \
-    --edge-channels-in 1 \
+    --max-hops 2 \
     --wandb-mode online 
