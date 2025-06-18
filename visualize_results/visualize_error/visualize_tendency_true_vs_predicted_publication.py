@@ -44,7 +44,7 @@ save_to_test_path = False  # Changed to False since we want to save to dedicated
 
 # === PLOT CONFIGURATION ===
 # Manually specify plot name and subfolder
-PLOT_NAME = "3D_GT_vs_GNN"  # Change this for each plot scenario
+PLOT_NAME = "3D_GT_vs_GNN_no_dropout"  # Change this for each plot scenario
 SUBFOLDER = "true_vs_predicted"  # Options: "MAE", "true_vs_predicted", or any custom folder name
 
 # Examples of plot names for different scenarios:
@@ -62,18 +62,32 @@ os.makedirs(plot_output_dir, exist_ok=True)
 
 # Define models to evaluate
 models = [
-    {'name': 'GNN-3D-64-L2-100-new', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
+    # those were the old models with distinct performance k=4 and 10^-6 clamp, old trainng setup
+    #{'name': 'GNN-3D-64-L2-100-new', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
     #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
         
         
-    # {'name': 'GNN-3D-64-L2-100-NoFully', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_nofully/test'},
+    #{'name': 'GNN-3D-64-L2-100-NoFully', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_nofully/test'},
     #{'name': 'GNN-3D-64-L2-100-Indep', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_indep_100/test'},
+    
+    # now want to campare old vs new for 1d with clamp 10^-20 and k=4, to see if clamp is the problem, can check training setup by comparing k=4 with 10^-20 for old vs new 1d
+    
+    
+    # Here without dropouts and k1 standardization and clamp 10^-20, 3d and 1 d look alsmot the same
+    {'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k1/test'},
+    {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k1/test'},
        
-       
-       
-   {'name': 'GT-3D-enha-64-L4-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_enhanced_64_l4_drop03_triangle39_k2/test'},
+    # Here with correct variance values during rescaling clamp 10^-20 and k=4? had a dropout issue 0.3, dropout might have make the diference diminishing
+    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100/test'},
+    #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100/test'},
+    
+    # Here with 4sigma std
+    # {'name': 'GNN-3D-4-sigma', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_4sig/test'},
+        
+   # gt used k=4 and clamp 10^-20?    
+   #{'name': 'GT-3D-enha-64-L4-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_enhanced_64_l4_drop03_triangle39_k2/test'},
    #{'name': 'GT-3D-simp-64-L4-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k1/test'},
-   {'name': 'GT-2D-genc-1024-L2-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},  
+   #{'name': 'GT-2D-genc-1024-L2-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},  
     
     # Add more models as needed for comparison
     # {'name': 'Model2', 'path': '/path/to/model2/test'},

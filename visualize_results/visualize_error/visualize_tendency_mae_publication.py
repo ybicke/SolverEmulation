@@ -37,7 +37,7 @@ save_to_test_path = False
 
 # === PLOT CONFIGURATION ===
 # Manually specify plot name and subfolder
-PLOT_NAME = "GT_vs_GNN_comparison"  # Change this for each plot scenario
+PLOT_NAME = "GNN_1D_vs_GNN_3D_no_dropout"  # Change this for each plot scenario
 SUBFOLDER = "MAE"  # Options: "MAE", "true_vs_predicted", or any custom folder name
 
 # Examples of plot names for different scenarios:
@@ -54,12 +54,25 @@ models = [
     #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
     #{'name': 'ViT-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/vit_128_l4_tendency_1d_triangle/test'},
     
-    {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
-    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
+    # Here with correct variance values during rescaling
+    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100/test'},
+    #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100/test'},
     
-    {'name': 'GT-3D-enha-64-L4-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_enhanced_64_l4_drop03_triangle39_k2/test'},
+    #Here without dropouts and k1 standardization
+    {'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k1/test'},
+    {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k1/test'},
+    
+    # Here with 4sigma std
+    # {'name': 'GNN-3D-4-sigma', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_4sig/test'},
+
+
+
+    #{'name': 'GNN-3D-64-L2-100-old', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
+    #{'name': 'GNN-1D-64-L2-100-old', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
+    
+    #{'name': 'GT-3D-enha-64-L4-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_enhanced_64_l4_drop03_triangle39_k2/test'},
     #{'name': 'GT-3D-simp-64-L4-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k1/test'},
-    {'name': 'GT-2D-genc-1024-L2-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
+    #{'name': 'GT-2D-genc-1024-L2-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
 
     # Add more models as needed
 ]

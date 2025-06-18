@@ -33,7 +33,12 @@ from torch.utils.data import DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
 from tendency_data_loader import TendencyDataset
-from utils.data_utils import DataNormalizer, interpolate_w_to_full_levels, transform_targets, inverse_transform_targets
+from utils.data_utils import (
+    DataNormalizer, 
+    interpolate_w_to_full_levels, 
+    transform_targets, 
+    inverse_transform_targets,
+)
 from utils.evaluation_utils import process_timing_statistics, warm_up_model, create_test_summary
 
 sys.path.append(dirname(__file__))
@@ -58,7 +63,7 @@ parser.add_argument('--dataset-input', type=str, required=True, help='Path to in
 parser.add_argument('--dataset-output', type=str, required=True, help='Path to output dataset')
 parser.add_argument('--save', type=str, required=True, help='Path to save results')
 parser.add_argument('--model', type=str, required=True, 
-                    help='Model type: vit_tendency, afno_tendency, gnn, gnn_3d_tendency, graph_transformer, etc.')
+                    help='Model type: vit_tendency, afno_tendency, gnn, gnn_3d, graph_transformer, etc.')
 parser.add_argument('--mode', type=str, default='1d', choices=['1d', '3d'],
                     help='Training mode: 1d (column-wise) or 3d (triangle-wise)')
 parser.add_argument('--dataset-type', type=str, default='triangle', choices=['triangle', 'full'],

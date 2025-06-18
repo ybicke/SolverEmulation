@@ -63,7 +63,6 @@ class DataNormalizer:
         return x3d_normalized, x2d_normalized, x2d_original
 
 
-
 def get_triangle_indices(triangle_id, division_factor, total_cols):
     """
     Get indices of triangle cells for a specific triangle ID with optional division.
@@ -149,33 +148,94 @@ def interpolate_w_to_full_levels(w, mode=None):
     return w_full
 
 
-def transform_targets(batch_y, means, variances, mode, k=4, min_scale=1e-20):
+def transform_targets_k1(batch_y, means, variances, mode, min_scale=1e-20):
     """
-    Standardize targets to zero-mean, unit-variance representation.
+    Standard normalization with k=1 (z-score normalization).
+    
+    This applies the classic statistical normalization: (x - μ) / σ
+    No additional scaling factor, just pure standardization.
     
     Args:
         batch_y: Target tensor to transform
         means: Mean values for each output channel
         variances: Variance values for each output channel
         mode: Either '1d' or '3d' to determine reshaping strategy
-        k: Scaling factor for the standard deviation (default: 4)
         min_scale: Minimum scale to prevent division by zero (default: 1e-20)
         
     Returns:
-        Transformed targets with zero mean and unit variance
+        Transformed targets with standard normalization
         
     Shapes:
         - 1D mode: batch_y [B, L, C] -> same shape
         - 3D mode: batch_y [B, N, L, C] -> same shape
     """
+    # Calculate standard deviations with minimum threshold (k=1)
+    stds = torch.clamp(torch.sqrt(variances), min=min_scale)
+    
+    # Expand dimensions to match batch_y shape
+    if mode == '1d':
+        # 1D mode: batch_y shape is (B, L, C)
+        means_expanded = means.view(1, 1, -1).expand_as(batch_y)
+        stds_expanded = stds.view(1, 1, -1).expand_as(batch_y)
+    elif mode == '3d':
+        # 3D mode: batch_y shape is (B, N, L, C)
+        means_expanded = means.view(1, 1, 1, -1).expand_as(batch_y)
+        stds_expanded = stds.view(1, 1, 1, -1).expand_as(batch_y)
+    else:
+        raise ValueError(f"Mode must be '1d' or '3d', got {mode}")
+    
+    # Apply standard normalization (k=1): (x - μ) / σ
+    batch_y_normalized = (batch_y - means_expanded) / stds_expanded
+    
+    return batch_y_normalized
+
+
+def inverse_transform_targets_k1(y_norm, means, variances, mode, min_scale=1e-20):
+    """
+    Inverse transform for standard normalization (k=1).
+    
+    Args:
+        y_norm: Normalized target tensor to inverse transform
+        means: Mean values for each output channel
+        variances: Variance values for each output channel
+        mode: Either '1d' or '3d' to determine reshaping strategy
+        min_scale: Minimum scale to prevent division by zero (default: 1e-20)
+        
+    Returns:
+        Targets in original physical units
+        
+    Shapes:
+        - 1D mode: y_norm [B, L, C] -> same shape
+        - 3D mode: y_norm [B, N, L, C] -> same shape
+    """
+    # Calculate standard deviations with minimum threshold (k=1)
+    stds = torch.clamp(torch.sqrt(variances), min=min_scale)
+    
+    # Expand dimensions to match y_norm shape
+    if mode == '1d':
+        means_expanded = means.view(1, 1, -1).expand_as(y_norm)
+        stds_expanded = stds.view(1, 1, -1).expand_as(y_norm)
+    elif mode == '3d':
+        means_expanded = means.view(1, 1, 1, -1).expand_as(y_norm)
+        stds_expanded = stds.view(1, 1, 1, -1).expand_as(y_norm)
+    else:
+        raise ValueError(f"Mode must be '1d' or '3d', got {mode}")
+    
+    # Inverse standard normalization: y = (y_norm * σ) + μ
+    return y_norm * stds_expanded + means_expanded
+
+
+# Legacy functions for backward compatibility with k=4 scaling
+def transform_targets(batch_y, means, variances, mode, k=4, min_scale=1e-20):
+    """
+    Legacy k=4 scaling normalization for comparison.
+    """
     scale = torch.clamp(k * torch.sqrt(variances), min=min_scale)
     
     if mode == '1d':
-        # 1D mode: batch_y shape is (B, L, C)
         means = means.view(1, 1, -1).expand_as(batch_y)
         scale = scale.view(1, 1, -1).expand_as(batch_y)
     elif mode == '3d':
-        # 3D mode: batch_y shape is (B, N, L, C)
         means = means.view(1, 1, 1, -1).expand_as(batch_y)
         scale = scale.view(1, 1, 1, -1).expand_as(batch_y)
     else:
@@ -186,31 +246,14 @@ def transform_targets(batch_y, means, variances, mode, k=4, min_scale=1e-20):
 
 def inverse_transform_targets(y_norm, means, variances, mode, k=4, min_scale=1e-20):
     """
-    Convert normalized values back to physical units.
-    
-    Args:
-        y_norm: Normalized target tensor to inverse transform
-        means: Mean values for each output channel
-        variances: Variance values for each output channel
-        mode: Either '1d' or '3d' to determine reshaping strategy
-        k: Scaling factor for the standard deviation (default: 4)
-        min_scale: Minimum scale to prevent division by zero (default: 1e-20)
-        
-    Returns:
-        Targets in original physical units
-        
-    Shapes:
-        - 1D mode: y_norm [B, L, C] -> same shape
-        - 3D mode: y_norm [B, N, L, C] -> same shape
+    Legacy inverse transform for k=4 scaling.
     """
     scale = torch.clamp(k * torch.sqrt(variances), min=min_scale)
     
     if mode == '1d':
-        # 1D mode
         means = means.view(1, 1, -1).expand_as(y_norm)
         scale = scale.view(1, 1, -1).expand_as(y_norm)
     elif mode == '3d':
-        # 3D mode
         means = means.view(1, 1, 1, -1).expand_as(y_norm)
         scale = scale.view(1, 1, 1, -1).expand_as(y_norm)
     else:

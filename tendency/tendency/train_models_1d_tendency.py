@@ -181,7 +181,7 @@ def get_model(model_name, is_test):
         ).to(device)
     
     elif model_name == 'gnn':
-        from gnn import AtmosphericColumnGNN
+        from models.gnn import AtmosphericColumnGNN
         
         model = AtmosphericColumnGNN(
             embed_dim=args.hidden_dim,
@@ -538,7 +538,7 @@ def get_column_data_with_disk_cache(input_filenames, output_filenames, subsample
     return DataLoader(**dataloader_args)
 
 
-def transform_targets(batch_y, means, variances, k=4, min_scale=1e-6):
+def transform_targets(batch_y, means, variances, k=4, min_scale=1e-20):
     """Standardize targets to zero-mean, unit-variance representation.
     
     Args:
@@ -554,7 +554,7 @@ def transform_targets(batch_y, means, variances, k=4, min_scale=1e-6):
     return (batch_y - means) / scale
 
 
-def inverse_transform_targets(y_norm, means, variances, k=4, min_scale=1e-6):
+def inverse_transform_targets(y_norm, means, variances, k=4, min_scale=1e-20):
     """Convert normalized values back to physical units."""
     scale = torch.clamp(k * torch.sqrt(variances), min=min_scale)
     means = means.view(1, 1, -1).expand_as(y_norm)

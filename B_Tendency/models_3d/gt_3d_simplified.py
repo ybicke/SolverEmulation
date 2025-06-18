@@ -40,7 +40,7 @@ class SimplifiedNeighborhoodAttention(nn.Module):
         self.to_k = nn.Linear(dim, inner_dim, bias=False)
         self.to_v = nn.Linear(dim, inner_dim, bias=False)
         
-        self.dropout = nn.Dropout(dropout)
+        # Output projection only - no attention dropout for better performance
         self.to_out = nn.Linear(inner_dim, dim)
     
     def get_simplified_neighborhoods(self, edge_index, num_nodes, num_columns, num_height_levels, cached_neighborhoods=None):
@@ -210,9 +210,8 @@ class SimplifiedNeighborhoodAttention(nn.Module):
         neighbor_mask_expanded = neighbor_mask.unsqueeze(2)
         scores = scores.masked_fill(~neighbor_mask_expanded, mask_value)
         
-        # Attention weights and output
+        # Attention weights and output - no dropout for better performance
         attn_weights = F.softmax(scores, dim=-1)
-        attn_weights = self.dropout(attn_weights)
         
         # Apply attention to values
         attn_weights_expanded = attn_weights.unsqueeze(-1)
@@ -234,16 +233,16 @@ class SimplifiedTransformerLayer(nn.Module):
         self.norm1 = nn.LayerNorm(dim)
         self.norm2 = nn.LayerNorm(dim)
         
-        # Hybrid attention
+        # Hybrid attention without dropout
         self.attn = SimplifiedNeighborhoodAttention(dim, heads, dim_head, dropout, max_hops)
         
-        # Feed-forward network
+        # Feed-forward network with single dropout after activation
+        # Dropout only after activation for minimal regularization
         self.mlp = nn.Sequential(
             nn.Linear(dim, mlp_dim),
             nn.SiLU(), 
             nn.Dropout(dropout),
-            nn.Linear(mlp_dim, dim),
-            nn.Dropout(dropout)
+            nn.Linear(mlp_dim, dim)
         )
     
     def forward(self, x, edge_index, num_columns, shared_cache=None):
