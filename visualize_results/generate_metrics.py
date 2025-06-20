@@ -13,6 +13,11 @@ from tabulate import tabulate
 models = [
     {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
     {'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
+    
+    
+    #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k4_correct_variance/test'},
+    #{'name': 'GT-3D-64-L4-k2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k2/test'},
+
 ]
 
 # Path to training statistics (for NRMSE normalization)
@@ -26,8 +31,8 @@ TRAINING_STATS_PATH = '/mydata/deepcloud/yves/h5_tendency_data_all/train_target_
 PRESSURE_WEIGHTS_PATH = None  # '/mydata/deepcloud/yves/pressure_weights.npy'
 
 # Output paths
-OUTPUT_DIR = '/mydata/deepcloud/yves/final_results'
-OUTPUT_FILENAME = '3D_vs_1D_tendency_eval_recommended_metrics.md'
+OUTPUT_DIR = '/mydata/deepcloud/yves/final_results/metrics'
+OUTPUT_FILENAME = 'GNN_3D_vs_1D_metrics.md'
 
 # Define target names and units
 target_units = {

@@ -32,7 +32,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
-from tendency_data_loader import TendencyDataset
+from tendency_data_loader_simple import TendencyDataset
 from utils.data_utils import (
     DataNormalizer, 
     interpolate_w_to_full_levels, 
@@ -76,12 +76,13 @@ parser.add_argument('--num-workers', type=int, default=os.cpu_count(), help='Num
 parser.add_argument('--prefetch-factor', type=int, default=2, help='Prefetch factor for data loading')
 parser.add_argument('--batch-size', type=int, default=4, help='Batch size')
 parser.add_argument('--shuffle', action=argparse.BooleanOptionalAction, default=True, help='Shuffle training data')
+parser.add_argument('--shuffle-columns', action=argparse.BooleanOptionalAction, default=False, help='Shuffle column order within triangle (1D mode only)')
 
 # Training parameters
 parser.add_argument('--train', action=argparse.BooleanOptionalAction, default=True, help='Enable training')
 parser.add_argument('--test', action=argparse.BooleanOptionalAction, default=True, help='Enable testing')
 parser.add_argument('--num-epoch', type=int, default=100, help='Number of training epochs')
-parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
+parser.add_argument('--learning-rate', type=float, default=0.0005, help='Learning rate')
 parser.add_argument('--optimizer', type=str, default='adamw', choices=['adam', 'adamw'], help='Optimizer type')
 parser.add_argument('--clip', type=float, default=1.0, help='Gradient clipping threshold')
 
@@ -94,7 +95,7 @@ parser.add_argument('--emb-dropout', type=float, default=0.0, help='Embedding dr
 
 # Data-specific parameters
 parser.add_argument('--num-cells', type=int, default=81920, help='Total number of ICON cells')
-parser.add_argument('--channel-3d', type=int, default=14, help='Number of 3D input channels (including w)')
+parser.add_argument('--channel-3d', type=int, default=10, help='Number of 3D input channels (including w)')
 parser.add_argument('--channel-2d', type=int, default=3, help='Number of 2D input channels')
 parser.add_argument('--channels-out', type=int, default=7, help='Number of output channels')
 parser.add_argument('--height', type=int, default=70, help='Number of vertical levels')
@@ -115,6 +116,10 @@ parser.add_argument('--patch-size', type=int, default=1, help='Patch size (ViT/A
 parser.add_argument('--dim-head', type=int, default=32, help='Dimension per attention head')
 parser.add_argument('--mlp-ratio', type=float, default=4.0, help='MLP expansion ratio')
 parser.add_argument('--max-skip', type=int, default=3, help='Maximum skip distance (GNN)')
+
+# Location features
+parser.add_argument('--use-lonlat', action=argparse.BooleanOptionalAction, default=False, 
+                    help='Include longitude and latitude coordinates as 2D features')
 
 # AFNO specific
 parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='AFNO sparsity threshold')
@@ -139,8 +144,14 @@ args = parser.parse_args()
 if args.mode == '3d' and args.grid_file_path is None:
     parser.error("--grid-file-path is required for 3D models")
 
+if args.use_lonlat and args.grid_file_path is None:
+    parser.error("--grid-file-path is required when --use-lonlat is enabled")
+
 if args.mode == '1d' and args.model.endswith('_3d') or args.model.startswith('graph_'):
     parser.error(f"Model {args.model} is not compatible with 1D mode")
+
+# Calculate effective 2D channel count (original + lon/lat if enabled)
+effective_channel_2d = args.channel_2d + (2 if args.use_lonlat else 0)
 
 # Setup paths and logging
 save_id = f'{basename(normpath(args.save))}'
@@ -156,6 +167,9 @@ logging.getLogger('matplotlib.font_manager').disabled = True
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 logger.info(f'Using device: {device}, CPUs: {os.cpu_count()}')
+
+if args.use_lonlat:
+    logger.info(f"Using lon/lat features: 2D channels increased from {args.channel_2d} to {effective_channel_2d}")
 
 # Save configuration
 with open(join(args.save, 'config.yml'), 'w') as f:
@@ -181,9 +195,12 @@ def get_model():
     """Create model based on args.model and args.mode"""
     logger.info(f'Creating {args.model} model for {args.mode} mode...')
     
+    # Calculate effective 2D channel count (original + lon/lat if enabled)
+    effective_channel_2d = args.channel_2d + (2 if args.use_lonlat else 0)
+    
     # 1D Models
     if args.mode == '1d':
-        if args.model == 'vit_tendency':
+        if args.model == 'vit':
             from models_1d.vit import ViT
             model = ViT(
                 patch_size=args.patch_size,
@@ -193,14 +210,14 @@ def get_model():
                 dropout=args.dropout,
                 emb_dropout=args.emb_dropout,
                 channels_in_3D=args.channel_3d,
-                channels_in_2D=args.channel_2d,
+                channels_in_2D=effective_channel_2d,
                 channels_out=args.channels_out,
                 height=args.height,
                 mlp_ratio=args.mlp_ratio,
                 dim_head=args.dim_head,
             ).to(device)
             
-        elif args.model == 'afno_tendency':
+        elif args.model == 'afno':
             from models_1d.afno import AFNONet
             model = AFNONet(
                 patch_size=args.patch_size,
@@ -210,7 +227,7 @@ def get_model():
                 dropout=args.dropout,
                 emb_dropout=args.emb_dropout,
                 channels_in_3D=args.channel_3d,
-                channels_in_2D=args.channel_2d,
+                channels_in_2D=effective_channel_2d,
                 channels_out=args.channels_out,
                 height=args.height,
                 mlp_ratio=args.mlp_ratio,
@@ -229,7 +246,7 @@ def get_model():
                 max_skip=args.max_skip,
                 emb_dropout=args.emb_dropout,
                 channel_3d=args.channel_3d,
-                channel_2d=args.channel_2d,
+                channel_2d=effective_channel_2d,
                 channels_out=args.channels_out,
                 edge_channels_in=args.edge_channels_in,
                 fully_connected=args.fully_connected,
@@ -250,7 +267,7 @@ def get_model():
                 depth=args.layers,
                 dropout=args.dropout,
                 channels_in_3d=args.channel_3d,
-                channels_in_2d=args.channel_2d,
+                channels_in_2d=effective_channel_2d,
                 channels_out=args.channels_out,
                 edge_channels_in=args.edge_channels_in,
                 num_height_levels=args.height,
@@ -270,7 +287,7 @@ def get_model():
                 depth=args.layers,
                 dropout=args.dropout,
                 channels_in_3d=args.channel_3d,
-                channels_in_2d=args.channel_2d,
+                channels_in_2d=effective_channel_2d,
                 channels_out=args.channels_out,
                 num_height_levels=args.height,
                 device=device,
@@ -293,7 +310,7 @@ def get_model():
                 depth=args.layers,
                 dropout=args.dropout,
                 channels_in_3d=args.channel_3d,
-                channels_in_2d=args.channel_2d,
+                channels_in_2d=effective_channel_2d,
                 channels_out=args.channels_out,
                 num_height_levels=args.height,
                 device=device,
@@ -316,7 +333,7 @@ def get_model():
                 depth=args.layers,
                 dropout=args.dropout,
                 channels_in_3d=args.channel_3d,
-                channels_in_2d=args.channel_2d,
+                channels_in_2d=effective_channel_2d,
                 channels_out=args.channels_out,
                 num_height_levels=args.height,
                 device=device,
@@ -340,7 +357,7 @@ def get_model():
                 depth=args.layers,
                 dropout=args.dropout,
                 channels_in_3d=args.channel_3d,
-                channels_in_2d=args.channel_2d,
+                channels_in_2d=effective_channel_2d,
                 channels_out=args.channels_out,
                 num_height_levels=args.height,
                 device=device,
@@ -380,9 +397,11 @@ def create_data_loader(input_files, output_files, shuffle=False, num_workers=Non
         triangle_id=args.triangle_id,
         division_factor=args.triangle_division_factor,
         shuffle=shuffle,
+        shuffle_columns=args.shuffle_columns,
         subsample=args.subsample,
-        cache_dir='/tmp',
         total_cols=args.num_cells,
+        use_lonlat=args.use_lonlat,
+        grid_file_path=args.grid_file_path if args.use_lonlat else None,
     )
 
     dataloader_args = {

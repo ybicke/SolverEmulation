@@ -37,7 +37,7 @@ save_to_test_path = False
 
 # === PLOT CONFIGURATION ===
 # Manually specify plot name and subfolder
-PLOT_NAME = "GNN_1D_vs_GNN_3D_no_dropout"  # Change this for each plot scenario
+PLOT_NAME = "GT_2D_vs_3D_large"  # Change this for each plot scenario
 SUBFOLDER = "MAE"  # Options: "MAE", "true_vs_predicted", or any custom folder name
 
 # Examples of plot names for different scenarios:
@@ -54,25 +54,46 @@ models = [
     #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
     #{'name': 'ViT-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/vit_128_l4_tendency_1d_triangle/test'},
     
-    # Here with correct variance values during rescaling
+    # Here with correct variance values during rescaling but dropout 0.3
     #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100/test'},
     #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100/test'},
     
-    #Here without dropouts and k1 standardization
-    {'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k1/test'},
-    {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k1/test'},
+    #Here without dropouts but k1 scaling, variance should be correct 
+    # {'name': 'GNN-1D-64-L2-K1-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k1/test'},
+    # {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k1/test'},
+    
+    # here with correct variance values during rescaling everything clean
+    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k4_correct_variance/test'},
+    #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k4_correct_variance/test'},
+    #{'name': 'GNN-3D-64-L2-100-shuffled', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k4_correct_variance_shuffled/test'},
+
+   
+   
+
+
     
     # Here with 4sigma std
     # {'name': 'GNN-3D-4-sigma', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_4sig/test'},
 
+    # compare 1d new and old
+    #{'name': 'GNN-1D-64-L2-100-new', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k4_reproduce_clamp_large_new/test'},
+    #{'name': 'GNN-1D-64-L2-100-old', 'path': '/mydata/deepcloud/yves/results-new/gnn_64_l2_tendency_1d_triangle_reproduce_clamp_old/test'},
+    #{'name': 'GNN-1D-64-L2-100-older', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_old/test'},
+   # {'name': 'GNN-1D-64-L2-100-very-old', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
 
 
-    #{'name': 'GNN-3D-64-L2-100-old', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
     #{'name': 'GNN-1D-64-L2-100-old', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
+    #{'name': 'GNN-1D-64-L2-100-new', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100/test'},
     
-    #{'name': 'GT-3D-enha-64-L4-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_enhanced_64_l4_drop03_triangle39_k2/test'},
-    #{'name': 'GT-3D-simp-64-L4-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k1/test'},
-    #{'name': 'GT-2D-genc-1024-L2-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
+    #{'name': 'GT-3D-simp-64-L4-k3-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_triangle39_k3/test'},
+    # {'name': 'GT-3D-enha-64-L4-k2-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_enhanced_64_l4_drop03_triangle39_k2/test'},
+    # {'name': 'GT-3D-simp-64-L4-l2-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k2/test'},
+    
+    
+    {'name': 'GT-2D-genc-1024-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
+    {'name': 'GT-3D-large-256-L4-k3-100', 'path': ' /mydata/deepcloud/yves/results-new/gt_simplified_large/test'},
+
+   
 
     # Add more models as needed
 ]
@@ -93,11 +114,18 @@ for model in models:
     if isinstance(y_pred, np.ndarray):
         y_pred = torch.tensor(y_pred)
     
+    # Print shapes of loaded data
+    print(f'  y_true shape: {y_true.shape}')
+    print(f'  y_pred shape: {y_pred.shape}')
+    
     # Handle different data formats
     if len(y_true.shape) == 4:  # Shape: [samples, areas, height, features]
         y_mae_h = torch.mean(torch.abs(y_true - y_pred), dim=(0, 1))
     else:  # Shape: [batch, height, features]
         y_mae_h = torch.mean(torch.abs(y_true - y_pred), dim=0)
+    
+    # Print shape of MAE data
+    print(f'  y_mae_h shape: {y_mae_h.shape}')
     
     y_mae_hs.append(y_mae_h)
 
