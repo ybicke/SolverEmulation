@@ -3,6 +3,7 @@ Utilities for data processing and normalization.
 """
 
 import torch
+import numpy as np
 
 class DataNormalizer:
     """
@@ -260,3 +261,105 @@ def inverse_transform_targets(y_norm, means, variances, mode, k=4, min_scale=1e-
         raise ValueError(f"Mode must be '1d' or '3d', got {mode}")
     
     return y_norm * scale + means 
+
+
+def get_lonlat_coordinates_for_triangle(grid_file_path, triangle_indices, device='cpu'):
+    """
+    Extract longitude and latitude coordinates for a specific triangle area.
+    
+    Args:
+        grid_file_path: Path to the ICON grid file
+        triangle_indices: Tensor of triangle column indices to extract
+        device: Device to place tensors on
+        
+    Returns:
+        lon_coords: Longitude coordinates (in radians) for triangle columns [num_columns, 1]
+        lat_coords: Latitude coordinates (in radians) for triangle columns [num_columns, 1]
+    """
+    import xarray as xr
+    
+    # Load grid dataset
+    grid_ds = xr.open_dataset(grid_file_path)
+    
+    try:
+        # Extract longitude and latitude for all cells
+        all_lon = grid_ds['clon'].values  # Shape: (81920,) in radians
+        all_lat = grid_ds['clat'].values  # Shape: (81920,) in radians
+        
+        # Extract coordinates for triangle indices
+        triangle_lon = all_lon[triangle_indices.cpu().numpy()]
+        triangle_lat = all_lat[triangle_indices.cpu().numpy()]
+        
+        # Convert to tensors and add feature dimension
+        lon_coords = torch.tensor(triangle_lon, dtype=torch.float32, device=device).unsqueeze(-1)
+        lat_coords = torch.tensor(triangle_lat, dtype=torch.float32, device=device).unsqueeze(-1)
+        
+        return lon_coords, lat_coords
+        
+    finally:
+        grid_ds.close()
+
+
+def create_lonlat_normalizer(grid_file_path, triangle_indices_list=None):
+    """
+    Create normalization statistics for longitude and latitude coordinates.
+    
+    Args:
+        grid_file_path: Path to the ICON grid file
+        triangle_indices_list: List of triangle indices to compute stats for. 
+                              If None, use all cells for global normalization.
+        
+    Returns:
+        lonlat_mean: Mean values [lon_mean, lat_mean]
+        lonlat_std: Standard deviation values [lon_std, lat_std]
+    """
+    import xarray as xr
+    
+    # Load grid dataset
+    grid_ds = xr.open_dataset(grid_file_path)
+    
+    try:
+        all_lon = grid_ds['clon'].values  # Shape: (81920,) in radians
+        all_lat = grid_ds['clat'].values  # Shape: (81920,) in radians
+        
+        if triangle_indices_list is not None:
+            # Use only specified triangle areas for normalization
+            all_indices = np.concatenate([indices.cpu().numpy() for indices in triangle_indices_list])
+            coords_for_stats = np.column_stack([all_lon[all_indices], all_lat[all_indices]])
+        else:
+            # Use all cells for global normalization
+            coords_for_stats = np.column_stack([all_lon, all_lat])
+        
+        lonlat_mean = np.mean(coords_for_stats, axis=0)
+        lonlat_std = np.std(coords_for_stats, axis=0)
+        
+        return lonlat_mean, lonlat_std
+        
+    finally:
+        grid_ds.close()
+
+
+def normalize_lonlat_coordinates(lon_coords, lat_coords, lonlat_mean, lonlat_std):
+    """
+    Normalize longitude and latitude coordinates.
+    
+    Args:
+        lon_coords: Longitude coordinates tensor [num_samples, 1]
+        lat_coords: Latitude coordinates tensor [num_samples, 1]
+        lonlat_mean: Mean values [lon_mean, lat_mean]
+        lonlat_std: Standard deviation values [lon_std, lat_std]
+        
+    Returns:
+        normalized_lonlat: Normalized coordinates [num_samples, 2]
+    """
+    lon_mean, lat_mean = lonlat_mean
+    lon_std, lat_std = lonlat_std
+    
+    # Normalize coordinates
+    lon_norm = (lon_coords.squeeze(-1) - lon_mean) / lon_std
+    lat_norm = (lat_coords.squeeze(-1) - lat_mean) / lat_std
+    
+    # Stack into single tensor
+    normalized_lonlat = torch.stack([lon_norm, lat_norm], dim=-1)
+    
+    return normalized_lonlat

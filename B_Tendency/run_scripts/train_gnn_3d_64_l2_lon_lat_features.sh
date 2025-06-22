@@ -26,7 +26,7 @@ python train_tendency.py \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
     --input-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_updated.pickle \
     --target-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_y2_no_temp.pickle \
-    --save /mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k1 \
+    --save /mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_lonlat \
     --percent 1.0 \
     --num-workers 4 \
     --prefetch-factor 2 \
@@ -47,8 +47,10 @@ python train_tendency.py \
     --layers 2 \
     --dropout 0.0 \
     --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
+    --use-lonlat \
     --triangle-id 39 \
     --triangle-division-factor 4 \
     --fully-connected \
+    --no-disable-horizontal \
     --edge-channels-in 1 \
     --wandb-mode online 

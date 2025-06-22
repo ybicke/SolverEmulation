@@ -32,7 +32,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
-from tendency_data_loader_simple import TendencyDataset
+from tendency_data_loader import TendencyDataset
 from utils.data_utils import (
     DataNormalizer, 
     interpolate_w_to_full_levels, 
@@ -121,6 +121,7 @@ parser.add_argument('--max-skip', type=int, default=3, help='Maximum skip distan
 parser.add_argument('--use-lonlat', action=argparse.BooleanOptionalAction, default=False, 
                     help='Include longitude and latitude coordinates as 2D features')
 
+
 # AFNO specific
 parser.add_argument('--afno-sparsity-threshold', type=float, default=0.01, help='AFNO sparsity threshold')
 parser.add_argument('--hard-thresholding-fraction', type=float, default=1, help='AFNO hard thresholding fraction')
@@ -137,6 +138,8 @@ parser.add_argument('--input-stats-file', type=str,
 parser.add_argument('--target-stats-file', type=str,
                     default='/mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_y2_no_temp.pickle',
                     help='Path to target normalization statistics file')
+
+
 
 args = parser.parse_args()
 
@@ -492,6 +495,13 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
 
             # Normalize inputs
             batch_x3_norm, batch_x2_norm, _ = normalizer.normalize(batch_x3_with_w, batch_x2)
+            
+            # Add lon/lat features after normalization if enabled
+            if args.use_lonlat:
+                lonlat_features = train_set.dataset.get_lonlat_features(batch_x2.shape)
+                if lonlat_features is not None:
+                    lonlat_features = lonlat_features.to(device)
+                    batch_x2_norm = torch.cat([batch_x2_norm, lonlat_features], dim=-1)
 
             # Transform targets
             batch_y_transformed = transform_targets(batch_y, target_means, target_vars, mode=args.mode)
@@ -526,6 +536,14 @@ def train_model(model, train_set, valid_set, normalizer, target_means, target_va
                 w_full = interpolate_w_to_full_levels(v_w, mode=args.mode)
                 vx3d_with_w = torch.cat([vx3d, w_full], dim=-1)
                 vx3d_norm, vx2d_norm, _ = normalizer.normalize(vx3d_with_w, vx2d)
+                
+                # Add lon/lat features after normalization if enabled
+                if args.use_lonlat:
+                    lonlat_features = valid_set.dataset.get_lonlat_features(vx2d.shape)
+                    if lonlat_features is not None:
+                        lonlat_features = lonlat_features.to(device)
+                        vx2d_norm = torch.cat([vx2d_norm, lonlat_features], dim=-1)
+                
                 v_labels_transformed = transform_targets(v_labels, target_means, target_vars, mode=args.mode)
 
                 v_outputs = model(vx3d_norm, vx2d_norm)
@@ -612,6 +630,14 @@ def test_model(model, test_set, normalizer, target_means, target_vars):
             w_full = interpolate_w_to_full_levels(batch_w, mode=args.mode)
             batch_x3_with_w = torch.cat([batch_x3, w_full], dim=-1)
             batch_x3_norm, batch_x2_norm, _ = normalizer.normalize(batch_x3_with_w, batch_x2)
+            
+            # Add lon/lat features after normalization if enabled
+            if args.use_lonlat:
+                lonlat_features = test_set.dataset.get_lonlat_features(batch_x2.shape)
+                if lonlat_features is not None:
+                    lonlat_features = lonlat_features.to(device)
+                    batch_x2_norm = torch.cat([batch_x2_norm, lonlat_features], dim=-1)
+            
             batch_y_transformed = transform_targets(batch_y, target_means, target_vars, mode=args.mode)
 
             # Time inference for subset of batches

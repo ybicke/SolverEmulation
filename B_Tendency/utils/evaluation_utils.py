@@ -169,6 +169,13 @@ def warm_up_model(model, test_loader, normalizer, target_means, target_vars, dev
             batch_x3_with_w = torch.cat([batch_x3, w_full], dim=-1)
             batch_x3_norm, batch_x2_norm, _ = normalizer.normalize(batch_x3_with_w, batch_x2)
             
+            # Add lon/lat features after normalization if enabled (same as training/testing)
+            if hasattr(test_loader.dataset, 'use_lonlat') and test_loader.dataset.use_lonlat:
+                lonlat_features = test_loader.dataset.get_lonlat_features(batch_x2.shape)
+                if lonlat_features is not None:
+                    lonlat_features = lonlat_features.to(device)
+                    batch_x2_norm = torch.cat([batch_x2_norm, lonlat_features], dim=-1)
+            
             with torch.no_grad():
                 _ = model(batch_x3_norm, batch_x2_norm)
             
