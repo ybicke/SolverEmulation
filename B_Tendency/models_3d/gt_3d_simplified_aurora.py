@@ -1,8 +1,84 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+import xarray as xr
 from utils.graph_3d import get_3d_graph
 from utils.data_utils import get_triangle_indices
+
+
+def create_aurora_position_encoding(grid_file_path, triangle_id, division_factor, total_cols, 
+                                   num_height_levels, embed_dim, lambda_min=0.01, lambda_max=720):
+    """
+    Simple Aurora-style positional encoding.
+    
+    Args:
+        grid_file_path: Path to grid file with lat/lon coordinates
+        triangle_id, division_factor, total_cols: Triangle selection parameters
+        num_height_levels: Number of vertical levels
+        embed_dim: Embedding dimension (must be even)
+        lambda_min, lambda_max: Wavelength range for sinusoidal encoding
+    
+    Returns:
+        torch.Tensor: Position embeddings [1, num_nodes, embed_dim]
+    """
+    assert embed_dim % 2 == 0, "embed_dim must be even for lat/lon split"
+    
+    # Get triangle indices and coordinates
+    triangle_indices = get_triangle_indices(triangle_id, division_factor, total_cols)
+    
+    # Load lat/lon coordinates
+    grid_ds = xr.open_dataset(grid_file_path)
+    lats = grid_ds['clat'].values[triangle_indices.numpy()]  # Radians
+    lons = grid_ds['clon'].values[triangle_indices.numpy()]  # Radians
+    grid_ds.close()
+    
+    # Convert to degrees and normalize to [0, 1]
+    lats_deg = np.degrees(lats)  # [-90, 90] 
+    lons_deg = np.degrees(lons)  # [-180, 180]
+    
+    lats_norm = (lats_deg + 90.0) / 180.0   # [0, 1]
+    lons_norm = (lons_deg + 180.0) / 360.0  # [0, 1]
+    
+    # Create frequency bands (geometric progression)
+    lat_dim = embed_dim // 2
+    lon_dim = embed_dim // 2
+    
+    def create_frequencies(dim):
+        if dim == 1:
+            return np.array([1.0 / lambda_max])
+        ratios = np.linspace(0, 1, dim)
+        wavelengths = lambda_min * (lambda_max / lambda_min) ** ratios
+        return 1.0 / wavelengths
+    
+    lat_freqs = create_frequencies(lat_dim)
+    lon_freqs = create_frequencies(lon_dim)
+    
+    # Apply sinusoidal encoding
+    def sinusoidal_encode(coords, frequencies):
+        # coords: [num_columns], frequencies: [dim]
+        angles = 2 * np.pi * coords[:, None] * frequencies[None, :]  # [num_columns, dim]
+        encodings = np.zeros_like(angles)
+        encodings[:, 0::2] = np.sin(angles[:, 0::2])  # sin for even indices
+        encodings[:, 1::2] = np.cos(angles[:, 1::2])  # cos for odd indices
+        return encodings
+    
+    lat_encodings = sinusoidal_encode(lats_norm, lat_freqs)  # [num_columns, lat_dim]
+    lon_encodings = sinusoidal_encode(lons_norm, lon_freqs)  # [num_columns, lon_dim]
+    
+    # Combine lat and lon encodings
+    spatial_encodings = np.concatenate([lat_encodings, lon_encodings], axis=1)  # [num_columns, embed_dim]
+    
+    # Repeat for all height levels (same spatial encoding for all levels in a column)
+    num_columns = len(triangle_indices)
+    position_embeddings = np.tile(spatial_encodings[:, None, :], (1, num_height_levels, 1))  # [num_columns, num_height_levels, embed_dim]
+    
+    # Flatten to match node ordering
+    position_embeddings = position_embeddings.reshape(-1, embed_dim)  # [num_nodes, embed_dim]
+    
+    # Convert to tensor and add batch dimension
+    position_embeddings = torch.tensor(position_embeddings, dtype=torch.float32)
+    return position_embeddings.unsqueeze(0)  # [1, num_nodes, embed_dim]
 
 
 class SimplifiedNeighborhoodAttention(nn.Module):
@@ -284,6 +360,7 @@ class SimplifiedGraphTransformer3D(nn.Module):
                  fully_connected,
                  disable_horizontal,
                  max_hops,
+                 use_aurora_position=False,  # NEW: Toggle between learnable and Aurora encoding
                  *args,
                  **kwargs):
         super().__init__()
@@ -292,6 +369,7 @@ class SimplifiedGraphTransformer3D(nn.Module):
         self.channels_out = channels_out
         self.embed_dim = embed_dim
         self.num_height_levels = num_height_levels
+        self.use_aurora_position = use_aurora_position
         
         # Store grid parameters
         self.grid_file_path = grid_file_path
@@ -306,14 +384,24 @@ class SimplifiedGraphTransformer3D(nn.Module):
         total_channels = channels_in_3d + channels_in_2d
         self.input_proj = nn.Linear(total_channels, embed_dim)
         
-        # Get actual number of columns
-        triangle_indices = get_triangle_indices(triangle_id, division_factor, total_cols)
-        actual_num_columns = len(triangle_indices)
-        
-        # Position embeddings with proper initialization
-        self.pos_embedding_3d = nn.Parameter(
-            torch.randn(1, actual_num_columns * num_height_levels, embed_dim) * 0.02
-        )
+        # Position embeddings
+        if use_aurora_position:
+            # Aurora-style geometry-aware encoding
+            if embed_dim % 2 != 0:
+                raise ValueError(f"For Aurora encoding, embed_dim ({embed_dim}) must be even")
+            
+            aurora_embeddings = create_aurora_position_encoding(
+                grid_file_path, triangle_id, division_factor, total_cols,
+                num_height_levels, embed_dim
+            )
+            self.register_buffer('pos_embedding_3d', aurora_embeddings)
+        else:
+            # Original learnable embeddings
+            triangle_indices = get_triangle_indices(triangle_id, division_factor, total_cols)
+            actual_num_columns = len(triangle_indices)
+            self.pos_embedding_3d = nn.Parameter(
+                torch.randn(1, actual_num_columns * num_height_levels, embed_dim) * 0.02
+            )
         
         # Hybrid transformer layers
         mlp_dim = int(embed_dim * mlp_ratio)

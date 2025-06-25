@@ -20,6 +20,7 @@ class GNN3D(nn.Module):
                  division_factor,
                  fully_connected,
                  disable_horizontal,
+                 use_height_dependent_decoder=False,  # NEW: For height-dependent decoder
                  *args,
                  **kwargs):
         super().__init__()
@@ -28,11 +29,12 @@ class GNN3D(nn.Module):
         self.channels_out = channels_out
         self.edge_channels_in = edge_channels_in
         self.embed_dim = embed_dim
+        self.num_height_levels = num_height_levels
+        self.use_height_dependent_decoder = use_height_dependent_decoder
         
         # Store graph parameters for later use
         self.grid_file_path = grid_file_path
         self.triangle_id = triangle_id
-        self.num_height_levels = num_height_levels
         self.division_factor = division_factor
         self.total_cols = total_cols
         self.fully_connected = fully_connected
@@ -43,7 +45,13 @@ class GNN3D(nn.Module):
         
         self.encoder = Encoder(total_channels, edge_channels_in, embed_dim, dropout)
         self.processor = Processor(embed_dim, depth=depth, dropout=dropout)
-        self.decoder = Decoder(embed_dim, channels_out, dropout=dropout)
+        
+        # Choose decoder type
+        if use_height_dependent_decoder:
+            self.decoder = HeightDependentDecoder(embed_dim, channels_out, num_height_levels, dropout)
+        # shared weight decoder
+        else: 
+            self.decoder = Decoder(embed_dim, channels_out, dropout)
 
     def forward(self, x3d_norm, x2d_norm):
         """
@@ -93,10 +101,14 @@ class GNN3D(nn.Module):
 
 
         # Decoding and output
-        x_decoded = self.decoder(x_processed)
-        
-        # Reshape back to batch format
-        x_output = x_decoded.view(B, N, L, self.channels_out)
+        if self.use_height_dependent_decoder:
+            x_decoded = self.decoder(x_processed, B, N)
+            # Height-dependent decoder already returns correct shape
+            x_output = x_decoded.view(B, N, L, self.channels_out)
+        else:
+            x_decoded = self.decoder(x_processed)
+            # Reshape back to batch format
+            x_output = x_decoded.view(B, N, L, self.channels_out)
         
         return x_output
 
@@ -145,13 +157,7 @@ class Encoder(nn.Module):
 
 
 class GNNLayer(MessagePassing):
-    """
-    Graph Neural Network layer for message passing with attention to both node and edge features.
     
-    Args:
-        embed_dim (int): Dimension of node and edge embeddings
-        dropout (float): Dropout probability
-    """
     def __init__(self, embed_dim, dropout):
         super().__init__(aggr='add')  # Use 'add' aggregation for messages
 
@@ -167,11 +173,9 @@ class GNNLayer(MessagePassing):
             nn.Dropout(dropout),
             nn.LayerNorm(embed_dim),
         )
-
-    def forward(self, x, edge_index, edge_attr):
-        """
-        Forward pass for the GNN layer.
         
+    def forward(self, x, edge_index, edge_attr):
+        """        
         Args:
             x (torch.Tensor): Node features [num_nodes, embed_dim]
             edge_index (torch.Tensor): Edge indices [2, num_edges]
@@ -180,15 +184,12 @@ class GNNLayer(MessagePassing):
         Returns:
             tuple: (node_updates, edge_updates)
         """
-        # Extract source and target nodes for each edge
         src, dst = edge_index
         x_src = x[src]
         x_dst = x[dst]
         
-        # Compute edge updates
         edge_update = self.edge_mlp(torch.cat([edge_attr, x_src, x_dst], dim=-1))
         
-        # Aggregate messages at nodes
         aggregated_edge_updates = self.propagate(edge_index, x=x, edge_attr=edge_update)
         node_update = self.node_mlp(torch.cat([x, aggregated_edge_updates], dim=1))
         
@@ -254,4 +255,57 @@ class Decoder(nn.Module):
         )
 
     def forward(self, x):
-        return self.mlp(x) 
+        return self.mlp(x)
+
+
+class HeightDependentDecoder(nn.Module):
+    """
+    Height-dependent decoder with separate MLPs for each height level.
+    
+    Args:
+        embed_dim (int): Dimension of node embeddings
+        channels_out (int): Number of output channels
+        num_height_levels (int): Number of height levels (70)
+        dropout (float): Dropout probability
+    """
+    def __init__(self, embed_dim, channels_out, num_height_levels, dropout=0.0):
+        super().__init__()
+        self.channels_out = channels_out
+        self.num_height_levels = num_height_levels
+        
+        # Create separate decoder for each height level
+        self.height_decoders = nn.ModuleList([
+            nn.Sequential(
+                nn.Linear(embed_dim, embed_dim),
+                nn.SiLU(),
+                nn.Dropout(dropout),
+                nn.Linear(embed_dim, channels_out),
+            )
+            for _ in range(num_height_levels)
+        ])
+
+    def forward(self, x, batch_size, num_columns):
+        """
+        Apply height-specific decoding.
+        
+        Args:
+            x: Node features [B*N*L, embed_dim]
+            batch_size: Batch size B
+            num_columns: Number of columns N
+            
+        Returns:
+            Decoded features [B*N*L, channels_out]
+        """
+        # Reshape to separate height levels: [B*N*L, embed_dim] -> [B, N, L, embed_dim]
+        x_reshaped = x.view(batch_size, num_columns, self.num_height_levels, -1)
+        
+        # Apply height-specific decoders
+        outputs = []
+        for level in range(self.num_height_levels):
+            level_features = x_reshaped[:, :, level, :]  # [B, N, embed_dim]
+            level_output = self.height_decoders[level](level_features)  # [B, N, channels_out]
+            outputs.append(level_output)
+        
+        # Stack and reshape back: [B, N, L, channels_out] -> [B*N*L, channels_out]
+        output = torch.stack(outputs, dim=2)  # [B, N, L, channels_out]
+        return output.view(-1, self.channels_out)  # [B*N*L, channels_out] 

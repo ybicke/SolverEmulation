@@ -120,6 +120,8 @@ parser.add_argument('--max-skip', type=int, default=3, help='Maximum skip distan
 # Location features
 parser.add_argument('--use-lonlat', action=argparse.BooleanOptionalAction, default=False, 
                     help='Include longitude and latitude coordinates as 2D features')
+parser.add_argument('--use-height-dependent-decoder', action=argparse.BooleanOptionalAction, default=False, 
+                    help='Use height-dependent decoder')
 
 
 # AFNO specific
