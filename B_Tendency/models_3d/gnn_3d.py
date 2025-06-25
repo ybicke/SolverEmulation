@@ -20,7 +20,7 @@ class GNN3D(nn.Module):
                  division_factor,
                  fully_connected,
                  disable_horizontal,
-                 use_height_dependent_decoder=False,  # NEW: For height-dependent decoder
+                 use_height_dependent_decoder,  # NEW: For height-dependent decoder
                  *args,
                  **kwargs):
         super().__init__()
@@ -103,8 +103,8 @@ class GNN3D(nn.Module):
         # Decoding and output
         if self.use_height_dependent_decoder:
             x_decoded = self.decoder(x_processed, B, N)
-            # Height-dependent decoder already returns correct shape
-            x_output = x_decoded.view(B, N, L, self.channels_out)
+            # Height-dependent decoder returns [B*N, L, channels_out], reshape to [B, N, L, channels_out]
+            x_output = x_decoded.view(B, N, L, self.channels_out).contiguous()
         else:
             x_decoded = self.decoder(x_processed)
             # Reshape back to batch format
@@ -260,33 +260,29 @@ class Decoder(nn.Module):
 
 class HeightDependentDecoder(nn.Module):
     """
-    Height-dependent decoder with separate MLPs for each height level.
+    Efficient vectorized height-dependent decoder.
+    Uses a single large weight matrix for all height levels, processed in parallel.
     
     Args:
         embed_dim (int): Dimension of node embeddings
         channels_out (int): Number of output channels
         num_height_levels (int): Number of height levels (70)
-        dropout (float): Dropout probability
+        dropout (float): Dropout probability (unused in this simple version)
     """
     def __init__(self, embed_dim, channels_out, num_height_levels, dropout=0.0):
         super().__init__()
         self.channels_out = channels_out
         self.num_height_levels = num_height_levels
+        self.embed_dim = embed_dim
         
-        # Create separate decoder for each height level
-        self.height_decoders = nn.ModuleList([
-            nn.Sequential(
-                nn.Linear(embed_dim, embed_dim),
-                nn.SiLU(),
-                nn.Dropout(dropout),
-                nn.Linear(embed_dim, channels_out),
-            )
-            for _ in range(num_height_levels)
-        ])
+        # Single large weight matrix for all height levels
+        # Shape: [num_height_levels, embed_dim, channels_out]
+        self.weight = nn.Parameter(torch.randn(num_height_levels, embed_dim, channels_out) * 0.02)
+        self.bias = nn.Parameter(torch.zeros(num_height_levels, channels_out))
 
     def forward(self, x, batch_size, num_columns):
         """
-        Apply height-specific decoding.
+        Efficient vectorized height-specific linear projections.
         
         Args:
             x: Node features [B*N*L, embed_dim]
@@ -296,16 +292,19 @@ class HeightDependentDecoder(nn.Module):
         Returns:
             Decoded features [B*N*L, channels_out]
         """
-        # Reshape to separate height levels: [B*N*L, embed_dim] -> [B, N, L, embed_dim]
-        x_reshaped = x.view(batch_size, num_columns, self.num_height_levels, -1)
+        # Calculate actual height levels from input tensor  
+        total_nodes = x.shape[0]
+        expected_total = batch_size * num_columns * self.num_height_levels
         
-        # Apply height-specific decoders
-        outputs = []
-        for level in range(self.num_height_levels):
-            level_features = x_reshaped[:, :, level, :]  # [B, N, embed_dim]
-            level_output = self.height_decoders[level](level_features)  # [B, N, channels_out]
-            outputs.append(level_output)
+        if total_nodes != expected_total:
+            raise ValueError(f"Expected {expected_total} nodes, got {total_nodes}")
+            
+        # Reshape to separate height levels: [B*N*L, embed_dim] -> [B*N, L, embed_dim]
+        x_reshaped = x.view(batch_size * num_columns, self.num_height_levels, self.embed_dim)
         
-        # Stack and reshape back: [B, N, L, channels_out] -> [B*N*L, channels_out]
-        output = torch.stack(outputs, dim=2)  # [B, N, L, channels_out]
-        return output.view(-1, self.channels_out)  # [B*N*L, channels_out] 
+        # Vectorized computation using einsum for efficiency
+        # x_reshaped: [B*N, L, embed_dim]
+        # self.weight: [L, embed_dim, channels_out]
+        # Result: [B*N, L, channels_out]
+        output = torch.einsum('bhe,hec->bhc', x_reshaped, self.weight) + self.bias[None, :, :]
+        return output 

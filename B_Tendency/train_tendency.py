@@ -276,6 +276,7 @@ def get_model():
                 channels_out=args.channels_out,
                 edge_channels_in=args.edge_channels_in,
                 num_height_levels=args.height,
+                use_height_dependent_decoder=args.use_height_dependent_decoder,
                 device=device,
                 division_factor=args.triangle_division_factor,
                 fully_connected=args.fully_connected,
@@ -402,7 +403,6 @@ def create_data_loader(input_files, output_files, shuffle=False, num_workers=Non
         triangle_id=args.triangle_id,
         division_factor=args.triangle_division_factor,
         shuffle=shuffle,
-        shuffle_columns=args.shuffle_columns,
         subsample=args.subsample,
         total_cols=args.num_cells,
         use_lonlat=args.use_lonlat,
@@ -740,12 +740,8 @@ def main():
 
     # Subsample if requested
     if args.percent < 1:
-        for file_list_pair in [(train_input_files, train_output_files), 
-                              (val_input_files, val_output_files), 
-                              (test_input_files, test_output_files)]:
-            indices = prng.choice(len(file_list_pair[0]), 
-                                max(1, int(args.percent * len(file_list_pair[0]))), 
-                                replace=False)
+        for file_list_pair in [(train_input_files, train_output_files), (val_input_files, val_output_files), (test_input_files, test_output_files)]:
+            indices = prng.choice(len(file_list_pair[0]),  max(1, int(args.percent * len(file_list_pair[0]))), replace=False)
             file_list_pair[0][:] = [file_list_pair[0][i] for i in indices]
             file_list_pair[1][:] = [file_list_pair[1][i] for i in indices]
 

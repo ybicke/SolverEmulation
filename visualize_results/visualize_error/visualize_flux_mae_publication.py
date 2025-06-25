@@ -3,7 +3,6 @@ import pickle
 import numpy as np
 from os.path import join
 from matplotlib import pyplot as plt
-from matplotlib.lines import Line2D
 import matplotlib.ticker as ticker
 from matplotlib.ticker import ScalarFormatter
 import os
@@ -26,8 +25,8 @@ plt.rcParams.update({
     'savefig.dpi': 300,        # High quality save
     'font.family': 'sans-serif',
     'font.sans-serif': ['Arial', 'DejaVu Sans'],
-    'grid.alpha': 1,         # Lighter grid
-    'grid.linewidth': 1,     # Thinner grid lines
+    'grid.alpha': 0.6,         # Lighter grid
+    'grid.linewidth': 0.5,     # Thinner grid lines
     'axes.grid': True,         # Enable grid by default
     'axes.axisbelow': True,    # Grid behind plot elements
 })
@@ -37,79 +36,29 @@ save_to_test_path = False
 
 # === PLOT CONFIGURATION ===
 # Manually specify plot name and subfolder
-PLOT_NAME = "GT3D_vs_GT2D_ViT1D_128"  # Change this for each plot scenario
-SUBFOLDER = "MAE"  # Options: "MAE", "true_vs_predicted", or any custom folder name
+PLOT_NAME = "GNN_vs_ViT"  # Change this for each plot scenario
+SUBFOLDER = "MAE_Flux"  # Options: "flux_MAE", "true_vs_predicted", or any custom folder name
 
 # Examples of plot names for different scenarios:
-# "3D_vs_1D_GNN_comparison"
-# "transformer_variants_comparison" 
-# "best_models_final_comparison"
-# "ablation_study_results"
+# "AFNO_vs_BiLSTM_flux_comparison"
+# "best_flux_models_final"
+# "ablation_study_flux_results"
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
 plot_output_dir = join(final_results_path, SUBFOLDER)
 os.makedirs(plot_output_dir, exist_ok=True)
 
+
+
 models = [
-    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
-    #{'name': 'ViT-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/vit_128_l4_tendency_1d_triangle/test'},
+    {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
+    {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
     
-    # Here with correct variance values during rescaling but dropout 0.3
-    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100/test'},
-    #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100/test'},
-    
-    #Here without dropouts but k1 scaling, variance should be correct 
-    # {'name': 'GNN-1D-64-L2-K1-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k1/test'},
-    # {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k1/test'},
-    
-    # here with correct variance values during rescaling everything clean
-    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k4_correct_variance/test'},
-    #{'name': 'GNN-3D-64-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k4_correct_variance/test'},
-    #{'name': 'GNN-3D-64-L2-100-shuffled', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k4_correct_variance_shuffled/test'},
-    #{'name': 'GNN-3D-64-L2-lonlat', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_lonlat/test'},
-   
-   # lonlat 1D 3D 128
-    #{'name': 'GNN-3D-128-L2-lonlat', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat/test'},   
-    #{'name': 'GNN-1D-128-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_128_l2_100/test'},
-
-
-
-    
-    # Here with 4sigma std
-    # {'name': 'GNN-3D-4-sigma', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_4sig/test'},
-
-    # compare 1d new and old
-    #{'name': 'GNN-1D-64-L2-100-new', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k4_reproduce_clamp_large_new/test'},
-    #{'name': 'GNN-1D-64-L2-100-old', 'path': '/mydata/deepcloud/yves/results-new/gnn_64_l2_tendency_1d_triangle_reproduce_clamp_old/test'},
-    #{'name': 'GNN-1D-64-L2-100-older', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_old/test'},
-   # {'name': 'GNN-1D-64-L2-100-very-old', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
-
-
-    #{'name': 'GNN-1D-64-L2-100-old', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
-    #{'name': 'GNN-1D-64-L2-100-new', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100/test'},
-    
-    # the first is an MR4
-    # {'name': 'GT-3D-simp-64-L4-k3', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_triangle39_k3/test'},
-    #{'name': 'GT-3D-enha-64-L4-k2-MR4-100', 'path': '/mydata/deepcloud/yves/results-new/gt_enhanced_64_l4_drop03_triangle39_k2/test'},
-    # {'name': 'GT-3D-simp-64-L4-l2-MR2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k2/test'},
-    
-    
-    #ViT
-    # {'name': 'ViT-1D-64-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_64_l4_triangle/test'},
-    #{'name': 'ViT-1D-128-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
-    
-    
-    # large GNN 3D versus GT 2D
-    #{'name': 'GT-2D-genc-1024-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
-    #{'name': 'GT-3D-large-256-L4-k3-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_large/test'},
-
-    
-   
-
     # Add more models as needed
 ]
 
 y_mae_hs = []
+h_mae_hs = []
 
 for model in models:
     test_path = model['path']
@@ -119,36 +68,48 @@ for model in models:
         y_true = pickle.load(handle)
     with open(join(test_path, 'y_pred.pickle'), 'rb') as handle:
         y_pred = pickle.load(handle)
+    with open(join(test_path, 'h_true.pickle'), 'rb') as handle:
+        h_true = pickle.load(handle)
+    with open(join(test_path, 'h_pred.pickle'), 'rb') as handle:
+        h_pred = pickle.load(handle)
 
     if isinstance(y_true, np.ndarray):
         y_true = torch.tensor(y_true)
     if isinstance(y_pred, np.ndarray):
         y_pred = torch.tensor(y_pred)
+    if isinstance(h_true, np.ndarray):
+        h_true = torch.tensor(h_true)
+    if isinstance(h_pred, np.ndarray):
+        h_pred = torch.tensor(h_pred)
     
     # Print shapes of loaded data
     print(f'  y_true shape: {y_true.shape}')
     print(f'  y_pred shape: {y_pred.shape}')
+    print(f'  h_true shape: {h_true.shape}')
+    print(f'  h_pred shape: {h_pred.shape}')
     
+    print('  calculating errors...')
     # Handle different data formats
-    if len(y_true.shape) == 4:  # Shape: [samples, areas, height, features]
-        y_mae_h = torch.mean(torch.abs(y_true - y_pred), dim=(0, 1))
-    else:  # Shape: [batch, height, features]
-        y_mae_h = torch.mean(torch.abs(y_true - y_pred), dim=0)
+    dim = [0, 1] if len(y_true.shape) == 4 else 0
+    y_mae_h = torch.mean(torch.abs(y_true - y_pred), dim=dim)
+    h_mae_h = torch.mean(torch.abs(h_true - h_pred), dim=dim)
     
     # Print shape of MAE data
     print(f'  y_mae_h shape: {y_mae_h.shape}')
+    print(f'  h_mae_h shape: {h_mae_h.shape}')
     
-    y_mae_hs.append(y_mae_h)
+    # Flip to match height convention (surface at bottom) - same as original visualize.py
+    y_mae_hs.append(torch.flip(y_mae_h, [0]))
+    h_mae_hs.append(torch.flip(h_mae_h, [0]))
 
-# Short descriptive titles for publication
-target_units = {
-    "Temp. Tendency": "K s⁻¹", 
-    "Temp. Tend. (Dyn.)": "K s⁻¹",
-    "U-Wind Tendency": "m s⁻²",
-    "V-Wind Tendency": "m s⁻²",
-    "Humidity Tend.": "kg m⁻³ s⁻¹",
-    "Cloud Water Tend.": "kg m⁻³ s⁻¹",
-    "Cloud Ice Tend.": "kg m⁻³ s⁻¹"
+# Short descriptive titles for publication - following same pattern as tendency script
+flux_target_units = {
+    "LW Upward": "W m⁻²",
+    "LW Downward": "W m⁻²",
+    "SW Upward": "W m⁻²", 
+    "SW Downward": "W m⁻²",
+    "LW Heating": "K day⁻¹",
+    "SW Heating": "K day⁻¹"
 }
 
 # Height level to kilometer mapping (approximate values for 70 levels)
@@ -165,7 +126,7 @@ height_km = {
 }
 
 def add_subplot_mae(fig, height_vals, mae_data_list, subplot_pos, models_names, 
-                    channel_idx, title=None, ylabel=None, xlabel=None):
+                    channel_idx, data_type='y', title=None, ylabel=None, xlabel=None):
     """
     Plots MAE lines for each model on the same subplot with publication styling.
     """
@@ -179,9 +140,15 @@ def add_subplot_mae(fig, height_vals, mae_data_list, subplot_pos, models_names,
     
     # Plot MAE for each model
     for i, (mae_data, model_name) in enumerate(zip(mae_data_list, models_names)):
+        # Adjust height vals based on data type (heating has 70 levels, flux has 71)
+        if data_type == 'h':
+            plot_height = height_vals[:-1]  # Remove last level for heating data (70 levels)
+        else:
+            plot_height = height_vals  # Full range for flux data (71 levels)
+            
         ax.plot(
             mae_data[:, channel_idx],
-            height_vals,
+            plot_height,
             label=model_name if channel_idx == 0 else None,
             color=colors[i % len(colors)],
             linestyle=line_styles[i % len(line_styles)],  # Cycle through line styles
@@ -193,13 +160,17 @@ def add_subplot_mae(fig, height_vals, mae_data_list, subplot_pos, models_names,
     ax.invert_yaxis()
     ax.tick_params(axis='both', which='major', labelsize=8)
     
-    # Only show y-axis ticks on leftmost plots (indices 0 and 4)
-    if channel_idx not in [0, 4]:
+    # Only show y-axis ticks on leftmost plots (indices 0 and 3 for 2x3 layout)
+    if channel_idx not in [0, 3]:
         ax.set_yticklabels([])  # Remove y-axis tick labels
         ax.tick_params(axis='y', which='both', length=0)  # Remove tick marks
     else:
         # Set custom y-axis labels with height level and km for leftmost plots
-        yticks = np.arange(0, 71, 10)  # 0, 10, 20, ..., 70
+        if data_type == 'h':
+            yticks = np.arange(0, 70, 10)  # 0, 10, 20, ..., 60 for heating rates
+        else:
+            yticks = np.arange(0, 71, 10)  # 0, 10, 20, ..., 70 for fluxes
+        
         ax.set_yticks(yticks)
         
         # Create labels with format "level (km)"
@@ -254,30 +225,41 @@ def add_subplot_mae(fig, height_vals, mae_data_list, subplot_pos, models_names,
 
 # Prepare data
 models_name = [model['name'] for model in models]
-height_range = np.arange(y_mae_hs[0].shape[0])
+height_range = np.arange(71)  # 0 to 70 for flux levels (71 total)
 
 # Create figure with 2-row layout for publication
-fig_mae = plt.figure(figsize=(8, 7.5))
+fig_mae = plt.figure(figsize=(10, 7.5))
 ax_list_mae = []
 
-# Create one subplot for each of the 7 target channels in a 2-row layout
-for i, (label, units) in enumerate(target_units.items()):
-    # First 4 plots in row 1, last 3 plots in row 2
-    if i < 4:
-        subplot_idx = (2, 4, i + 1)
-    else:
-        subplot_idx = (2, 4, i + 1)
+# Create one subplot for each of the 6 flux channels in a 2-row layout
+# Following the pattern from original visualize.py plotting order
+flux_channels = [
+    (1, 'y', "LW Downward"),   # y[:, 1] - position (2,3,1)
+    (0, 'y', "LW Upward"),     # y[:, 0] - position (2,3,2)  
+    (3, 'y', "SW Downward"),   # y[:, 3] - position (2,3,3)
+    (2, 'y', "SW Upward"),     # y[:, 2] - position (2,3,4)
+    (0, 'h', "LW Heating"),    # h[:, 0] - position (2,3,5)
+    (1, 'h', "SW Heating"),    # h[:, 1] - position (2,3,6)
+]
+
+for i, (channel_idx, data_type, label) in enumerate(flux_channels):
+    # 2 rows, 3 columns
+    subplot_idx = (2, 3, i + 1)
+    
+    # Select appropriate data list
+    data_list = y_mae_hs if data_type == 'y' else h_mae_hs
 
     ax = add_subplot_mae(
         fig=fig_mae,
         height_vals=height_range,
-        mae_data_list=y_mae_hs,
+        mae_data_list=data_list,
         subplot_pos=subplot_idx,
         models_names=models_name,
-        channel_idx=i,
+        channel_idx=channel_idx,
+        data_type=data_type,
         title=label,
-        ylabel='Height index' if i in [0, 4] else None,
-        xlabel=f'MAE [{units}]'
+        ylabel='Height index' if i in [0, 3] else None,
+        xlabel=f'MAE [{flux_target_units[label]}]'
     )
     
     ax_list_mae.append(ax)
@@ -292,16 +274,16 @@ for ax in ax_list_mae:
 
 # Place legend below all subplots
 fig_mae.legend(handles, labels, loc='lower center', ncol=len(labels),
-               bbox_to_anchor=(0.5, -0.03), frameon=False, fontsize=9)
+               bbox_to_anchor=(0.5, -0.05), frameon=False, fontsize=9)
 
 # Tight layout with extra space at bottom for legend
-fig_mae.tight_layout(rect=[0, 0.02, 1, 0.98], pad=0.1, h_pad=1, w_pad=0.5)
+fig_mae.tight_layout(rect=[0, 0.05, 1, 0.98], pad=0.1, h_pad=1.5, w_pad=0.8)
 
 # Save the figure
 # Final output: /mydata/deepcloud/yves/final_results/{SUBFOLDER}/{PLOT_NAME}.png
 # To change: modify PLOT_NAME and SUBFOLDER at the top of the script
 output_path = join(plot_output_dir, f"{PLOT_NAME}.png")
 plt.savefig(output_path, bbox_inches='tight', dpi=300)
-print(f"Saved MAE visualization to {output_path}")
+print(f"Saved flux MAE visualization to {output_path}")
 
-plt.show()
+plt.show() 

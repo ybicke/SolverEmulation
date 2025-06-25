@@ -20,7 +20,6 @@ class TendencyDataset(IterableDataset):
         triangle_id=39,
         division_factor=4,
         shuffle=False,
-        shuffle_columns=False,  # New parameter for column shuffling
         subsample=None,
         total_cols=81920,
         use_lonlat=False,  # New parameter for lon/lat features
@@ -29,7 +28,6 @@ class TendencyDataset(IterableDataset):
         self.input_filenames = input_filenames
         self.output_filenames = output_filenames
         self.shuffle = shuffle
-        self.shuffle_columns = shuffle_columns
         self.mode = mode
         self.subsample = subsample
         self.use_lonlat = use_lonlat
@@ -62,14 +60,6 @@ class TendencyDataset(IterableDataset):
         if self.use_lonlat:
             self._initialize_lonlat_features()
         
-        # Log column shuffling setting
-        if self.shuffle_columns and self.mode == '1d' and self.triangle_indices is not None:
-            print(f"Column shuffling ENABLED: spatial order within triangle will be randomized")
-        elif self.shuffle_columns and (self.mode != '1d' or self.triangle_indices is None):
-            print(f"Column shuffling requested but DISABLED (only works in 1D triangle mode)")
-        else:
-            print(f"Column shuffling DISABLED: spatial order preserved")
-
 
     def _initialize_lonlat_features(self):
         """Initialize longitude/latitude coordinates and normalization."""
@@ -165,11 +155,7 @@ class TendencyDataset(IterableDataset):
                 if num_samples > 0:
                     indices = torch.randperm(x3d.shape[0])[:num_samples]
                     x3d, x2d, y, w = x3d[indices], x2d[indices], y[indices], w[indices]
-            
-            # Apply column shuffling if requested (only for 1D mode and triangle dataset)
-            if self.shuffle_columns and self.mode == '1d' and self.triangle_indices is not None:
-                perm = torch.randperm(x3d.shape[0])
-                x3d, x2d, y, w = x3d[perm], x2d[perm], y[perm], w[perm]
+        
             
             return x3d, x2d, y, w
 
