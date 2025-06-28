@@ -33,7 +33,7 @@ plt.rcParams.update({
 
 # === PLOT CONFIGURATION ===
 # Manually specify plot name and subfolder
-PLOT_NAME = "flux_models_comparison"  # Change this for each plot scenario
+PLOT_NAME = "flux1d_linear_log"  # Change this for each plot scenario
 SUBFOLDER = "MAE_Flux"  # Options: "flux_MAE", "true_vs_predicted", or any custom folder name
 
 # Examples of plot names for different scenarios:
@@ -46,10 +46,17 @@ plot_output_dir = join(final_results_path, SUBFOLDER)
 os.makedirs(plot_output_dir, exist_ok=True)
 
 models = [
+    # Fluxes 1D models
     {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
     {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
     {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
     {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
+
+    # Fluxes 1D models hrlu
+    # {'name': 'AFNO-128-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
+    #{'name': 'GNN-128-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
+    # {'name': 'BiLSTM-32-128-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_32_128_hrlu_0005/test'},
+    #{'name': 'ViT-128-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
 ]
 
 y_mae_hs, h_mae_hs = [], []
@@ -112,7 +119,7 @@ def add_subplot_flux(fig, x, ys, subplot_pos, models_name, xlabel=None, ylabel=N
     
     # Define colors and line styles for consistent plotting
     colors = ['red', 'blue', 'green', 'purple', 'orange', 'brown', 'pink']
-    line_styles = ['--', '-', '-.', '--', '-.', '--']  # Different styles for each model
+    line_styles = ['--', '-.', '-', '-.', '-', '--']  # Different styles for each model
     
     # Plot each model
     for i, (y, model_name) in enumerate(zip(ys, models_name)):
@@ -164,23 +171,39 @@ def add_subplot_flux(fig, x, ys, subplot_pos, models_name, xlabel=None, ylabel=N
     if title:
         ax.set_title(title, fontsize=10, pad=2)
     
-    # Set log scale for x-axis (same as original visualize.py)
-    ax.set_xscale('log')
-    
-    # Set x-axis range based on data type
+    # Use different scaling based on data type
     if is_flux:
-        ax.set_xlim(1e-3, 1e1)  # Flux data: 10^-2 to 10^1
+        # Linear scale for flux data (more interpretable MAE values)
+        ax.set_xscale('linear')
+        ax.set_xlim(-0.5, 7)  # Flux data: -0.2 to 8 W m⁻² 
+        
+        # Set up linear ticks for fluxes
+        ax.xaxis.set_major_locator(ticker.MaxNLocator(6))  # Maximum 6 major ticks
+        ax.xaxis.set_minor_locator(ticker.AutoMinorLocator())  # Auto minor ticks
+        ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
+        
+        # Enable grid for both major and minor ticks
+        ax.grid(True, which='major', alpha=0.6, linewidth=0.5, color='gray')
+        #ax.grid(True, which='minor', alpha=0.3, linewidth=0.3, color='gray')
     else:
-        ax.set_xlim(1e-2, 1e2)  # Heating rates: 10^-2 to 10^2
-    
-    # Set up log ticks only at integer powers of 10
-    ax.xaxis.set_major_locator(ticker.LogLocator(base=10, numticks=6))
-    ax.xaxis.set_minor_locator(ticker.NullLocator())  # No minor ticks
-    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, p: f'10$^{{{int(np.log10(x))}}}$'))
-    
-    # Enable grid only for major ticks (powers of 10)
-    ax.grid(True, which='major', alpha=0.4, linewidth=0.5, color='gray')
-    ax.grid(False, which='minor')  # No minor grid lines
+        # Log scale for heating rates (handle large dynamic range)
+        ax.set_xscale('log')
+        ax.set_xlim(1e-2, 1e3)  # Heating rates: 10^-2 to 10^2 K day⁻¹
+        ax.set_xlim(-0.5, 100)  # Flux data: -0.2 to 8 W m⁻² 
+
+        
+        # Set up log ticks for heating rates
+        ax.xaxis.set_major_locator(ticker.LogLocator(base=10, numticks=6))
+        ax.xaxis.set_minor_locator(ticker.NullLocator())  # No minor ticks for log scale
+        ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, p: f'10$^{{{int(np.log10(x))}}}$'))
+        
+        #ax.xaxis.set_major_locator(ticker.MaxNLocator(6))  # Maximum 6 major ticks
+        #ax.xaxis.set_minor_locator(ticker.AutoMinorLocator())  # Auto minor ticks
+        #ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
+        
+        # Enable grid only for major ticks (powers of 10)
+        ax.grid(True, which='major', alpha=0.6, linewidth=0.5, color='gray')
+        ax.grid(False, which='minor')  # No minor grid lines for log scale
     
     # Adjust positioning
     ax.xaxis.labelpad = 10
@@ -228,7 +251,7 @@ ax_list.append(ax5)
 
 ax6 = add_subplot_flux(fig, x=range(69), ys=[h[:69, 0] for h in h_mae_hs], 
                        subplot_pos=(2, 3, 6), models_name=models_name, 
-                       xlabel='MAE [K day⁻¹]', title='Heating rates', is_heating=True)
+                       xlabel='MAE [K day⁻¹]', title='LW Heating rates', is_heating=True)
 ax_list.append(ax6)
 
 
@@ -243,7 +266,7 @@ for ax in ax_list:
 
 # Place legend below all subplots
 fig.legend(handles, labels, loc='lower center', ncol=len(labels),
-           bbox_to_anchor=(0.5, -0.01), frameon=False, fontsize=9)
+           bbox_to_anchor=(0.5, -0.03), frameon=False, fontsize=9)
 
 # Tight layout with extra space at top and bottom for titles and legend
 fig.tight_layout(rect=[0, 0.05, 1, 0.92], pad=0.3, h_pad=2.0, w_pad=1.0)

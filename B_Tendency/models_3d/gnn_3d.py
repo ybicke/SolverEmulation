@@ -15,7 +15,7 @@ class GNN3D(nn.Module):
                  channels_in_2d,
                  channels_out,
                  edge_channels_in,
-                 num_height_levels,
+                num_height_levels,
                  device,
                  division_factor,
                  fully_connected,
@@ -48,7 +48,7 @@ class GNN3D(nn.Module):
         
         # Choose decoder type
         if use_height_dependent_decoder:
-            self.decoder = HeightDependentDecoder(embed_dim, channels_out, num_height_levels, dropout)
+            self.decoder = HeightDependentDecoder_old(embed_dim, channels_out, num_height_levels, dropout)
         # shared weight decoder
         else: 
             self.decoder = Decoder(embed_dim, channels_out, dropout)
@@ -308,3 +308,129 @@ class HeightDependentDecoder(nn.Module):
         # Result: [B*N, L, channels_out]
         output = torch.einsum('bhe,hec->bhc', x_reshaped, self.weight) + self.bias[None, :, :]
         return output 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+class HeightDependentDecoder_old(nn.Module):
+    """
+    Height-dependent decoder with separate linear layers for each height level.
+    
+    Args:
+        embed_dim (int): Dimension of node embeddings
+        channels_out (int): Number of output channels
+        num_height_levels (int): Number of height levels (70)
+        dropout (float): Dropout probability (unused in this simple version)
+    """
+    def __init__(self, embed_dim, channels_out, num_height_levels, dropout=0.0):
+        super().__init__()
+        self.channels_out = channels_out
+        self.num_height_levels = num_height_levels
+        
+        # Create separate linear layer for each height level
+        self.height_layers = nn.ModuleList([
+            nn.Linear(embed_dim, channels_out)
+            for _ in range(num_height_levels)
+        ])
+
+    def forward(self, x, batch_size, num_columns):
+        """
+        Apply height-specific linear projections.
+        
+        Args:
+            x: Node features [B*N*L, embed_dim]
+            batch_size: Batch size B
+            num_columns: Number of columns N
+            
+        Returns:
+            Decoded features [B*N*L, channels_out]
+        """
+        # Reshape to separate height levels: [B*N*L, embed_dim] -> [B, N, L, embed_dim]
+        x_reshaped = x.view(batch_size, num_columns, self.num_height_levels, -1)
+        
+        # Apply height-specific linear layers
+        outputs = []
+        for level in range(self.num_height_levels):
+            level_features = x_reshaped[:, :, level, :]  # [B, N, embed_dim]
+            level_output = self.height_layers[level](level_features)  # [B, N, channels_out]
+            outputs.append(level_output)
+        
+        # Stack and reshape back: [B, N, L, channels_out] -> [B*N*L, channels_out]
+        output = torch.stack(outputs, dim=2)  # [B, N, L, channels_out]
+        return output.view(-1, self.channels_out)  # [B*N*L, channels_out] 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

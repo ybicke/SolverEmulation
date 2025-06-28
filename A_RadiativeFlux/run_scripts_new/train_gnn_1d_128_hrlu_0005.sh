@@ -18,12 +18,12 @@ cd $myfolder
 echo "Unified 1D with Heating Rate Loss training started!"
 
 # Run the unified training script - 1D mode with heating rate smoothness loss
-python unified_train_flux.py \
+python train_flux.py \
     --model gnn \
     --mode 1d \
     --dataset-type full \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/unified_gnn_1d_hr_loss \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/gnn_1d_128_hrlu_0005 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -36,20 +36,18 @@ python unified_train_flux.py \
     --train \
     --test \
     --shuffle \
-    --batch-size 512 \
+    --batch-size 1024 \
     --optimizer adamw \
     --clip 1.0 \
-    --num-epoch 60 \
+    --num-epoch 80 \
     --learning-rate 0.0005 \
-    --hidden-dim 32 \
-    --layers 3 \
+    --hidden-dim 128 \
+    --layers 2 \
     --dropout 0.0 \
     --edge-channels-in 1 \
     --fully-connected \
-    --max-skip 3 \
-    --hr-smoothness-weight 0.05 \
+    --hr-smoothness-weight 0.005 \
     --hr-smoothness-top-levels 30 \
-    --no-l1-loss \
     --wandb-mode online
 
 echo "1D with Heating Rate Loss training completed!" 

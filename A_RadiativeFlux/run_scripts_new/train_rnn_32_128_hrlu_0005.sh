@@ -4,7 +4,7 @@
 set -e
 
 # Source setup script (optional, in case you want to load a specific conda environment, install packages, setup ssh/gpg/weights-and-biases (wandb) or other keys, ...)
-source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts/setup.sh
+source /mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/run_scripts_new/setup.sh
 
 # Check if GPU available
 #nvidia-smi
@@ -17,17 +17,19 @@ myfolder=/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/
 # run script
 
 cd $myfolder
-echo "ViT training started!"
+echo "RNN training started!"
 
 
 # bash <(sed -n "${line_number}p" run_all_models.sh)
 
 
 # Run the training script with all required parameters
-python train_models_HRLU.py \
-    --model vit \
+python train_flux.py \
+    --model rnn \
+    --mode 1d \
+    --dataset-type full \
     --dataset /mydata/deepcloud/salman/dataset/h5_data_all_chuncked \
-    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/vit_128_hrlu_0005 \
+    --save /mydata/deepcloud/yves/A_RadiativeFlux/results/rnn_32_128_hrlu_0005 \
     --percent 0.1 \
     --subsample 0.1 \
     --num-workers 4 \
@@ -45,15 +47,10 @@ python train_models_HRLU.py \
     --clip 1.0 \
     --num-epoch 80 \
     --learning-rate 0.0005 \
-    --patch-size 1 \
-    --hidden-dim 128 \
-    --layers 4 \
-    --heads 6 \
-    --dim-head 64 \
-    --dropout 0.0 \
-    --emb-dropout 0.0 \
-    --scale-output \
+    --lstm-units 32 32 64 64 128 128 \
+    --mlp-units 32 64 \
     --hr-smoothness-weight 0.005 \
     --hr-smoothness-top-levels 30 \
-    --wandb-mode online \
+    --lstm-droprate 0.0 \
+    --wandb-mode online
 

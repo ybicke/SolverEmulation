@@ -143,10 +143,10 @@ parser.add_argument('--hr-smoothness-top-levels', type=int, default=None,
 parser.add_argument('--wandb-mode', type=str, default='disabled', choices=['online', 'offline', 'disabled'], help='W&B mode')
 
 # Memory efficiency parameters
-parser.add_argument('--test-chunk-size', type=int, default=100, 
-                    help='Number of batches to process before saving during testing (for memory efficiency)')
-parser.add_argument('--memory-efficient-test', action=argparse.BooleanOptionalAction, default=False,
-                    help='Use memory-efficient testing that saves results in chunks')
+#parser.add_argument('--test-chunk-size', type=int, default=100, 
+#                    help='Number of batches to process before saving during testing (for memory efficiency)')
+#parser.add_argument('--memory-efficient-test', action=argparse.BooleanOptionalAction, default=False,
+#                    help='Use memory-efficient testing that saves results in chunks')
 
 args = parser.parse_args()
 
@@ -549,19 +549,13 @@ def test_model(model, test_set, normalizer):
         ).to(device)
         smoothness_losses = []
 
-    # Memory-efficient result collection
-    if args.memory_efficient_test:
-        logger.info(f'Using memory-efficient testing with chunk size: {args.test_chunk_size}')
-        chunk_idx = 0
-        y_true_chunk, y_pred_chunk = [], []
-        h_true_chunk, h_pred_chunk = [], []
-    else:
-        # Original approach - collect all results in memory
-        y_true, y_pred = [], []
-        h_true, h_pred = [], []
+   
+    # Original approach - collect all results in memory
+    y_true, y_pred = [], []
+    h_true, h_pred = [], []
     
     # Timing configuration
-    num_timing_batches = 10 if args.mode == '3d' else 10
+    num_timing_batches = 50 if args.mode == '3d' else 50
     warmup_batches = 2 if args.mode == '3d' else 2
     timing_data = []
     
@@ -610,48 +604,10 @@ def test_model(model, test_set, normalizer):
             h_true_cpu = calculate_heating_rates(batch_y, batch_x3, batch_x2, mode=args.mode).detach().cpu()
             h_pred_cpu = calculate_heating_rates(outputs, batch_x3, batch_x2, mode=args.mode).detach().cpu()
             
-            if args.memory_efficient_test:
-                # Memory-efficient approach: collect in chunks
-                y_true_chunk.append(batch_y_cpu)
-                y_pred_chunk.append(outputs_cpu)
-                h_true_chunk.append(h_true_cpu)
-                h_pred_chunk.append(h_pred_cpu)
-                
-                # Save chunk when it reaches chunk_size
-                if (i + 1) % args.test_chunk_size == 0:
-                    # Concatenate chunk
-                    y_true_cat = torch.cat(y_true_chunk, 0)
-                    y_pred_cat = torch.cat(y_pred_chunk, 0)
-                    h_true_cat = torch.cat(h_true_chunk, 0)
-                    h_pred_cat = torch.cat(h_pred_chunk, 0)
-                    
-                    # Save chunk
-                    chunk_suffix = f'_chunk_{chunk_idx}'
-                    with open(join(test_path, f'y_true{chunk_suffix}.pickle'), 'wb') as f:
-                        pickle.dump(y_true_cat, f, protocol=pickle.HIGHEST_PROTOCOL)
-                    with open(join(test_path, f'y_pred{chunk_suffix}.pickle'), 'wb') as f:
-                        pickle.dump(y_pred_cat, f, protocol=pickle.HIGHEST_PROTOCOL)
-                    with open(join(test_path, f'h_true{chunk_suffix}.pickle'), 'wb') as f:
-                        pickle.dump(h_true_cat, f, protocol=pickle.HIGHEST_PROTOCOL)
-                    with open(join(test_path, f'h_pred{chunk_suffix}.pickle'), 'wb') as f:
-                        pickle.dump(h_pred_cat, f, protocol=pickle.HIGHEST_PROTOCOL)
-                    
-                    logger.info(f'Saved chunk {chunk_idx} ({len(y_true_cat)} samples)')
-                    
-                    # Clear chunk storage
-                    y_true_chunk, y_pred_chunk = [], []
-                    h_true_chunk, h_pred_chunk = [], []
-                    chunk_idx += 1
-                    
-                    # Force garbage collection
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-            else:
-                # Original approach
-                y_true.append(batch_y_cpu)
-                y_pred.append(outputs_cpu)
-                h_true.append(h_true_cpu)
-                h_pred.append(h_pred_cpu)
+            y_true.append(batch_y_cpu)
+            y_pred.append(outputs_cpu)
+            h_true.append(h_true_cpu)
+            h_pred.append(h_pred_cpu)
 
             total_batches += 1
             
@@ -660,64 +616,28 @@ def test_model(model, test_set, normalizer):
 
     t2 = time.perf_counter()
 
-    # Handle final results based on mode
-    if args.memory_efficient_test:
-        # Save final chunk if there's remaining data
-        if y_true_chunk:
-            y_true_cat = torch.cat(y_true_chunk, 0)
-            y_pred_cat = torch.cat(y_pred_chunk, 0)
-            h_true_cat = torch.cat(h_true_chunk, 0)
-            h_pred_cat = torch.cat(h_pred_chunk, 0)
-            
-            chunk_suffix = f'_chunk_{chunk_idx}'
-            with open(join(test_path, f'y_true{chunk_suffix}.pickle'), 'wb') as f:
-                pickle.dump(y_true_cat, f, protocol=pickle.HIGHEST_PROTOCOL)
-            with open(join(test_path, f'y_pred{chunk_suffix}.pickle'), 'wb') as f:
-                pickle.dump(y_pred_cat, f, protocol=pickle.HIGHEST_PROTOCOL)
-            with open(join(test_path, f'h_true{chunk_suffix}.pickle'), 'wb') as f:
-                pickle.dump(h_true_cat, f, protocol=pickle.HIGHEST_PROTOCOL)
-            with open(join(test_path, f'h_pred{chunk_suffix}.pickle'), 'wb') as f:
-                pickle.dump(h_pred_cat, f, protocol=pickle.HIGHEST_PROTOCOL)
-            
-            logger.info(f'Saved final chunk {chunk_idx} ({len(y_true_cat)} samples)')
-            chunk_idx += 1
-        
-        # Save metadata about chunks
-        metadata = {
-            'num_chunks': chunk_idx,
-            'chunk_size': args.test_chunk_size,
-            'total_batches': total_batches,
-            'test_loss': float(test_loss.compute()),
-            'test_mae': float(test_mae.compute()),
-        }
-        
-        with open(join(test_path, 'chunk_metadata.pickle'), 'wb') as f:
-            pickle.dump(metadata, f)
-        
-        logger.info(f'Results saved to {test_path} in {chunk_idx} chunks')
-        
-    else:
-        # Original approach - save all at once
-        y_true = torch.cat(y_true, 0)
-        y_pred = torch.cat(y_pred, 0)
-        h_true = torch.cat(h_true, 0)
-        h_pred = torch.cat(h_pred, 0)
-        
-        logger.info(f'Saving results ({len(y_true)} samples)...')
-        
-        with open(join(test_path, 'y_true.pickle'), 'wb') as f:
-            pickle.dump(y_true, f, protocol=pickle.HIGHEST_PROTOCOL)
-        
-        with open(join(test_path, 'y_pred.pickle'), 'wb') as f:
-            pickle.dump(y_pred, f, protocol=pickle.HIGHEST_PROTOCOL)
-            
-        with open(join(test_path, 'h_true.pickle'), 'wb') as f:
-            pickle.dump(h_true, f, protocol=pickle.HIGHEST_PROTOCOL)
-        
-        with open(join(test_path, 'h_pred.pickle'), 'wb') as f:
-            pickle.dump(h_pred, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-        logger.info(f'Results saved to {test_path}')
+    # Original approach - save all at once
+    y_true = torch.cat(y_true, 0)
+    y_pred = torch.cat(y_pred, 0)
+    h_true = torch.cat(h_true, 0)
+    h_pred = torch.cat(h_pred, 0)
+
+    logger.info(f'Saving results ({len(y_true)} samples)...')
+    
+    with open(join(test_path, 'y_true.pickle'), 'wb') as f:
+        pickle.dump(y_true, f, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    with open(join(test_path, 'y_pred.pickle'), 'wb') as f:
+        pickle.dump(y_pred, f, protocol=pickle.HIGHEST_PROTOCOL)
+        
+    with open(join(test_path, 'h_true.pickle'), 'wb') as f:
+        pickle.dump(h_true, f, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    with open(join(test_path, 'h_pred.pickle'), 'wb') as f:
+        pickle.dump(h_pred, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    logger.info(f'Results saved to {test_path}')
 
     # Final metrics
     total_test_loss = test_loss.compute()

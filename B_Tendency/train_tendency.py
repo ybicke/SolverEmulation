@@ -376,6 +376,28 @@ def get_model():
                 max_hops=args.max_hops
             ).to(device)
             
+            
+        elif args.model == 'gnn_2d_graphcast_style':
+            from models_3d.gnn_2d_graphcast_style import GraphCastStyleGNN2D
+            model = GraphCastStyleGNN2D(
+                total_cols=args.num_cells,
+                grid_file_path=args.grid_file_path,
+                triangle_id=args.triangle_id,
+                embed_dim=args.hidden_dim,
+                depth=args.layers,
+                dropout=args.dropout,
+                channels_in_3d=args.channel_3d,
+                channels_in_2d=effective_channel_2d,
+                channels_out=args.channels_out,
+                num_height_levels=args.height,
+                device=device,
+                division_factor=args.triangle_division_factor,
+                fully_connected=args.fully_connected,
+                disable_horizontal=args.disable_horizontal,
+                edge_channels_in=args.edge_channels_in,
+                # use_height_dependent_decoder=args.use_height_dependent_decoder
+            ).to(device)
+            
         else:
             raise ValueError(f"3D model {args.model} not supported")
     

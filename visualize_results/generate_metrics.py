@@ -11,12 +11,30 @@ from tabulate import tabulate
 
 # Models to compare
 models = [
-    {'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
-    {'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
+    
+    
+    #{'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
+    #{'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
+    #{'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
+    #{'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
+    
+    
+    #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn3d_id39_tendency_64_l2_100_new/test'},
+    #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-temp/gnn_64_l2_tendency_1d_triangle_fully_connected/test'},
     
     
     #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k4_correct_variance/test'},
     #{'name': 'GT-3D-64-L4-k2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k2/test'},
+
+
+
+   # lonlat 1D 3D 128
+    {'name': 'GNN-1D-128-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_128_l2_100/test'},
+    
+    # 2D graphcast style
+    {'name': 'GNN-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_2d_graphcast_style_1024_l2_100/test'},
+    
+    {'name': 'GNN-3D-128-L2-lonlat', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat/test'},   
 
 ]
 
@@ -31,18 +49,18 @@ TRAINING_STATS_PATH = '/mydata/deepcloud/yves/h5_tendency_data_all/train_target_
 PRESSURE_WEIGHTS_PATH = None  # '/mydata/deepcloud/yves/pressure_weights.npy'
 
 # Output paths
-OUTPUT_DIR = '/mydata/deepcloud/yves/final_results/metrics'
-OUTPUT_FILENAME = 'GNN_3D_vs_1D_metrics.md'
+OUTPUT_DIR = '/mydata/deepcloud/yves/results_final/metrics_tendency'
+OUTPUT_FILENAME = '1D_2D_3D_GNN_models.md'
 
 # Define target names and units
 target_units = {
-    "Sum of Temperature Tendency": "K s-1", 
-    "Dynamical Temperature Tendency": "K s-1",
-    "Sum of Zonal Wind Tendency": "m s-2",
-    "Sum of Meridional Wind Tendency": "m s-2",
-    "Convective Tend. Absolute Humidity": "kg m-3 s-1",
-    "Convective Tend. Cloud Water Mass Density": "kg m-3 s-1",
-    "Convective Tend. Cloud Ice Mass Density": "kg m-3 s-1"
+    "Total Temperature": "K s-1", 
+    "Dynamical Temperature": "K s-1",
+    "Zonal Wind ": "m s-2",
+    "Meridional Wind": "m s-2",
+    "Convective Humidity": "kg m-3 s-1",
+    "Convective Cloud Water": "kg m-3 s-1",
+    "Convective Cloud Ice": "kg m-3 s-1"
 }
 
 # Baseline model for skill score calculation
