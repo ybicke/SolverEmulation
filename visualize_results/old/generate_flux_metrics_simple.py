@@ -10,14 +10,15 @@ import os
 # ====================================================================
 
 models = [
-    {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
-    {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
-    {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
-    {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
+    {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
+    {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
+    {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
+    {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu/test'},
+    
 ]
 
-OUTPUT_DIR = '/mydata/deepcloud/yves/results_final/Flux_Metrics'
-OUTPUT_FILENAME = 'flux_metrics_simple.md'
+OUTPUT_DIR = '/mydata/deepcloud/yves/results_final/metrics_flux'
+OUTPUT_FILENAME = 'Flux_1D_hrlu_3.md'
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Variable names (must match data order)

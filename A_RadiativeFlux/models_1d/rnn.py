@@ -6,6 +6,8 @@ Author: s.mohebi22[at]gmail.com
 
 import torch 
 import torch.nn as nn
+import torch.nn.functional as F
+from einops import rearrange, repeat
 
 from utils.base_methods import BaseRadiationModel
 
@@ -39,14 +41,10 @@ class FastParallelLayers(nn.Module):
             raise NotImplementedError
 
     def forward(self, x):
-        # x shape: [B, num_players, input_size]
-        batch_size = x.shape[0]
-        x = x.transpose(1, 2).reshape(batch_size, self.num_players*self.input_size, 1)
+        x = x.reshape([-1, self.num_players*self.input_size, 1])
         for cnv in self.players:
             x = self.activation(cnv(x))
-        # Reshape back to [B, num_players, output_size]
-        x = x.reshape(batch_size, self.num_players, self.output_size)
-        return x
+        return x.reshape([-1, self.num_players, self.output_size])
 
 
 
@@ -132,17 +130,17 @@ class FastRnnIg(BaseRadiationModel):
         x2d_repeated = x2d_norm.unsqueeze(1).repeat(1, x3d_norm.shape[1], 1)  # [B, H+1, C2d]
         
         # Concatenate 3D and 2D features
-        x = torch.cat([x2d_repeated, x3d_norm], dim=-1)  # [B, H, C3d+C2d]
+        x = torch.cat([x2d_repeated, x3d_norm], dim=-1)  # [B, H+1, C3d+C2d]
         
         # Process through first layer
-        x = self.p_layer1(x)  # [B, H, mlp_units[-1]]
+        x = self.p_layer1(x)  # [B, H+1, mlp_units[-1]]
         
         # Process through LSTM layers
         for layer in self.bi_lstms:
-            x, _ = layer(x)  # [B, H, lstm_units[-1]*2]
+            x, _ = layer(x)  # [B, H+1, lstm_units[-1]*2]
         
         # Process through output layer
-        y = self.p_layer2(x)  # [B, H, channel_out]
+        y = self.p_layer2(x)  # [B, H+1, channel_out]
         
         
         # Scale the output

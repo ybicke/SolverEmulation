@@ -13,19 +13,29 @@ import os
 # Flux models to compare
 models = [
     # {'name': 'GNN-64-l3', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_64_l3/test'},
-    {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
-    {'name': 'GNN-512-l3', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_medium/test'},
+    #{'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
+    #{'name': 'GNN-512-l3', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_medium/test'},
     
     
     #{'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
     #{'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
+    #{'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
+    
+    
+    {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
+    {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
+    {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
     {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
     
-    # Additional models can be added here
-    # {'name': 'AFNO-128-l4-more-data', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_full_30percent_new/test'},
-    # {'name': 'GNN-128-l4-more-data', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/gnn_1d_full_30percent_64_l2/test'},
-    # {'name': 'BiLSTM-medium-more-data', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/rnn_1d_full_30percent_256/test'},
-]
+    
+    
+    # Fluxes 1D models hrlu
+    #{'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
+    #{'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
+    #{'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
+    #{'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu/test'},
+    
+    ]
 
 # Path to training statistics (for NRMSE normalization)
 # NOTE: Currently commented out as training statistics not available for flux data
@@ -33,8 +43,8 @@ models = [
 TRAINING_STATS_PATH = None
 
 # Output paths
-OUTPUT_DIR = '/mydata/deepcloud/yves/results_final/Flux_Metrics'
-OUTPUT_FILENAME = 'flux_models_detailed_metrics.md'
+OUTPUT_DIR = '/mydata/deepcloud/yves/results_final/metrics_flux'
+OUTPUT_FILENAME = 'Flux_1D.md'
 
 # Make sure output directory exists
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -358,7 +368,7 @@ def get_formatted_table(df, metric_name, highlight_best=True):
     table = tabulate(rows, tablefmt="pipe", headers="firstrow")
     return table
 
-def create_flux_summary_text(flux_dataframes, heating_dataframes, metric_names, baseline_name):
+def create_flux_summary_text(combined_dataframes, _, metric_names, baseline_name):
     """Create the markdown summary text for flux models."""
     
     output_text = f"""# Flux Model Performance Comparison
@@ -375,7 +385,7 @@ The evaluation includes two types of radiative transfer predictions:
 - **SW Upward Flux**: Shortwave radiation moving upward [W m⁻²]
 - **SW Downward Flux**: Shortwave radiation moving downward [W m⁻²]
 
-### Heating Rates (2 variables, 69 height levels):
+### Heating Rates (2 variables, 70 height levels):
 - **LW Heating Rate**: Longwave radiative heating rate [K day⁻¹]
 - **SW Heating Rate**: Shortwave radiative heating rate [K day⁻¹]
 
@@ -409,27 +419,16 @@ Following best practices for emulator evaluation, we report:
 
 """
 
-    # Add flux results
-    output_text += "\n# RADIATIVE FLUX RESULTS\n\n"
+    # Add combined results (flux and heating rates in same tables)
+    output_text += "\n# COMBINED FLUX AND HEATING RATE RESULTS\n\n"
     for metric_name in metric_names:
-        if metric_name in flux_dataframes:
-            output_text += f"\n## Flux {metric_name}\n\n"
+        if metric_name in combined_dataframes:
+            output_text += f"\n## {metric_name}\n\n"
             if metric_name in ['R2', 'Pearson_r', 'Skill_Score']:
                 output_text += "Higher values are better.\n\n"
             else:
                 output_text += "Lower values are better.\n\n"
-            output_text += get_formatted_table(flux_dataframes[metric_name], metric_name) + "\n"
-
-    # Add heating rate results
-    output_text += "\n# HEATING RATE RESULTS\n\n"
-    for metric_name in metric_names:
-        if metric_name in heating_dataframes:
-            output_text += f"\n## Heating Rate {metric_name}\n\n"
-        if metric_name in ['R2', 'Pearson_r', 'Skill_Score']:
-            output_text += "Higher values are better.\n\n"
-        else:
-            output_text += "Lower values are better.\n\n"
-            output_text += get_formatted_table(heating_dataframes[metric_name], metric_name) + "\n"
+            output_text += get_formatted_table(combined_dataframes[metric_name], metric_name) + "\n"
 
     # Add interpretation section
     output_text += f"""
@@ -546,40 +545,43 @@ def main():
     
     print(f"\nCreating summary tables...")
     
-    # Create DataFrames for flux metrics
-    flux_dataframes = {}
+    # Create combined DataFrames for both flux and heating rate metrics
+    combined_dataframes = {}
     for metric_name in metric_names:
         if metric_name == 'Skill_Score' and not flux_skill_scores:
             continue
             
+        # Combine flux and heating rate data
         data = {}
         for model_name, metrics in flux_model_results.items():
             if metric_name in metrics:
                 data[model_name] = metrics[metric_name].numpy()
         
-        if data:
-            df = pd.DataFrame(data, index=flux_target_names)
-            flux_dataframes[metric_name] = df
-    
-    # Create DataFrames for heating rate metrics
-    heating_dataframes = {}
-    for metric_name in metric_names:
-        if metric_name == 'Skill_Score' and not heating_skill_scores:
-            continue
-            
-        data = {}
+        # Add heating rate data to the same table
+        heating_data = {}
         for model_name, metrics in heating_model_results.items():
             if metric_name in metrics:
-                data[model_name] = metrics[metric_name].numpy()
+                heating_data[model_name] = metrics[metric_name].numpy()
         
-        if data:
-            df = pd.DataFrame(data, index=heating_target_names)
-            heating_dataframes[metric_name] = df
+        if data and heating_data:
+            # Create combined DataFrame with both flux and heating targets
+            all_target_names = flux_target_names + heating_target_names
+            
+            # Stack flux and heating data
+            combined_data = {}
+            for model_name in data.keys():
+                if model_name in heating_data:
+                    combined_values = np.concatenate([data[model_name], heating_data[model_name]])
+                    combined_data[model_name] = combined_values
+            
+            if combined_data:
+                df = pd.DataFrame(combined_data, index=all_target_names)
+                combined_dataframes[metric_name] = df
     
     # Create summary text
     output_text = create_flux_summary_text(
-        flux_dataframes, heating_dataframes, 
-        list(flux_dataframes.keys()), BASELINE_FOR_SKILL
+        combined_dataframes, combined_dataframes, 
+        list(combined_dataframes.keys()), BASELINE_FOR_SKILL
     )
     
     # Save results

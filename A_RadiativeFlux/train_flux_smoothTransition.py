@@ -137,13 +137,17 @@ parser.add_argument('--cnn-kernel-sizes', nargs='+', type=int, default=[2, 2, 2,
 parser.add_argument('--hr-smoothness-weight', type=float, default=0.0,
                    help='Weight for heating rate smoothness loss (0.0 to disable)')
 parser.add_argument('--hr-smoothness-top-levels', type=int, default=None,
-                   help='Apply heating rate smoothness only to top N levels')
+                   help='Apply heating rate smoothness only to top N levels (for original loss type)')
 parser.add_argument('--hr-smoothness-type', type=str, default='original', 
                    choices=['original', 'smooth'], 
                    help='Type of heating rate smoothness loss: original (hard cutoff) or smooth (gradual transition)')
 parser.add_argument('--hr-smooth-transition', type=str, default='linear',
                    choices=['linear', 'sigmoid', 'quadratic'],
                    help='Transition type for smooth HR loss: linear, sigmoid, or quadratic')
+parser.add_argument('--hr-full-start-level', type=int, default=30,
+                   help='Atmospheric level where full HR smoothness starts (0=top, 70=surface)')
+parser.add_argument('--hr-transition-end-level', type=int, default=50,
+                   help='Atmospheric level where HR smoothness transition ends (becomes 0)')
 
 # Logging
 parser.add_argument('--wandb-mode', type=str, default='disabled', choices=['online', 'offline', 'disabled'], help='W&B mode')
@@ -394,9 +398,13 @@ def train_model(model, train_set, valid_set, normalizer):
         
         if args.hr_smoothness_type == 'smooth':
             logger.info(f"Using smooth transition HR loss with {args.hr_smooth_transition} transition")
+            logger.info(f"  Full weight: levels 0-{args.hr_full_start_level-1}")
+            logger.info(f"  Transition: levels {args.hr_full_start_level}-{args.hr_transition_end_level-1}")
+            logger.info(f"  Zero weight: levels {args.hr_transition_end_level}-70")
             hr_smoothness = SmoothHeatingRateSmoothnessLoss(
                 weight=args.hr_smoothness_weight,
-                top_levels=args.hr_smoothness_top_levels,
+                full_start_level=args.hr_full_start_level,
+                transition_end_level=args.hr_transition_end_level,
                 mode=args.mode,
                 transition_type=args.hr_smooth_transition
             ).to(device)
@@ -562,7 +570,8 @@ def test_model(model, test_set, normalizer):
         if args.hr_smoothness_type == 'smooth':
             hr_smoothness = SmoothHeatingRateSmoothnessLoss(
                 weight=1.0,
-                top_levels=args.hr_smoothness_top_levels,
+                full_start_level=args.hr_full_start_level,
+                transition_end_level=args.hr_transition_end_level,
                 mode=args.mode,
                 transition_type=args.hr_smooth_transition
             ).to(device)

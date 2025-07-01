@@ -73,4 +73,57 @@ class HeatingRateSmoothnessLoss(torch.nn.Module):
             hr_diff_pred = hr_diff_pred[:, -n_levels:, :]
             
         smoothness_loss = torch.mean(hr_diff_pred**2)
-        return self.weight * smoothness_loss 
+        return self.weight * smoothness_loss
+
+
+class SmoothHeatingRateSmoothnessLoss(torch.nn.Module):
+    """Heating rate smoothness loss with smooth transition (RNN-friendly)"""
+    def __init__(self, weight=0.1, full_start_level=30, transition_end_level=50, mode='1d', transition_type='linear'):
+        super(SmoothHeatingRateSmoothnessLoss, self).__init__()
+        self.weight = weight
+        self.full_start_level = full_start_level  # Level where full weight starts (atmospheric top)
+        self.transition_end_level = transition_end_level  # Level where weight becomes 0 (towards surface)
+        self.mode = mode
+        self.transition_type = transition_type
+        
+    def forward(self, outputs, x3d, x2d):
+        hr_pred = calculate_heating_rates(outputs, x3d, x2d, mode=self.mode)
+        hr_diff_pred = hr_pred[:, 1:, :] - hr_pred[:, :-1, :]
+        
+        n_levels = hr_diff_pred.shape[1]  # Should be 70
+        
+        # Create weight function based on atmospheric levels
+        # Level 0 = atmospheric top, Level 70 = surface
+        weights = torch.zeros(n_levels, device=hr_diff_pred.device)
+        
+        # Full weight from level 0 to full_start_level (e.g., 0-29)
+        if self.full_start_level > 0:
+            weights[:self.full_start_level] = 1.0
+        
+        # Smooth transition from full_start_level to transition_end_level (e.g., 30-49)
+        if self.transition_end_level > self.full_start_level:
+            transition_length = self.transition_end_level - self.full_start_level
+            
+            if self.transition_type == 'linear':
+                # Linear transition from 1 to 0
+                weights[self.full_start_level:self.transition_end_level] = torch.linspace(
+                    1, 0, transition_length, device=hr_diff_pred.device
+                )
+            elif self.transition_type == 'sigmoid':
+                # Sigmoid transition from 1 to 0
+                x = torch.linspace(3, -3, transition_length, device=hr_diff_pred.device)
+                weights[self.full_start_level:self.transition_end_level] = torch.sigmoid(x)
+            elif self.transition_type == 'quadratic':
+                # Quadratic transition (fast start, slow finish)
+                x = torch.linspace(1, 0, transition_length, device=hr_diff_pred.device)
+                weights[self.full_start_level:self.transition_end_level] = x**2
+        
+        # Zero weight from transition_end_level to surface (e.g., 50-70)
+        # (already zero by default)
+        
+        # Apply weights: [B, levels, features] * [levels, 1]
+        weights = weights.unsqueeze(0).unsqueeze(-1)  # [1, levels, 1]
+        hr_diff_weighted = hr_diff_pred * weights
+        smoothness_loss = torch.mean(hr_diff_weighted**2)
+            
+        return self.weight * smoothness_loss

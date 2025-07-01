@@ -34,7 +34,7 @@ plt.rcParams.update({
 })
 
 # === PLOT CONFIGURATION ===
-PLOT_NAME = "flux1d_linear_log_optimized"
+PLOT_NAME = "flux_linear_hrlu_second"
 SUBFOLDER = "MAE_Flux"
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
@@ -44,18 +44,21 @@ os.makedirs(plot_output_dir, exist_ok=True)
 os.makedirs(cache_dir, exist_ok=True)
 
 models = [
-    {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
-    {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
-    {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
-    {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
+    #{'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
+    #{'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
+    #{'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
+    #{'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
     
     
     # Fluxes 1D models hrlu
-    # {'name': 'AFNO-128-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
-    #{'name': 'GNN-128-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
-    # {'name': 'BiLSTM-32-128-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_32_128_hrlu_0005/test'},
-    #{'name': 'ViT-128-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
+    {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
+    #{'name': 'BiLSTM-32-128', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_32_128_hrlu_0005/test'},
+    {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
+    {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
+    #{'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu/test'},
+    {'name': 'BiLSTM-second', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
 ]
+
 
 def get_cache_path(model_path):
     """Generate cache file path based on model path hash."""
@@ -200,10 +203,21 @@ def add_subplot_flux_optimized(fig, x, ys, subplot_pos, models_name, xlabel=None
     
     # Simplified scaling
     if is_flux:
-        ax.set_xlim(-0.5, 7)
+        #ax.set_xscale('log')  # Set log scale for heating rates
+        #ax.set_xlim(1e-3, 1e2) 
+        #ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
+        #ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
+        #ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
+        ax.set_xlim(-0.5, 40)
         ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
+    elif is_heating:
+        ax.set_xscale('log')  # Set log scale for heating rates
+        ax.set_xlim(1e-2, 1e3)  # Adjust limits for log scale
+        ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
+        ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
+        ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
     else:
-        ax.set_xlim(-0.5, 100)
+        ax.set_xlim(-0.5, 95)
         ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
     
     # Minimal grid
@@ -255,38 +269,38 @@ def main():
     
     ax1 = add_subplot_flux_optimized(fig, x=range(71), ys=[y[:, 3] for y in y_mae_hs], 
                                    subplot_pos=(2, 3, 1), models_name=models_name, 
-                                   title='SW Downward flux', xlabel='MAE [W m⁻²]', is_flux=True)
+                                   title='SW Downward Flux', xlabel='MAE [W m⁻²]', is_flux=True)
     ax_list.append(ax1)
     
     ax2 = add_subplot_flux_optimized(fig, x=range(71), ys=[y[:, 2] for y in y_mae_hs], 
                                    subplot_pos=(2, 3, 2), models_name=models_name, 
-                                   title='SW Upward flux', xlabel='MAE [W m⁻²]', is_flux=True)
+                                   title='SW Upward Flux', xlabel='MAE [W m⁻²]', is_flux=True)
     ax_list.append(ax2)
     
-    ax3 = add_subplot_flux_optimized(fig, x=range(69), ys=[h[:69, 1] for h in h_mae_hs], 
+    ax3 = add_subplot_flux_optimized(fig, x=range(70), ys=[h[:, 1] for h in h_mae_hs], 
                                    subplot_pos=(2, 3, 3), models_name=models_name, 
-                                   title='SW Heating rates', xlabel='MAE [K day⁻¹]', is_heating=True)
+                                   title='SW Heating Rates', xlabel='MAE [K day⁻¹]', is_heating=True)
     ax_list.append(ax3)
     
     ax4 = add_subplot_flux_optimized(fig, x=range(71), ys=[y[:, 1] for y in y_mae_hs], 
                                    subplot_pos=(2, 3, 4), models_name=models_name, 
-                                   xlabel='MAE [W m⁻²]', title='LW Downward flux', is_flux=True)
+                                   xlabel='MAE [W m⁻²]', title='LW Downward Flux', is_flux=True)
     ax_list.append(ax4)
     
     ax5 = add_subplot_flux_optimized(fig, x=range(71), ys=[y[:, 0] for y in y_mae_hs], 
                                    subplot_pos=(2, 3, 5), models_name=models_name, 
-                                   xlabel='MAE [W m⁻²]', title='LW Upward flux', is_flux=True)
+                                   xlabel='MAE [W m⁻²]', title='LW Upward Flux', is_flux=True)
     ax_list.append(ax5)
     
-    ax6 = add_subplot_flux_optimized(fig, x=range(69), ys=[h[:69, 0] for h in h_mae_hs], 
+    ax6 = add_subplot_flux_optimized(fig, x=range(70), ys=[h[:, 0] for h in h_mae_hs], 
                                    subplot_pos=(2, 3, 6), models_name=models_name, 
-                                   xlabel='MAE [K day⁻¹]', title='LW Heating rates', is_heating=True)
+                                   xlabel='MAE [K day⁻¹]', title='LW Heating Rates', is_heating=True)
     ax_list.append(ax6)
     
     # Simple legend
     handles, labels = ax_list[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc='lower center', ncol=len(labels),
-               bbox_to_anchor=(0.5, -0.03), frameon=False, fontsize=9)
+               bbox_to_anchor=(0.5, -0.0), frameon=False, fontsize=9)
     
     # Layout
     fig.tight_layout(rect=[0, 0.05, 1, 0.92], pad=0.3, h_pad=2.0, w_pad=1.0)
