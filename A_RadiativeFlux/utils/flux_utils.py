@@ -126,4 +126,4 @@ class SmoothHeatingRateSmoothnessLoss(torch.nn.Module):
         hr_diff_weighted = hr_diff_pred * weights
         smoothness_loss = torch.mean(hr_diff_weighted**2)
             
-        return self.weight * smoothness_loss
+        return self.weight * smoothness_loss 

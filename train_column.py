@@ -949,7 +949,7 @@ def test_model(model, test_set):
 
 def test_loading_time(train_files, iter=10):
     logger.info('Test Loading time started...')
-    dataset = get_data_with_disk_cache(train_files, shuffle=True)
+    dataset = get_column_data_with_disk_cache(train_files, shuffle=True)
         
     for it in range(iter):
         t1 = time.perf_counter(), time.process_time()

@@ -321,6 +321,7 @@ def get_model():
                 num_height_levels=args.height,
                 device=device,
                 division_factor=args.triangle_division_factor,
+                use_height_dependent_decoder=args.use_height_dependent_decoder,
                 heads=args.heads,
                 dim_head=args.dim_head,
                 mlp_ratio=args.mlp_ratio,

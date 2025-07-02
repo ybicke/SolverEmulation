@@ -354,54 +354,148 @@ class ViT4(nn.Module):
     
 
     def visualize_attention(self, avg_attention_matrix, layer_idx=0, save_path=None):
-        """Compute and visualize the average attention matrix over the test set"""
+        """Enhanced attention visualization with proper height labeling and statistical analysis"""
         
-        # Clean mapping: Position 0 = Surface token, Position 1-71 = x3d[0-70] (surface to TOA)
-        # Height mapping for atmospheric levels (your original was correct!)
-        height_mapping = {
-            0: 65, 10: 39, 20: 25, 30: 15, 40: 8, 50: 4, 60: 1, 70: 0
+        # Height mapping for 70 levels (approximate, based on ICON model structure)
+        height_km_mapping = {
+            0: 65.0, 5: 55.0, 10: 41.1, 15: 33.0, 20: 26.4, 25: 21.0,
+            30: 16.4, 35: 12.5, 40: 9.3, 45: 6.6, 50: 4.4, 55: 2.6,
+            60: 1.3, 65: 0.5, 69: 0.07, 70: 0.02
         }
         
-        # Create tick positions and labels with level and height in brackets
-        tick_positions = list(height_mapping.keys())
-        tick_labels = [f"{level} ({height_mapping[level]} km)" for level in tick_positions]
-        
-        # Flip both dimensions to have surface at bottom-right, TOA at top-left (your original logic!)
+        def get_height_label(level_idx):
+            """Get height label for a given level index"""
+            if level_idx in height_km_mapping:
+                return f"{level_idx} ({height_km_mapping[level_idx]:.1f}km)"
+            else:
+                # Interpolate for missing levels
+                levels = sorted(height_km_mapping.keys())
+                for i in range(len(levels)-1):
+                    if levels[i] <= level_idx <= levels[i+1]:
+                        # Linear interpolation
+                        ratio = (level_idx - levels[i]) / (levels[i+1] - levels[i])
+                        height = height_km_mapping[levels[i]] + ratio * (height_km_mapping[levels[i+1]] - height_km_mapping[levels[i]])
+                        return f"{level_idx} ({height:.1f}km)"
+                return f"{level_idx}"
+
+        # Flip attention matrix to have surface at bottom (as per your original code)
         flipped_attn_rows = torch.flip(avg_attention_matrix, dims=[0])
         flipped_attn_cols = torch.flip(flipped_attn_rows, dims=[1])
         flipped_attn = flipped_attn_cols
-
-        # Create publication-ready plot with larger size for better text readability
-        plt.figure(figsize=(12, 10))
         
-        # Plot the attention matrix
-        im = plt.imshow(flipped_attn, cmap='plasma', interpolation='nearest', aspect='equal')
+        # Create multiple visualizations
+        fig, axes = plt.subplots(2, 2, figsize=(16, 14))
         
-        # Set ticks and labels for both axes with larger font
-        plt.xticks(tick_positions, tick_labels, fontsize=15, rotation=45)
-        plt.yticks(tick_positions, tick_labels, fontsize=15)
+        # 1. Full attention matrix with proper labels
+        ax1 = axes[0, 0]
+        im1 = ax1.imshow(flipped_attn, cmap='plasma', interpolation='nearest', aspect='auto')
         
-        # Add proper labels with interpretation and more spacing
-        plt.xlabel('Key Position', fontsize=19, labelpad=15)
-        plt.ylabel('Query Position', fontsize=19, labelpad=15)
-        plt.title(f'Attention Matrix - Layer {layer_idx}', 
-                 fontsize=19, pad=25)
+        # Set ticks every 10 levels
+        tick_positions = list(range(0, avg_attention_matrix.shape[0], 10))
+        if tick_positions[-1] != avg_attention_matrix.shape[0] - 1:
+            tick_positions.append(avg_attention_matrix.shape[0] - 1)
+            
+        # For flipped matrix, we need to adjust tick labels
+        tick_labels = []
+        for pos in tick_positions:
+            original_level = avg_attention_matrix.shape[0] - 1 - pos  # Account for flipping
+            tick_labels.append(get_height_label(original_level))
         
-        # Add colorbar with label and more spacing
-        cbar = plt.colorbar(im, fraction=0.046, pad=0.04)
-        cbar.set_label('Attention Weight', fontsize=19, labelpad=20)
-        cbar.ax.tick_params(labelsize=15)
+        ax1.set_xticks(tick_positions)
+        ax1.set_yticks(tick_positions)
+        ax1.set_xticklabels(tick_labels, rotation=45, ha='right', fontsize=8)
+        ax1.set_yticklabels(tick_labels, fontsize=8)
+        ax1.set_xlabel('Height Level (attending TO)', fontsize=10)
+        ax1.set_ylabel('Height Level (attending FROM)', fontsize=10)
+        ax1.set_title(f'Attention Matrix Layer {layer_idx}\n(Surface at bottom-right)', fontsize=12)
+        plt.colorbar(im1, ax=ax1, label='Attention Weight')
         
-        # Add grid for better readability
-        plt.grid(True, alpha=0.7, linestyle='--', linewidth=0.5)
+        # 2. Attention entropy per level (measure of attention dispersion)
+        ax2 = axes[0, 1]
+        # Calculate entropy for each row (query position)
+        epsilon = 1e-8  # Small constant to avoid log(0)
+        attention_probs = flipped_attn + epsilon
+        entropy = -torch.sum(attention_probs * torch.log(attention_probs), dim=1)
         
+        height_levels = list(range(avg_attention_matrix.shape[0]))
+        ax2.plot(entropy.cpu().numpy(), height_levels, 'b-', linewidth=2, marker='o', markersize=3)
+        ax2.set_ylabel('Height Level Index (flipped)', fontsize=10)
+        ax2.set_xlabel('Attention Entropy', fontsize=10)
+        ax2.set_title('Attention Dispersion by Height\n(Higher = more distributed attention)', fontsize=12)
+        ax2.grid(True, alpha=0.3)
+        ax2.invert_yaxis()
         
-        # Improve layout and save
+        # 3. Dominant attention direction (where does each level attend most?)
+        ax3 = axes[1, 0]
+        max_attention_indices = torch.argmax(flipped_attn, dim=1)
+        
+        ax3.plot(max_attention_indices.cpu().numpy(), height_levels, 'r-', linewidth=2, marker='s', markersize=3)
+        ax3.plot([0, avg_attention_matrix.shape[0]-1], [0, avg_attention_matrix.shape[0]-1], 'k--', alpha=0.5, label='Self-attention diagonal')
+        ax3.set_ylabel('Height Level Index (FROM)', fontsize=10)
+        ax3.set_xlabel('Height Level Index (TO - max attention)', fontsize=10)
+        ax3.set_title('Primary Attention Target by Height\n(Where does each level attend most?)', fontsize=12)
+        ax3.grid(True, alpha=0.3)
+        ax3.legend()
+        ax3.invert_yaxis()
+        
+        # 4. Attention strength statistics
+        ax4 = axes[1, 1]
+        
+        # Calculate statistics
+        max_attention_per_row = torch.max(flipped_attn, dim=1)[0]
+        mean_attention_per_row = torch.mean(flipped_attn, dim=1)
+        
+        ax4.plot(max_attention_per_row.cpu().numpy(), height_levels, 'g-', linewidth=2, label='Max attention', marker='o', markersize=3)
+        ax4.plot(mean_attention_per_row.cpu().numpy(), height_levels, 'orange', linewidth=2, label='Mean attention', marker='^', markersize=3)
+        
+        ax4.set_ylabel('Height Level Index (flipped)', fontsize=10)
+        ax4.set_xlabel('Attention Strength', fontsize=10)
+        ax4.set_title('Attention Strength Statistics\nby Height Level', fontsize=12)
+        ax4.grid(True, alpha=0.3)
+        ax4.legend()
+        ax4.invert_yaxis()
+        
         plt.tight_layout()
-        save_filename = save_path if save_path else f'vit_attention_matrix_layer_{layer_idx}_publication.png'
-        plt.savefig(save_filename, dpi=300, bbox_inches='tight', facecolor='white')
+        
+        # Save the comprehensive plot
+        if save_path:
+            plt.savefig(f'{save_path}/vit_attention_analysis_layer_{layer_idx}.png', dpi=300, bbox_inches='tight')
+        else:
+            plt.savefig(f'vit_attention_analysis_layer_{layer_idx}.png', dpi=300, bbox_inches='tight')
         plt.close()
         
-        print(f"Publication-ready attention matrix saved as: {save_filename}")
+        # Additional: Create a simple attention matrix for quick reference
+        plt.figure(figsize=(10, 8))
+        plt.imshow(flipped_attn, cmap='plasma', interpolation='nearest', aspect='auto')
+        
+        # Simplified labels every 10 levels
+        simple_ticks = list(range(0, avg_attention_matrix.shape[0], 10))
+        simple_labels = [get_height_label(avg_attention_matrix.shape[0] - 1 - pos) for pos in simple_ticks]
+        
+        plt.xticks(simple_ticks, simple_labels, rotation=45, ha='right')
+        plt.yticks(simple_ticks, simple_labels)
+        plt.xlabel('Height Level (Keys - attending TO)')
+        plt.ylabel('Height Level (Queries - attending FROM)')
+        plt.title(f'Attention Matrix Layer {layer_idx} - Simplified\n(Surface at bottom-right)')
+        plt.colorbar(label='Attention Weight')
+        
+        if save_path:
+            plt.savefig(f'{save_path}/vit_attention_simple_layer_{layer_idx}.png', dpi=300, bbox_inches='tight')
+        else:
+            plt.savefig(f'vit_attention_simple_layer_{layer_idx}.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        # Print statistical summary
+        print(f"\n=== Attention Analysis for Layer {layer_idx} ===")
         print(f"Matrix shape: {avg_attention_matrix.shape}")
-        print("Atmospheric visualization: Surface (0 km) at bottom-right, TOA (65 km) at top-left")
+        print(f"Attention range: [{flipped_attn.min():.4f}, {flipped_attn.max():.4f}]")
+        print(f"Mean attention entropy: {entropy.mean():.4f} (±{entropy.std():.4f})")
+        print(f"Most focused level (lowest entropy): Level {torch.argmin(entropy)} (entropy: {entropy.min():.4f})")
+        print(f"Most dispersed level (highest entropy): Level {torch.argmax(entropy)} (entropy: {entropy.max():.4f})")
+        
+        # Check for predominant attention patterns
+        diagonal_strength = torch.diagonal(flipped_attn).mean()
+        off_diagonal_strength = (flipped_attn.sum() - torch.diagonal(flipped_attn).sum()) / (flipped_attn.numel() - flipped_attn.shape[0])
+        print(f"Self-attention strength: {diagonal_strength:.4f}")
+        print(f"Cross-level attention strength: {off_diagonal_strength:.4f}")
+        print(f"Self vs Cross ratio: {diagonal_strength/off_diagonal_strength:.2f}")

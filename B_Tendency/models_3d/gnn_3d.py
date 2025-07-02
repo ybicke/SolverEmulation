@@ -48,7 +48,7 @@ class GNN3D(nn.Module):
         
         # Choose decoder type
         if use_height_dependent_decoder:
-            self.decoder = HeightDependentDecoder_old(embed_dim, channels_out, num_height_levels, dropout)
+            self.decoder = HeightDecoder_old(embed_dim, channels_out, num_height_levels, dropout)
         # shared weight decoder
         else: 
             self.decoder = Decoder(embed_dim, channels_out, dropout)
@@ -258,7 +258,7 @@ class Decoder(nn.Module):
         return self.mlp(x)
 
 
-class HeightDependentDecoder(nn.Module):
+class HeightDecoder(nn.Module):
     """
     Efficient vectorized height-dependent decoder.
     Uses a single large weight matrix for all height levels, processed in parallel.
@@ -310,20 +310,14 @@ class HeightDependentDecoder(nn.Module):
         return output 
     
     
+
     
     
     
     
     
     
-    
-    
-    
-    
-    
-    
-    
-class HeightDependentDecoder_old(nn.Module):
+class HeightDecoder_old(nn.Module):
     """
     Height-dependent decoder with separate linear layers for each height level.
     
@@ -338,7 +332,7 @@ class HeightDependentDecoder_old(nn.Module):
         self.channels_out = channels_out
         self.num_height_levels = num_height_levels
         
-        # Create separate linear layer for each height level
+        # Create separate linear layer for each height level, each linear layer shares the same weights per height level.
         self.height_layers = nn.ModuleList([
             nn.Linear(embed_dim, channels_out)
             for _ in range(num_height_levels)
@@ -368,7 +362,7 @@ class HeightDependentDecoder_old(nn.Module):
         
         # Stack and reshape back: [B, N, L, channels_out] -> [B*N*L, channels_out]
         output = torch.stack(outputs, dim=2)  # [B, N, L, channels_out]
-        return output.view(-1, self.channels_out)  # [B*N*L, channels_out] 
+        return output 
     
     
     

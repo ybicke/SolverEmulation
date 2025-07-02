@@ -264,6 +264,7 @@ class SimplifiedGraphTransformer3D(nn.Module):
     2. Efficient vectorized implementation
     3. Proper caching for repeated computations
     4. Training pipeline compatibility
+    5. Optional height-dependent decoder
     """
     def __init__(self,
                  total_cols,
@@ -284,6 +285,7 @@ class SimplifiedGraphTransformer3D(nn.Module):
                  fully_connected,
                  disable_horizontal,
                  max_hops,
+                 use_height_dependent_decoder=False,  # NEW: For height-dependent decoder
                  *args,
                  **kwargs):
         super().__init__()
@@ -292,6 +294,7 @@ class SimplifiedGraphTransformer3D(nn.Module):
         self.channels_out = channels_out
         self.embed_dim = embed_dim
         self.num_height_levels = num_height_levels
+        self.use_height_dependent_decoder = use_height_dependent_decoder
         
         # Store grid parameters
         self.grid_file_path = grid_file_path
@@ -324,7 +327,15 @@ class SimplifiedGraphTransformer3D(nn.Module):
         
         # Output processing
         self.norm = nn.LayerNorm(embed_dim)
-        self.output_proj = nn.Linear(embed_dim, channels_out)
+        
+        # Choose decoder type
+        if use_height_dependent_decoder:
+            self.height_decoders = nn.ModuleList([
+                nn.Linear(embed_dim, channels_out)
+                for _ in range(num_height_levels)
+            ])
+        else:
+            self.output_proj = nn.Linear(embed_dim, channels_out)
         
         # Shared cache for efficiency
         self._shared_cache = {
@@ -381,6 +392,20 @@ class SimplifiedGraphTransformer3D(nn.Module):
         
         # Final processing
         x = self.norm(x)
-        x = self.output_proj(x)
+        
+        # Apply decoder (height-dependent or shared)
+        if self.use_height_dependent_decoder:
+            # Apply height-specific decoders
+            outputs = []
+            for level in range(self.num_height_levels):
+                level_features = x[:, :, level, :]  # [B, N, embed_dim]
+                level_output = self.height_decoders[level](level_features)  # [B, N, channels_out]
+                outputs.append(level_output)
+            
+            # Stack to final output shape: [B, N, L, channels_out]
+            x = torch.stack(outputs, dim=2)
+        else:
+            # Use shared decoder
+            x = self.output_proj(x)
         
         return x 

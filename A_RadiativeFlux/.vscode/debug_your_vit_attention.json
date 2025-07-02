@@ -1,0 +1,43 @@
+{
+    "name": "Debug: Your ViT Attention Analysis",
+    "type": "debugpy",
+    "request": "launch",
+    "program": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux/train_flux.py",
+    "console": "integratedTerminal",
+    "python": "/myhome/mambaforge/envs/deepFlux/bin/python",
+    "cwd": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux",
+    "env": {
+        "PYTHONPATH": "/mydata/deepcloud/yves/SolverEmulation/A_RadiativeFlux"
+    },
+    "args": [
+        "--model", "vit",
+        "--mode", "1d",
+        "--dataset-type", "full",
+        "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+        "--save", "/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new",
+        "--percent", "0.01",
+        "--subsample", "0.01",
+        "--num-workers", "4",
+        "--prefetch-factor", "2",
+        "--num-cells", "81920",
+        "--channel-3d", "6",
+        "--channel-2d", "6", 
+        "--channel-out", "4",
+        "--height-in", "71",
+        "--no-train",
+        "--test",
+        "--batch-size", "4",
+        "--hidden-dim", "128",
+        "--layers", "4",
+        "--dropout", "0.0",
+        "--mlp-ratio", "4.0",
+        "--heads", "6",
+        "--dim-head", "64",
+        "--emb-dropout", "0.0",
+        "--patch-size", "1",
+        "--wandb-mode", "disabled",
+        "--attention-analysis",
+        "--attention-samples", "500",
+        "--attention-layers", "0", "1", "2", "3"
+    ]
+} 

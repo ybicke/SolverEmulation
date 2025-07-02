@@ -42,6 +42,7 @@ from flux_data_loader import UnifiedFluxDataset
 from utils.data_utils import DataNormalizer
 from utils.flux_utils import calculate_heating_rates, HeatingRateSmoothnessLoss, SmoothHeatingRateSmoothnessLoss
 from utils.evaluation_utils import process_timing_statistics, warm_up_model
+#from flux_analysis.attention_analysis import run_attention_analysis_if_enabled
 
 sys.path.append(dirname(__file__))
 
@@ -144,6 +145,11 @@ parser.add_argument('--hr-smoothness-type', type=str, default='original',
 parser.add_argument('--hr-smooth-transition', type=str, default='linear',
                    choices=['linear', 'sigmoid', 'quadratic'],
                    help='Transition type for smooth HR loss: linear, sigmoid, or quadratic')
+
+# Attention Analysis
+#parser.add_argument('--attention-analysis', action='store_true', help='Run attention analysis during testing (ViT models only)')
+#parser.add_argument('--attention-samples', type=int, default=500, help='Number of samples for attention analysis')
+#parser.add_argument('--attention-layers', nargs='+', type=int, default=None, help='Specific layers to analyze (e.g., 0 1 2 3)')
 
 # Logging
 parser.add_argument('--wandb-mode', type=str, default='disabled', choices=['online', 'offline', 'disabled'], help='W&B mode')
@@ -338,6 +344,7 @@ def create_data_loader(filenames, shuffle=False, num_workers=None):
         subsample=args.subsample,
         cache_dir='/tmp',
         total_cols=args.num_cells,
+        subsample_seed=seed,
     )
 
     dataloader_args = {
@@ -552,6 +559,17 @@ def test_model(model, test_set, normalizer):
     assert isfile(best_chkpt), 'Best model checkpoint not found!'
     checkpoint = torch.load(best_chkpt, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
+    
+    # Run attention analysis if enabled
+    #run_attention_analysis_if_enabled(
+    #    model=model, 
+    #    test_loader=test_set, 
+    #    normalizer=normalizer, 
+    #    save_dir=test_path, 
+    #    num_samples=getattr(args, 'attention_samples', 500),
+    #    enabled=getattr(args, 'attention_analysis', False),
+    #    target_layers=getattr(args, 'attention_layers', None)
+    #)
 
     # Initialize metrics
     test_loss = MeanSquaredError().to(device)

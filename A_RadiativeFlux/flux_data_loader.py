@@ -40,6 +40,7 @@ class UnifiedFluxDataset(IterableDataset):
         dtype='float32',
         cache_dir=None,
         total_cols=81920,
+        subsample_seed=42,  # Add deterministic seed for subsampling
     ):
         super().__init__()
         self.filenames = filenames
@@ -50,6 +51,7 @@ class UnifiedFluxDataset(IterableDataset):
         self.triangle_id = triangle_id
         self.division_factor = division_factor
         self.subsample = subsample
+        self.subsample_seed = subsample_seed  # Store seed for deterministic subsampling
         
         # Convert dtype string to torch dtype
         self.dtype = getattr(torch, dtype)
@@ -101,11 +103,15 @@ class UnifiedFluxDataset(IterableDataset):
                         x2d = torch.tensor(h['x2d'][:], dtype=self.dtype)
                         y = torch.tensor(h['y'][:, :, :], dtype=self.dtype)
                 
-                # Apply subsampling if specified
+                # Apply subsampling if specified - DETERMINISTIC VERSION
                 if self.subsample is not None and self.subsample < 1.0:
                     num_samples = int(self.subsample * x3d.shape[0])
                     if num_samples > 0:
-                        indices = torch.randperm(x3d.shape[0])[:num_samples]
+                        # Simple deterministic subsampling - same pattern for all files
+                        rng = torch.Generator()
+                        rng.manual_seed(self.subsample_seed)
+                        indices = torch.randperm(x3d.shape[0], generator=rng)[:num_samples]
+                        
                         x3d = x3d[indices]
                         x2d = x2d[indices]
                         y = y[indices]

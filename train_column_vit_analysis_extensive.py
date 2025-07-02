@@ -31,7 +31,7 @@ import torch.autograd.profiler as profiler
 
 
 from data_loaders_new import IconColumnIterableDataset
-from flux_specific_sigmoid.FluxSpecificSigmoid_lwdown import load_gaussian_parameters, construct_gaussian_params_by_height
+# from flux_specific_sigmoid.FluxSpecificSigmoid_lwdown import load_gaussian_parameters, construct_gaussian_params_by_height
 
 
 
@@ -90,9 +90,6 @@ parser.add_argument('--cutoff-frequency', type=float, default=0.1, help='cutoff 
 parser.add_argument('--zero-freq-indices', nargs='+', type=int, default=None, help='Zero frequency indices to zero out')
 parser.add_argument('--gaussian_params_file_LWDown', type=str, help='Path to the .npz file containing Gaussian parameters')
 parser.add_argument('--gaussian_params_file_LWUp', type=str, help='Path to the .npz file containing Gaussian parameters')
-parser.add_argument('--attention-analysis', action=argparse.BooleanOptionalAction, default=False, help='Run attention analysis during testing (ViT models only)')
-parser.add_argument('--attention-layers', nargs='+', type=int, default=[0], help='Layers to analyze for attention (default: [0])')
-parser.add_argument('--attention-samples', type=int, default=100, help='Number of samples to use for attention analysis')
 args = parser.parse_args()
 
 
@@ -132,11 +129,7 @@ def get_normalization_params(stats_file):
 def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
     logger.info('Preparing the model...')
     if model_name == 'vit':
-        # Use analysis version if attention analysis is requested
-        if is_test and hasattr(args, 'attention_analysis') and args.attention_analysis:
-            from train_column_vit_analysis import ViT4 as ViT
-        else:
-            from vit import ViT
+        from column_files.vit_column import ViT
         model = ViT(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -152,12 +145,45 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             device=device
         ).to(device)
         
+        
+    elif model_name == 'vit_column4':
+        from column_files.vit_column import ViT4
+        model = ViT4(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            dim=args.vit_hidden_dim,
+            mlp_dim=args.vit_hidden_dim,
+            depth=args.vit_layers,
+            heads=args.vit_heads,
+            dropout=args.vit_dropout,
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device
+        ).to(device)
+        
+        
     elif model_name == 'vit_analysis':
-        # Use analysis version if attention analysis is requested
-        if is_test and hasattr(args, 'attention_analysis') and args.attention_analysis:
-            from column_files.vit_column_analysis import ViT4 as ViT
-        else:
-            from column_files.vit_column import ViT
+        from column_files.vit_column_analysis import ViT4
+        model = ViT4(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            dim=args.vit_hidden_dim,
+            mlp_dim=args.vit_hidden_dim,
+            depth=args.vit_layers,
+            heads=args.vit_heads,
+            dropout=args.vit_dropout,
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device
+        ).to(device) 
+ 
+ 
+    elif model_name == 'vit_analysis2':
+        from column_files.vit_column_analysis2 import ViT
         model = ViT(
             num_cells=args.num_cells,
             patch_size=args.patch_size,
@@ -172,7 +198,8 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             var3d=var3d,
             device=device
         ).to(device)
-    
+ 
+ 
     else:
         raise NotImplementedError('Model has not implemented yet!')
     return model
@@ -364,85 +391,15 @@ def calculate_heating_rates(y, x3d, x2d):
     return heating_rate
 
 
-def run_attention_analysis(model, test_set):
-    """Run attention analysis on a subset of test data"""
-    logger.info('Computing attention weights...')
-    
-    # Collect samples for attention analysis
-    attention_data = []
-    sample_count = 0
-    
-    for i, data in enumerate(test_set):
-        if sample_count >= args.attention_samples:
-            break
-            
-        batch_x3, batch_x2, batch_y = data
-        batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
-        
-        # Take only the first sample from each batch to avoid memory issues
-        attention_data.append((batch_x3[:1], batch_x2[:1]))
-        sample_count += batch_x3.shape[0]
-        
-        if i % 50 == 0:
-            logger.info(f'Collected {sample_count} samples for attention analysis')
-    
-    logger.info(f'Collected {len(attention_data)} batches with {sample_count} samples total')
-    
-    # Analyze attention for each specified layer
-    for layer_idx in args.attention_layers:
-        logger.info(f'Analyzing attention for layer {layer_idx}...')
-        
-        all_attention_weights = []
-        
-        # Process samples in batches to manage memory
-        for batch_x3, batch_x2 in attention_data:
-            try:
-                # Get attention weights for this batch
-                attention_weights = model.get_attention_weights(batch_x3, batch_x2, layer_idx=layer_idx)
-                
-                # Average over batch and heads dimensions
-                if attention_weights is not None:
-                    # Shape: (batch_size, heads, seq_len, seq_len) -> (seq_len, seq_len)
-                    avg_attention = torch.mean(attention_weights, dim=(0, 1))
-                    all_attention_weights.append(avg_attention.cpu())
-                    
-            except Exception as e:
-                logger.warning(f'Error computing attention weights: {e}')
-                continue
-        
-        if all_attention_weights:
-            # Average attention weights across all samples
-            avg_attention_matrix = torch.mean(torch.stack(all_attention_weights), dim=0)
-            
-            # Create visualization
-            save_path = join(test_path, f'attention_layer_{layer_idx}_publication.png')
-            model.visualize_attention(avg_attention_matrix, layer_idx=layer_idx, save_path=save_path)
-            
-            # Save attention matrix data
-            attention_data_path = join(test_path, f'attention_matrix_layer_{layer_idx}.pickle')
-            with open(attention_data_path, 'wb') as handle:
-                pickle.dump(avg_attention_matrix, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            
-            logger.info(f'Attention analysis for layer {layer_idx} completed and saved')
-        else:
-            logger.warning(f'No valid attention weights collected for layer {layer_idx}')
-
-
 def test_model(model, test_set):
     logger.info('Test started...')    
  
     # Load the best model checkpoint
     best_chkpt = join(checkpoint_path, 'best_model.pth')
+    best_chkpt = join(checkpoint_path, 'best_model.pth')
     assert isfile(best_chkpt), 'Checkpoint not found, testing faild!'
     checkpoint = torch.load(best_chkpt, map_location=torch.device(device))
     model.load_state_dict(checkpoint['model_state_dict'])
-    
-    # Run attention analysis if requested and model supports it
-    if (hasattr(args, 'attention_analysis') and args.attention_analysis and 
-        hasattr(model, 'get_attention_weights') and hasattr(model, 'visualize_attention')):
-        
-        logger.info('Running attention analysis...')
-        run_attention_analysis(model, test_set)
     
     # Initialize loss and metric trackers
     test_loss = MeanSquaredError().to(device)
@@ -453,16 +410,94 @@ def test_model(model, test_set):
     
     t1 = time.perf_counter(), time.process_time()
     
+    # Enhanced attention analysis setup
+    num_layers = args.vit_layers
+    num_heads = args.vit_heads
     
+    # Store attention data for analysis
+    all_attention_matrices = {layer_idx: [] for layer_idx in range(num_layers)}
+    head_importance_scores = {layer_idx: [] for layer_idx in range(num_layers)}
+    
+    # Analysis settings - analyze fewer batches for efficiency
+    max_analysis_batches = 5  # Analyze first 5 batches for attention patterns
+    
+    logger.info(f"Starting enhanced attention analysis for {max_analysis_batches} batches...")
+
     for i, data in enumerate(test_set):
-        
         batch_x3, batch_x2, batch_y = data
         batch_x3, batch_x2, batch_y = batch_x3.to(device), batch_x2.to(device), batch_y.to(device)
         model.eval()
+        
         with torch.no_grad():
+            # Forward pass for regular prediction
             outputs = model(batch_x3, batch_x2)
-            
-        # Collect true and predicted values for further analysis
+
+            # Enhanced attention analysis (only for first few batches)
+            if i < max_analysis_batches:
+                logger.info(f"Analyzing attention patterns for batch {i+1}/{max_analysis_batches}...")
+                
+                for layer_idx in range(num_layers):
+                    # Get attention weights for this layer
+                    attention_weights = model.get_attention_weights(batch_x3, batch_x2, layer_idx=layer_idx)
+                    # attention_weights shape: [batch_size, num_heads, seq_len, seq_len]
+                    
+                    # 1. Store average attention across batch and heads for this layer
+                    layer_avg_attention = attention_weights.mean(dim=[0, 1])  # Average over batch and heads
+                    all_attention_matrices[layer_idx].append(layer_avg_attention.cpu())
+                    
+                    # 2. Calculate head importance scores (entropy-based)
+                    batch_head_importance = []
+                    for head_idx in range(num_heads):
+                        head_attention = attention_weights[:, head_idx, :, :]  # [batch_size, seq_len, seq_len]
+                        # Calculate entropy for each head (measure of attention dispersion)
+                        epsilon = 1e-8
+                        head_attention_prob = head_attention + epsilon
+                        head_entropy = -torch.sum(head_attention_prob * torch.log(head_attention_prob), dim=[1, 2])
+                        avg_head_entropy = head_entropy.mean()  # Average across batch
+                        batch_head_importance.append(avg_head_entropy.cpu().item())
+                    
+                    head_importance_scores[layer_idx].append(batch_head_importance)
+                    
+                    # 3. For the first batch, generate individual head visualizations for selected layers
+                    if i == 0:  # Only first batch to avoid too many plots
+                        selected_layers_for_heads = [0, num_layers//2, num_layers-1]  # First, middle, last layer
+                        
+                        if layer_idx in selected_layers_for_heads:
+                            logger.info(f"Creating individual head visualizations for layer {layer_idx}...")
+                            
+                            # Analyze head similarity/clustering
+                            head_similarities = calculate_head_similarity(attention_weights)
+                            logger.info(f"Layer {layer_idx} head similarities: {head_similarities}")
+                            
+                            # Create head analysis plots
+                            create_head_analysis_plots(
+                                attention_weights, 
+                                layer_idx, 
+                                head_importance_scores[layer_idx][-1], 
+                                head_similarities,
+                                save_path=test_path
+                            )
+                            
+                            # Individual head attention matrices (only most and least important heads)
+                            head_importances = batch_head_importance
+                            most_important_head = np.argmax(head_importances)
+                            least_important_head = np.argmin(head_importances)
+                            
+                            for head_idx, head_name in [(most_important_head, "most_important"), 
+                                                      (least_important_head, "least_important")]:
+                                single_head_attn = attention_weights[0, head_idx, :, :].cpu()  # First batch, specific head
+                                model.visualize_attention(
+                                    single_head_attn,
+                                    layer_idx=f"{layer_idx}_head{head_idx}_{head_name}",
+                                    save_path=test_path
+                                )
+                
+                # After analyzing the desired number of batches, break
+                if i == max_analysis_batches - 1:
+                    logger.info("Finished collecting attention data. Creating summary visualizations...")
+                    break
+        
+        # Continue with regular testing workflow
         y_true.append(batch_y.detach().cpu())
         y_pred.append(outputs.detach().cpu())
         h_true.append(calculate_heating_rates(batch_y, batch_x3, batch_x2).detach().cpu())
@@ -471,10 +506,31 @@ def test_model(model, test_set):
         # Calculate and log loss and mean absolute error
         loss = test_loss(outputs, batch_y)
         mae = test_mae(outputs, batch_y)
-        # print(i+1)
+        
         if i % 1000 == 999:
             print(f'batch {i+1} loss: {loss:.4f}, '
                     f'mean_absolute_error: {mae:.4f},')
+
+    # Generate comprehensive attention analysis
+    logger.info("Creating comprehensive attention analysis...")
+    create_comprehensive_attention_analysis(
+        all_attention_matrices, 
+        head_importance_scores, 
+        test_path
+    )
+    
+    # Generate layer-wise averaged attention matrices
+    for layer_idx in range(num_layers):
+        if all_attention_matrices[layer_idx]:
+            # Average attention matrix across all analyzed batches
+            final_avg_attention = torch.stack(all_attention_matrices[layer_idx]).mean(dim=0)
+            
+            logger.info(f"Creating visualization for layer {layer_idx} (averaged across {len(all_attention_matrices[layer_idx])} batches)...")
+            model.visualize_attention(
+                final_avg_attention,
+                layer_idx=layer_idx,
+                save_path=test_path
+            )
 
     t2 = time.perf_counter(), time.process_time()
     
@@ -490,9 +546,6 @@ def test_model(model, test_set):
 
     print(f'Test time: {t2[0] - t1[0]:.2f} loss: {total_test_loss:.4f} ',
             f'mean_absolute_error: {total_test_mae:.4f}')
-    
-    # mean_err = torch.mean(torch.abs(y_true - y_pred), dim=0)
-    # heat_err = torch.mean(torch.abs(h_true - h_pred), dim=0)
 
     # Save true and predicted values to files for further analysis
     with open(join(test_path, 'y_true.pickle'), 'wb') as handle:
@@ -506,7 +559,213 @@ def test_model(model, test_set):
     
     with open(join(test_path, 'h_pred.pickle'), 'wb') as handle:
         pickle.dump(h_pred, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    logger.info('Attention analysis completed.')
+
+
+def calculate_head_similarity(attention_weights):
+    """Calculate pairwise similarity between attention heads"""
+    # attention_weights: [batch_size, num_heads, seq_len, seq_len]
+    batch_size, num_heads, seq_len, _ = attention_weights.shape
+    
+    # Flatten attention matrices for similarity calculation
+    flat_attention = attention_weights.view(batch_size, num_heads, -1)  # [batch_size, num_heads, seq_len^2]
+    
+    # Average across batch
+    avg_flat_attention = flat_attention.mean(dim=0)  # [num_heads, seq_len^2]
+    
+    # Calculate cosine similarity between heads
+    similarities = torch.zeros(num_heads, num_heads)
+    for i in range(num_heads):
+        for j in range(num_heads):
+            if i != j:
+                cos_sim = torch.nn.functional.cosine_similarity(
+                    avg_flat_attention[i:i+1], 
+                    avg_flat_attention[j:j+1], 
+                    dim=1
+                )
+                similarities[i, j] = cos_sim.item()
+    
+    return similarities.cpu().numpy()
+
+
+def create_head_analysis_plots(attention_weights, layer_idx, head_importances, head_similarities, save_path):
+    """Create comprehensive head analysis plots"""
+    batch_size, num_heads, seq_len, _ = attention_weights.shape
+    
+    fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+    
+    # 1. Head importance scores
+    ax1 = axes[0, 0]
+    head_indices = list(range(num_heads))
+    ax1.bar(head_indices, head_importances, color='skyblue', edgecolor='navy')
+    ax1.set_xlabel('Head Index')
+    ax1.set_ylabel('Attention Entropy (Importance)')
+    ax1.set_title(f'Layer {layer_idx}: Head Importance Scores\n(Higher = more dispersed attention)')
+    ax1.grid(True, alpha=0.3)
+    
+    # 2. Head similarity heatmap
+    ax2 = axes[0, 1]
+    im2 = ax2.imshow(head_similarities, cmap='viridis', aspect='auto')
+    ax2.set_xlabel('Head Index')
+    ax2.set_ylabel('Head Index')
+    ax2.set_title(f'Layer {layer_idx}: Head Similarity Matrix\n(Cosine similarity)')
+    plt.colorbar(im2, ax=ax2)
+    
+    # Add text annotations for similarity values
+    for i in range(num_heads):
+        for j in range(num_heads):
+            if i != j:
+                text = ax2.text(j, i, f'{head_similarities[i, j]:.2f}', 
+                              ha="center", va="center", color="white", fontsize=8)
+    
+    # 3. Average attention pattern across all heads
+    ax3 = axes[1, 0]
+    avg_attention = attention_weights.mean(dim=[0, 1]).cpu()  # Average over batch and heads
+    im3 = ax3.imshow(avg_attention, cmap='plasma', aspect='auto')
+    ax3.set_xlabel('Height Level (TO)')
+    ax3.set_ylabel('Height Level (FROM)')
+    ax3.set_title(f'Layer {layer_idx}: Average Attention Pattern\n(All heads combined)')
+    plt.colorbar(im3, ax=ax3)
+    
+    # 4. Attention diversity (standard deviation across heads)
+    ax4 = axes[1, 1]
+    attention_std = attention_weights.std(dim=1).mean(dim=0).cpu()  # Std across heads, avg across batch
+    im4 = ax4.imshow(attention_std, cmap='coolwarm', aspect='auto')
+    ax4.set_xlabel('Height Level (TO)')
+    ax4.set_ylabel('Height Level (FROM)')
+    ax4.set_title(f'Layer {layer_idx}: Attention Diversity\n(Std deviation across heads)')
+    plt.colorbar(im4, ax=ax4)
+    
+    plt.tight_layout()
+    plt.savefig(f'{save_path}/layer_{layer_idx}_head_analysis.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
+
+def create_comprehensive_attention_analysis(all_attention_matrices, head_importance_scores, save_path):
+    """Create comprehensive analysis across all layers"""
+    num_layers = len(all_attention_matrices)
+    
+    # 1. Layer-wise attention evolution
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    
+    # Calculate various metrics across layers
+    layer_metrics = {
+        'self_attention_strength': [],
+        'cross_attention_strength': [],
+        'attention_entropy': [],
+        'max_attention_strength': []
+    }
+    
+    for layer_idx in range(num_layers):
+        if all_attention_matrices[layer_idx]:
+            avg_attention = torch.stack(all_attention_matrices[layer_idx]).mean(dim=0)
+            
+            # Self-attention strength (diagonal)
+            self_attn = torch.diagonal(avg_attention).mean().item()
+            layer_metrics['self_attention_strength'].append(self_attn)
+            
+            # Cross-attention strength (off-diagonal)
+            total_attn = avg_attention.sum().item()
+            diag_attn = torch.diagonal(avg_attention).sum().item()
+            cross_attn = (total_attn - diag_attn) / (avg_attention.numel() - avg_attention.shape[0])
+            layer_metrics['cross_attention_strength'].append(cross_attn)
+            
+            # Attention entropy
+            epsilon = 1e-8
+            attn_prob = avg_attention + epsilon
+            entropy = -torch.sum(attn_prob * torch.log(attn_prob)).item()
+            layer_metrics['attention_entropy'].append(entropy)
+            
+            # Max attention strength
+            max_attn = avg_attention.max().item()
+            layer_metrics['max_attention_strength'].append(max_attn)
+    
+    # Plot layer evolution
+    layer_indices = list(range(len(layer_metrics['self_attention_strength'])))
+    
+    axes[0, 0].plot(layer_indices, layer_metrics['self_attention_strength'], 'o-', label='Self-attention')
+    axes[0, 0].plot(layer_indices, layer_metrics['cross_attention_strength'], 's-', label='Cross-attention')
+    axes[0, 0].set_xlabel('Layer Index')
+    axes[0, 0].set_ylabel('Attention Strength')
+    axes[0, 0].set_title('Attention Strength Evolution')
+    axes[0, 0].legend()
+    axes[0, 0].grid(True, alpha=0.3)
+    
+    axes[0, 1].plot(layer_indices, layer_metrics['attention_entropy'], 'd-', color='green')
+    axes[0, 1].set_xlabel('Layer Index')
+    axes[0, 1].set_ylabel('Total Attention Entropy')
+    axes[0, 1].set_title('Attention Entropy Evolution')
+    axes[0, 1].grid(True, alpha=0.3)
+    
+    axes[0, 2].plot(layer_indices, layer_metrics['max_attention_strength'], '^-', color='red')
+    axes[0, 2].set_xlabel('Layer Index')
+    axes[0, 2].set_ylabel('Max Attention Weight')
+    axes[0, 2].set_title('Max Attention Evolution')
+    axes[0, 2].grid(True, alpha=0.3)
+    
+    # Head importance analysis
+    if head_importance_scores:
+        avg_head_importance = {}
+        for layer_idx in range(num_layers):
+            if head_importance_scores[layer_idx]:
+                # Average importance across batches
+                layer_head_importance = np.array(head_importance_scores[layer_idx]).mean(axis=0)
+                avg_head_importance[layer_idx] = layer_head_importance
         
+        # Plot head importance heatmap
+        if avg_head_importance:
+            importance_matrix = np.array([avg_head_importance[i] for i in sorted(avg_head_importance.keys())])
+            
+            im = axes[1, 0].imshow(importance_matrix, cmap='viridis', aspect='auto')
+            axes[1, 0].set_xlabel('Head Index')
+            axes[1, 0].set_ylabel('Layer Index')
+            axes[1, 0].set_title('Head Importance Across Layers')
+            plt.colorbar(im, ax=axes[1, 0])
+            
+            # Most/least important heads per layer
+            most_important_heads = [np.argmax(importance_matrix[i]) for i in range(importance_matrix.shape[0])]
+            least_important_heads = [np.argmin(importance_matrix[i]) for i in range(importance_matrix.shape[0])]
+            
+            axes[1, 1].plot(layer_indices, most_important_heads, 'o-', label='Most important', color='red')
+            axes[1, 1].plot(layer_indices, least_important_heads, 's-', label='Least important', color='blue')
+            axes[1, 1].set_xlabel('Layer Index')
+            axes[1, 1].set_ylabel('Head Index')
+            axes[1, 1].set_title('Most/Least Important Heads')
+            axes[1, 1].legend()
+            axes[1, 1].grid(True, alpha=0.3)
+            
+            # Head importance variance
+            head_variance = np.var(importance_matrix, axis=1)
+            axes[1, 2].plot(layer_indices, head_variance, 'D-', color='purple')
+            axes[1, 2].set_xlabel('Layer Index')
+            axes[1, 2].set_ylabel('Head Importance Variance')
+            axes[1, 2].set_title('Head Specialization by Layer\n(Higher = more head diversity)')
+            axes[1, 2].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(f'{save_path}/comprehensive_attention_analysis.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    # Save numerical results
+    analysis_results = {
+        'layer_metrics': layer_metrics,
+        'head_importance_scores': head_importance_scores
+    }
+    
+    with open(join(save_path, 'attention_analysis_results.pickle'), 'wb') as f:
+        pickle.dump(analysis_results, f, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    logger.info(f"Comprehensive attention analysis saved to {save_path}")
+    
+    # Print summary
+    print(f"\n=== COMPREHENSIVE ATTENTION ANALYSIS SUMMARY ===")
+    print(f"Analyzed {num_layers} layers with attention patterns")
+    if layer_metrics['self_attention_strength']:
+        print(f"Self-attention strength: {np.mean(layer_metrics['self_attention_strength']):.4f} ± {np.std(layer_metrics['self_attention_strength']):.4f}")
+        print(f"Cross-attention strength: {np.mean(layer_metrics['cross_attention_strength']):.4f} ± {np.std(layer_metrics['cross_attention_strength']):.4f}")
+        print(f"Strongest self-attention in layer: {np.argmax(layer_metrics['self_attention_strength'])}")
+        print(f"Strongest cross-attention in layer: {np.argmax(layer_metrics['cross_attention_strength'])}")
 
 def test_loading_time(train_files, iter=10):
     logger.info('Test Loading time started...')

@@ -1,0 +1,36 @@
+{
+    "name": "Debug: Attention Analysis (train_flux)",
+    "type": "debugpy",
+    "request": "launch",
+    "program": "${workspaceFolder}/SolverEmulation/A_RadiativeFlux/train_flux.py",
+    "console": "integratedTerminal",
+    "python": "/myhome/mambaforge/envs/deepFlux/bin/python",
+    "cwd": "${workspaceFolder}/SolverEmulation/A_RadiativeFlux",
+    "env": {
+        "PYTHONPATH": "${workspaceFolder}/SolverEmulation/A_RadiativeFlux"
+    },
+    "args": [
+        "--model", "vit",
+        "--dataset", "/mydata/deepcloud/salman/dataset/h5_data_all_chuncked",
+        "--save", "/mydata/deepcloud/yves/online-datasets/workspace/results/attention_debug",
+        "--no-train",
+        "--test",
+        "--attention-analysis",
+        "--attention-samples", "500",
+        "--batch-size", "4",
+        "--hidden-dim", "128",
+        "--layers", "4",
+        "--heads", "6",
+        "--patch-size", "1",
+        "--dim-head", "64",
+        "--mlp-ratio", "4.0",
+        "--channel-3d", "6",
+        "--channel-2d", "6",
+        "--channel-out", "4",
+        "--height-in", "70",
+        "--num-workers", "4",
+        "--dataset-type", "triangle",
+        "--triangle-id", "0",
+        "--mode", "1d"
+    ]
+} 

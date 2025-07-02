@@ -33,7 +33,7 @@ plt.rcParams.update({
 
 # === PLOT CONFIGURATION ===
 # Manually specify plot name and subfolder
-PLOT_NAME = "AFNO"  # Change this for each plot scenario
+PLOT_NAME = "AFNO_HRLU"  # Change this for each plot scenario
 SUBFOLDER = "Differences_Flux"  # Output subfolder
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
@@ -44,12 +44,21 @@ os.makedirs(plot_output_dir, exist_ok=True)
 models = [
     #{'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
     #{'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
-    {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
+    #{'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
     #{'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
+    
+    
+    {'name': 'AFNO-128-l4-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
+
+    
+   #{'name': 'BiLSTM-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu/test'},
+   #{'name': 'BiLSTM-hrlu-second', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
+    
+   # {'name': 'BiLSTM-second', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_second/test'},
 ]
 
 # Sample selection
-sample_index = 91  # Change this to select a different sample
+sample_index = 84 # Change this to select a different sample
 
 # Vertical level range - upper 30 levels (0 = uppermost, 70 = surface)
 upper_level = 0  # Uppermost level
