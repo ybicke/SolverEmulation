@@ -313,10 +313,9 @@ class SimplifiedGraphTransformer3D(nn.Module):
         triangle_indices = get_triangle_indices(triangle_id, division_factor, total_cols)
         actual_num_columns = len(triangle_indices)
         
-        # Position embeddings with proper initialization
-        self.pos_embedding_3d = nn.Parameter(
-            torch.randn(1, actual_num_columns * num_height_levels, embed_dim) * 0.02
-        )
+        # Simplified positional embeddings - separate for spatial and height
+        self.pos_embedding_spatial = nn.Embedding(actual_num_columns, embed_dim)  # Column positions
+        self.pos_embedding_height = nn.Embedding(num_height_levels, embed_dim)   # Height positions
         
         # Hybrid transformer layers
         mlp_dim = int(embed_dim * mlp_ratio)
@@ -380,8 +379,20 @@ class SimplifiedGraphTransformer3D(nn.Module):
         # Flatten for graph processing
         x_flat = x.view(B, N * L, -1)  # [B, N*L, embed_dim]
         
-        # Add position embeddings to node features
-        x_flat += self.pos_embedding_3d
+       
+        # Create position indices for embeddings
+        # Spatial positions: column indices repeated for each height level. [0,0,...,0, 1,1,...,1, ..., N-1,N-1,...,N-1]
+        spatial_indices = torch.arange(N, device=x.device).repeat_interleave(L)  
+        # Height positions: height indices repeated for each column. [0,1,2,...,L-1, 0,1,2,...,L-1, ...]
+         
+        height_indices = torch.arange(L, device=x.device).repeat(N)  
+        # Get positional embeddings
+        pos_emb_spatial = self.pos_embedding_spatial(spatial_indices)  # [N*L, embed_dim]
+        pos_emb_height = self.pos_embedding_height(height_indices)      # [N*L, embed_dim]
+        
+        # Add positional embeddings: token + pos_emb_spatial + pos_emb_height
+        x_flat = x_flat + pos_emb_spatial.unsqueeze(0) + pos_emb_height.unsqueeze(0)  # [B, N*L, embed_dim]
+        
         
         # Process through hybrid transformer layers
         for layer in self.layers:

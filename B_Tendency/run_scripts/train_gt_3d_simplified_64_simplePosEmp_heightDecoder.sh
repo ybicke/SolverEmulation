@@ -26,7 +26,7 @@ python train_tendency.py \
     --dataset-output /mydata/deepcloud/yves/h5_tendency_data_all/outputs \
     --input-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_updated.pickle \
     --target-stats-file /mydata/deepcloud/shared/h5_tendency_all/normalizer_stats_per_feat_y2_no_temp.pickle \
-    --save /mydata/deepcloud/yves/results-new/gt_simplified_64_l4_height_decoder \
+    --save /mydata/deepcloud/yves/results-new/gt_simplified_64_l4_k2_drop01_simplePosEmp_heightDecoder \
     --percent 1.0 \
     --num-workers 4 \
     --prefetch-factor 2 \
@@ -45,11 +45,10 @@ python train_tendency.py \
     --learning-rate 0.0005 \
     --hidden-dim 64 \
     --layers 4 \
-    --dropout 0.3 \
+    --dropout 0.1 \
     --heads 8 \
     --dim-head 8 \
     --mlp-ratio 2.0 \
-    --emb-dropout 0.3 \
     --grid-file-path /mydata/deepcloud/yves/SolverEmulation/data_exploration/icon_grid_0008_R02B05_G.nc \
     --use-height-dependent-decoder \
     --triangle-id 39 \
