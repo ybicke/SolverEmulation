@@ -172,6 +172,29 @@ def get_model(model_name, mean2d, var2d, mean3d, var3d, is_test):
             var3d=var3d,
             device=device
         ).to(device)
+        
+        
+    elif model_name == 'vit_analysis_concat':
+        # Use analysis version if attention analysis is requested
+        if is_test and hasattr(args, 'attention_analysis') and args.attention_analysis:
+            from column_files.vit_column_analysis_concat import ViT4 as ViT
+        else:
+            from column_files.vit_column_concat import ViT4 as ViT
+        model = ViT(
+            num_cells=args.num_cells,
+            patch_size=args.patch_size,
+            dim=args.vit_hidden_dim,
+            mlp_dim=args.vit_hidden_dim,
+            depth=args.vit_layers,
+            heads=args.vit_heads,
+            dropout=args.vit_dropout,
+            mean2d=mean2d,
+            var2d=var2d, 
+            mean3d=mean3d, 
+            var3d=var3d,
+            device=device
+        ).to(device)
+    
     
     else:
         raise NotImplementedError('Model has not implemented yet!')
@@ -388,6 +411,9 @@ def run_attention_analysis(model, test_set):
     
     logger.info(f'Collected {len(attention_data)} batches with {sample_count} samples total')
     
+    # Dictionary to store all attention matrices for grid visualization
+    all_attention_matrices = {}
+    
     # Analyze attention for each specified layer
     for layer_idx in args.attention_layers:
         logger.info(f'Analyzing attention for layer {layer_idx}...')
@@ -414,7 +440,10 @@ def run_attention_analysis(model, test_set):
             # Average attention weights across all samples
             avg_attention_matrix = torch.mean(torch.stack(all_attention_weights), dim=0)
             
-            # Create visualization
+            # Store for grid visualization
+            all_attention_matrices[layer_idx] = avg_attention_matrix
+            
+            # Create individual visualization
             save_path = join(test_path, f'attention_layer_{layer_idx}_publication.png')
             model.visualize_attention(avg_attention_matrix, layer_idx=layer_idx, save_path=save_path)
             
@@ -426,6 +455,15 @@ def run_attention_analysis(model, test_set):
             logger.info(f'Attention analysis for layer {layer_idx} completed and saved')
         else:
             logger.warning(f'No valid attention weights collected for layer {layer_idx}')
+    
+    # Create grid visualization if we have multiple layers
+    if len(all_attention_matrices) > 1:
+        logger.info('Creating grid visualization for all layers...')
+        grid_save_path = join(test_path, 'attention_matrices_grid_publication.png')
+        model.visualize_attention_grid(all_attention_matrices, save_path=grid_save_path)
+        logger.info('Grid visualization completed and saved')
+    elif len(all_attention_matrices) == 1:
+        logger.info('Only one layer analyzed, grid visualization not needed')
 
 
 def test_model(model, test_set):
