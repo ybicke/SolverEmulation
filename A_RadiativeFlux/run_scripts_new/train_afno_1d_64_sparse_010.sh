@@ -48,7 +48,7 @@ python train_flux.py \
     --patch-size 1 \
     --mlp-ratio 2 \
     --fno-blocks 4 \
-    --afno-sparsity-threshold 0.10 \
+    --afno-sparsity-threshold 0.11 \
     --hard-thresholding-fraction 1.0 \
     --hidden-size-factor 1 \
     --wandb-mode online
