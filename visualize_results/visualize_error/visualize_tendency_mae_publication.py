@@ -38,7 +38,7 @@ plt.rcParams.update({
 save_to_test_path = False
 
 # === PLOT CONFIGURATION ===
-PLOT_NAME = "GNN_3D_64_l2_lonlat_second"
+PLOT_NAME = "GT_3D_simple_heightDecoder_simplePosEmp"
 SUBFOLDER = "MAE_Tendency"
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
@@ -66,9 +66,9 @@ models = [
     #{'name': 'GNN-1D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k4_correct_variance/test'},
     #{'name': 'GNN-3D-64-L2','path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k4_correct_variance/test'},
     #{'name': 'GNN-3D-64-L2-100-shuffled', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_64_l2_100_k4_correct_variance_shuffled/test'},
-    {'name': 'GNN-3D-64-L2-lonlat', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_lonlat/test'},
+    #{'name': 'GNN-3D-64-L2-lonlat', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_lonlat/test'},
     
-    {'name': 'GNN-3D-64-L2-lonlat-second', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_lonlat_second/test'},
+    #{'name': 'GNN-3D-64-L2-lonlat-second', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_lonlat_second/test'},
 
     
     #{'name': 'GNN-3D-128-L2-lonlat', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat/test'},
@@ -113,17 +113,33 @@ models = [
     
     #ViT
     #{'name': 'ViT-1D-64-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_64_l4_triangle/test'},
-    {'name': 'ViT-1D-128-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
+    #{'name': 'ViT-1D-128-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
     
     # large GNN 3D versus GT 2D
-    {'name': 'GT-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
+    #{'name': 'GT-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
     
-    #{'name': 'GT-3D-large-256-L4-k3-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_large/test'},
-    #{'name': 'GT-3D-128-L4', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4/test'},
-
-
+    # {'name': 'GT-3D-large-256-L4-k3-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_large/test'},
+    {'name': 'GT-3D-128-L4', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4/test'},
     #{'name': 'AFNO-1D-128-L4', 'path': '/mydata/deepcloud/yves/results-new/afno_1d_128_l4_triangle/test'},
+    
+
+    #{'name': 'GT-3D-64-L4-k2-drop01-simplePosEmp', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_k2_drop01_simplePosEmp/test'},
+    #{'name': 'GT-3D-64-L4-k2-drop01-simplePosEmp-heightDecoder', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_k2_drop01_simplePosEmp_heightDecoder/test'},
+    #{'name': 'GT-3D-64-L4-heightDecoder', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_height_decoder/test'},
+
+
+    {'name': 'GT-3D-128-L4-k2-drop01-simplePosEmp', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp/test'},
+    {'name': 'GT-3D-128-L4-k2-drop01-simplePosEmp-heightDecoder', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp_heightDecoder/test'},
+
+
+
+
+
+
 ]
+
+
+
 
 # Short descriptive titles for publication
 target_units = {

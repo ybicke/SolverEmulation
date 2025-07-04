@@ -34,7 +34,7 @@ plt.rcParams.update({
 })
 
 # === PLOT CONFIGURATION ===
-PLOT_NAME = "flux_linear_second"
+PLOT_NAME = "flux_linear_log_second"
 SUBFOLDER = "MAE_Flux"
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
@@ -44,21 +44,21 @@ os.makedirs(plot_output_dir, exist_ok=True)
 os.makedirs(cache_dir, exist_ok=True)
 
 models = [
-    {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
-    {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
-    {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
+    {'name': 'GNN', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
+    {'name': 'ViT', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
+    {'name': 'AFNO', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
     # {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
     
     
     # Fluxes 1D models hrlu
-    #{'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
+    #{'name': 'GNN', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
+    #{'name': 'ViT', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
+    #{'name': 'AFNO', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
     #{'name': 'BiLSTM-32-128', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_32_128_hrlu_0005/test'},
-    #{'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
-    #{'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
     # {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu/test'},
     
-    #{'name': 'BiLSTM-hrlu-second', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
-    {'name': 'BiLSTM-medium-second', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_second/test'},
+    #{'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
+    {'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_second/test'},
 ]
 
 
@@ -213,13 +213,14 @@ def add_subplot_flux_optimized(fig, x, ys, subplot_pos, models_name, xlabel=None
         ax.set_xlim(-0.5, 7)
         ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
     elif is_heating:
-        #ax.set_xscale('log')  # Set log scale for heating rates
-        #ax.set_xlim(1e-2, 1e3)  # Adjust limits for log scale
-        #ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
-        #ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
-        #ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
-        ax.set_xlim(-5, 20)
-        ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
+        ax.set_xscale('log')  # Set log scale for heating rates
+        ax.set_xlim(1e-2, 1e3)  # Adjust limits for log scale
+        ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
+        ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
+        ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
+        
+        #ax.set_xlim(-5, 30)
+        #ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
     else:
         ax.set_xlim(-0.5, 95)
         ax.xaxis.set_major_locator(ticker.MaxNLocator(6))

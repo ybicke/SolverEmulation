@@ -21,6 +21,14 @@ models = [
     
     #{'name': 'GNN-3D-64-L2-100', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_k4_correct_variance/test'},
     #{'name': 'GT-3D-64-L4-k2-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_drop03_triangle39_k2/test'},
+    
+    
+    #ViT and large GNN 3D versus GT 2D
+
+    #{'name': 'ViT-1D-64-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_64_l4_triangle/test'},
+    {'name': 'ViT-1D-128-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
+    {'name': 'GT-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
+    {'name': 'GT-3D-128-L4', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp_heightDecoder/test'},
 
 
 
@@ -36,6 +44,7 @@ models = [
     #ViT
     #{'name': 'ViT-1D-64-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_64_l4_triangle/test'},
     #{'name': 'ViT-1D-128-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
+    
     # large GNN 3D versus GT 2D
     #{'name': 'GT-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
     #{'name': 'GT-3D-large-256-L4-k3-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_large/test'},
@@ -55,7 +64,7 @@ PRESSURE_WEIGHTS_PATH = None  # '/mydata/deepcloud/yves/pressure_weights.npy'
 
 # Output paths
 OUTPUT_DIR = '/mydata/deepcloud/yves/results_final/metrics_tendency'
-OUTPUT_FILENAME = '1D_2D_3D_Transformer_models.md'
+OUTPUT_FILENAME = '1D_2D_3D_Transformer_models_new.md'
 
 # Define target names and units
 target_units = {

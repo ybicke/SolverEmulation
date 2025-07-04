@@ -453,14 +453,15 @@ def run_attention_analysis(model, test_set):
                 pickle.dump(avg_attention_matrix, handle, protocol=pickle.HIGHEST_PROTOCOL)
             
             logger.info(f'Attention analysis for layer {layer_idx} completed and saved')
-        else:
+            else:
             logger.warning(f'No valid attention weights collected for layer {layer_idx}')
     
     # Create grid visualization if we have multiple layers
     if len(all_attention_matrices) > 1:
         logger.info('Creating grid visualization for all layers...')
         grid_save_path = join(test_path, 'attention_matrices_grid_publication.png')
-        model.visualize_attention_grid(all_attention_matrices, save_path=grid_save_path)
+        # model.visualize_attention_grid(all_attention_matrices, save_path=grid_save_path)
+        model.visualize_attention_average(all_attention_matrices, save_path=grid_save_path)
         logger.info('Grid visualization completed and saved')
     elif len(all_attention_matrices) == 1:
         logger.info('Only one layer analyzed, grid visualization not needed')

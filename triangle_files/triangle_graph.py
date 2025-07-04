@@ -314,7 +314,7 @@ def visualize_3d_graph_plotly(grid_data, triangle_indices, edge_index, node_ids,
     print(f"Horizontal edges: {len(horiz_edges_x)//3}, Vertical edges: {len(vert_edges_x)//3}")
 
 
-def visualize_edge_index(edge_index, num_height_levels=3):
+def visualize_edge_index(edge_index, num_height_levels=3, show_node_labels=False):
     """
     Visualizes just the edge_index tensor without using grid_data or triangle_indices.
     Creates a simple graph visualization using only connectivity information.
@@ -326,6 +326,8 @@ def visualize_edge_index(edge_index, num_height_levels=3):
         The edge_index tensor of shape [2, num_edges]
     num_height_levels : int
         Number of height levels in the graph
+    show_node_labels : bool
+        Whether to show node numbers/labels on the visualization
     """
     
     # Convert edge_index to numpy for easier processing
@@ -384,7 +386,7 @@ def visualize_edge_index(edge_index, num_height_levels=3):
                         cmap='viridis', 
                         node_size=100,
                         alpha=0.8)
-    plt.colorbar(nodes, label='Height Level')
+    #plt.colorbar(nodes, label='Height Level')
     
     nx.draw_networkx_edges(G, pos, 
                         edgelist=horizontal_edges,
@@ -398,13 +400,14 @@ def visualize_edge_index(edge_index, num_height_levels=3):
                         alpha=0.4,
                         label='Vertical Connections')
     
-    if num_nodes <= 100:
+    # Only show node labels if explicitly requested
+    if show_node_labels and num_nodes <= 100:
         nx.draw_networkx_labels(G, pos, font_size=8)
     
-    plt.title('Complete Graph Structure from Edge Index')
+    #plt.title('Complete Graph Structure from Edge Index')
     plt.legend()
     plt.axis('off')
-    plt.savefig('pure_edge_index_visualization.png', dpi=300, bbox_inches='tight')
+    plt.savefig('pure_edge_index_visualization_2.png', dpi=300, bbox_inches='tight')
     plt.show()
     
     print(f"Plotted {len(horizontal_edges)} horizontal edges and {len(vertical_edges)} vertical edges")
@@ -432,7 +435,7 @@ if __name__ == '__main__':
 
     # Visualize the pure edge_index without grid data
     print("\nVisualizing pure edge_index:")
-    visualize_edge_index(edge_index, visualization_height_levels)
+    visualize_edge_index(edge_index, visualization_height_levels, show_node_labels=False)
 
     # Regular plot using horizontal_edges_list
     print("\nPlotting using horizontal_edges_list:")

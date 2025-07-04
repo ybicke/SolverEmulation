@@ -452,7 +452,7 @@ class ViT4(nn.Module):
         
         # Enhanced contrast: use power-law normalization to make attention patterns more pronounced
         # Power < 1 enhances low values, power > 1 enhances high values
-        norm = PowerNorm(gamma=0.8, vmin=vmin, vmax=vmax)  # gamma=0.5 enhances mid-range values
+        # norm = PowerNorm(gamma=0.8, vmin=vmin, vmax=vmax)  # gamma=0.5 enhances mid-range values
         
         # Calculate grid dimensions (2 plots per row)
         cols = 2
@@ -489,8 +489,9 @@ class ViT4(nn.Module):
             # Use 'hot' colormap for better contrast (black->red->yellow->white)
             im = ax.imshow(flipped_attn, cmap='plasma', 
                            interpolation='nearest', aspect='equal',
-                           #vmin=vmin, vmax=vmax, 
-                           norm=norm)
+                           vmin=vmin, vmax=vmax, 
+                           #norm=norm
+                           )
             
             # Store first image of each row for colorbar
             if col == 0:
@@ -582,3 +583,86 @@ class ViT4(nn.Module):
         print(f"Colormap: 'plasma' with PowerNorm(gamma=0.5) for enhanced contrast")
         print(f"Layout: Minimal spacing (hspace=0.08, wspace=0.02), row-fitted colorbars")
         print("Atmospheric visualization: Surface (0 km) at bottom-right, TOA (65 km) at top-left")
+
+    def visualize_attention_average(self, attention_matrices_dict, save_path=None):
+        """Visualize the average attention matrix across all layers
+        
+        Args:
+            attention_matrices_dict: Dictionary with layer_idx as key and attention matrix as value
+            save_path: Path to save the figure
+        """
+        
+        # Get layer indices and sort them
+        layer_indices = sorted(attention_matrices_dict.keys())
+        num_layers = len(layer_indices)
+        
+        if num_layers == 0:
+            print("No attention matrices to visualize")
+            return
+        
+        print(f"Averaging attention across {num_layers} layers: {layer_indices}")
+        
+        # Flip and collect all matrices
+        flipped_matrices = []
+        for layer_idx in layer_indices:
+            avg_attention_matrix = attention_matrices_dict[layer_idx]
+            # Flip both dimensions to have surface at bottom-right, TOA at top-left
+            flipped_attn_rows = torch.flip(avg_attention_matrix, dims=[0])
+            flipped_attn_cols = torch.flip(flipped_attn_rows, dims=[1])
+            flipped_attn = flipped_attn_cols
+            flipped_matrices.append(flipped_attn)
+        
+        # Stack and average across all layers
+        stacked_matrices = torch.stack(flipped_matrices, dim=0)
+        averaged_attention = torch.mean(stacked_matrices, dim=0)
+        
+        # Height mapping for atmospheric levels
+        height_mapping = {
+            0: 65, 10: 39, 20: 25, 30: 15, 40: 8, 50: 4, 60: 1, 70: 0
+        }
+        
+        # Create tick positions and labels with level and height in brackets
+        tick_positions = list(height_mapping.keys())
+        tick_labels = [f"{level} ({height_mapping[level]} km)" for level in tick_positions]
+        
+        # Create publication-ready plot with larger size for better text readability
+        plt.figure(figsize=(12, 10))
+        
+        # Plot the averaged attention matrix
+        im = plt.imshow(averaged_attention, cmap='plasma', interpolation='nearest', aspect='equal')
+        
+        # Set ticks and labels for both axes with larger font
+        plt.xticks(tick_positions, tick_labels, fontsize=18, rotation=45)
+        plt.yticks(tick_positions, tick_labels, fontsize=18)
+        
+        # Add proper labels with interpretation and more spacing
+        plt.xlabel('Key Position', fontsize=19, labelpad=15)
+        plt.ylabel('Query Position', fontsize=19, labelpad=15)
+        plt.title(f'Average Attention Matrix (Layers {min(layer_indices)+1}-{max(layer_indices)+1})', 
+                 fontsize=19, pad=25)
+        
+        # Add colorbar with label and more spacing
+        cbar = plt.colorbar(im, fraction=0.046, pad=0.04)
+        cbar.set_label('Average Attention Weight', fontsize=19, labelpad=20)
+        cbar.ax.tick_params(labelsize=18)
+        
+        # Add grid for better readability
+        plt.grid(True, alpha=1, linestyle='--', linewidth=0.5)
+        
+        # Improve layout and save
+        plt.tight_layout()
+        save_filename = save_path if save_path else f'vit_attention_matrix_average_layers_{min(layer_indices)+1}-{max(layer_indices)+1}_publication.png'
+        plt.savefig(save_filename, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.close()
+        
+        print(f"Publication-ready averaged attention matrix saved as: {save_filename}")
+        print(f"Matrix shape: {averaged_attention.shape}")
+        print(f"Averaged over {num_layers} layers")
+        print("Atmospheric visualization: Surface (0 km) at bottom-right, TOA (65 km) at top-left")
+        
+        # Print some statistics about the averaged attention
+        print(f"Average attention statistics:")
+        print(f"  Min: {averaged_attention.min():.4f}")
+        print(f"  Max: {averaged_attention.max():.4f}")
+        print(f"  Mean: {averaged_attention.mean():.4f}")
+        print(f"  Std: {averaged_attention.std():.4f}")

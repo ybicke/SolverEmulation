@@ -25,7 +25,9 @@ models = [
     {'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
     {'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
     {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
-    {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
+    {'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_second/test'},
+
+    # {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
     
     
     
@@ -34,6 +36,8 @@ models = [
     #{'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
     #{'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
     #{'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu/test'},
+    #{'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
+
     
     ]
 
@@ -44,7 +48,7 @@ TRAINING_STATS_PATH = None
 
 # Output paths
 OUTPUT_DIR = '/mydata/deepcloud/yves/results_final/metrics_flux'
-OUTPUT_FILENAME = 'Flux_1D.md'
+OUTPUT_FILENAME = 'Flux_1D_second.md'
 
 # Make sure output directory exists
 os.makedirs(OUTPUT_DIR, exist_ok=True)
