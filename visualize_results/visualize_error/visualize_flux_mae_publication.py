@@ -34,8 +34,8 @@ plt.rcParams.update({
 })
 
 # === PLOT CONFIGURATION ===
-PLOT_NAME = "flux_linear_log_second"
-SUBFOLDER = "MAE_Flux"
+PLOT_NAME = "flux_soft_thresholding_final"
+SUBFOLDER = "MAE_Sparsity"
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
 plot_output_dir = join(final_results_path, SUBFOLDER)
@@ -44,9 +44,9 @@ os.makedirs(plot_output_dir, exist_ok=True)
 os.makedirs(cache_dir, exist_ok=True)
 
 models = [
-    {'name': 'GNN', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
-    {'name': 'ViT', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
-    {'name': 'AFNO', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
+    #{'name': 'GNN', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
+    #{'name': 'ViT', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
+    #{'name': 'AFNO', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
     # {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
     
     
@@ -58,7 +58,35 @@ models = [
     # {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu/test'},
     
     #{'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
-    {'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_second/test'},
+    #{'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_second/test'},
+    
+    
+    
+    #{'name': 'AFNO_010', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_64_full_1percent_sparse_010/test'},
+    {'name': 'AFNO_021', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_64_full_1percent_sparse_021/test'},
+    #{'name': 'AFNO_051', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_64_full_1percent_sparse_051/test'},
+    
+    #{'name': 'AFNO_010', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00106/test'},
+    #{'name': 'AFNO_021', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_004/test'},
+   # {'name': 'AFNO_051', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_008/test'},
+    
+    #{'name': 'AFNO_0172', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00172/test'},
+    #{'name': 'AFNO_0208', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00208/test'},
+    #{'name': 'AFNO_04', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars04/test'},
+    #{'name': 'AFNO_05', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars05/test'},
+
+    {'name': 'AFNO_000', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_000/test'},
+    {'name': 'AFNO_0106', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00106/test'},
+    #{'name': 'AFNO_0172', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00172/test'},
+    #{'name': 'AFNO_0208', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00208/test'},
+    #{'name': 'AFNO_03', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars03/test'},
+
+    
+    #{'name': 'AFNO_06', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard06/test'},
+    #{'name': 'AFNO_07', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard07/test'},
+    #{'name': 'AFNO_08', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard08/test'},
+    #{'name': 'AFNO_09', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard09/test'},
+    
 ]
 
 

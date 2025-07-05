@@ -23,10 +23,7 @@ from einops.layers.torch import Rearrange
 
 from afno.afno1d import AFNO1D
 # from afno.afno2d import AFNO2D
-from afno.bfno2d import BFNO2D
-from afno.ls import AttentionLS
-from afno.sa import SelfAttention
-from afno.gfn import GlobalFilter
+
 
 import matplotlib.pyplot as plt
 import os
