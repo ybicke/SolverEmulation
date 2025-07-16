@@ -40,7 +40,7 @@ from torchmetrics import MeanAbsoluteError, MeanSquaredError
 
 from flux_data_loader import UnifiedFluxDataset
 from utils.data_utils import DataNormalizer
-from utils.flux_utils import calculate_heating_rates, HeatingRateSmoothnessLoss, SmoothHeatingRateSmoothnessLoss
+from utils.flux_utils import calculate_heating_rates, HeatingRateSmoothnessLoss, SmoothHeatingRateSmoothnessLoss, EnergyConservationLossV2
 from utils.evaluation_utils import process_timing_statistics, warm_up_model
 #from flux_analysis.attention_analysis import run_attention_analysis_if_enabled
 
@@ -146,10 +146,16 @@ parser.add_argument('--hr-smooth-transition', type=str, default='linear',
                    choices=['linear', 'sigmoid', 'quadratic'],
                    help='Transition type for smooth HR loss: linear, sigmoid, or quadratic')
 
+# Energy Conservation Loss parameters  
+parser.add_argument('--energy-conservation-weight', type=float, default=0.0,
+                   help='Weight for energy conservation physics loss (0.0 to disable)')
+parser.add_argument('--energy-conservation-alpha', type=float, default=0.5,
+                   help='Balance between MSE (alpha) and energy conservation (1-alpha) in physics loss')
+
 # Attention Analysis
-#parser.add_argument('--attention-analysis', action='store_true', help='Run attention analysis during testing (ViT models only)')
-#parser.add_argument('--attention-samples', type=int, default=500, help='Number of samples for attention analysis')
-#parser.add_argument('--attention-layers', nargs='+', type=int, default=None, help='Specific layers to analyze (e.g., 0 1 2 3)')
+parser.add_argument('--attention-analysis', action='store_true', help='Run attention analysis during testing (ViT models only)')
+parser.add_argument('--attention-samples', type=int, default=500, help='Number of samples for attention analysis')
+parser.add_argument('--attention-layers', nargs='+', type=int, default=None, help='Specific layers to analyze (e.g., 0 1 2 3)')
 
 # Logging
 parser.add_argument('--wandb-mode', type=str, default='disabled', choices=['online', 'offline', 'disabled'], help='W&B mode')
@@ -414,6 +420,12 @@ def train_model(model, train_set, valid_set, normalizer):
                 top_levels=args.hr_smoothness_top_levels,
                 mode=args.mode
             ).to(device)
+            
+    # Initialize energy conservation loss if enabled
+    use_energy_conservation = args.energy_conservation_weight > 0
+    if use_energy_conservation:
+        logger.info(f"Using energy conservation physics loss with weight={args.energy_conservation_weight}, alpha={args.energy_conservation_alpha}")
+        energy_conservation_loss = EnergyConservationLossV2(alpha=args.energy_conservation_alpha, mode=args.mode).to(device)
 
     # Load checkpoint if available
     p_path, cp_id = find_latest_checkpoint(checkpoint_path)
@@ -441,6 +453,10 @@ def train_model(model, train_set, valid_set, normalizer):
         
         smoothness_losses_train = []
         smoothness_losses_valid = []
+        
+        # Reset energy conservation loss if enabled
+        if use_energy_conservation:
+            energy_conservation_loss.reset()
 
         # Training step
         model.train(True)
@@ -465,8 +481,13 @@ def train_model(model, train_set, valid_set, normalizer):
                 smoothness_loss = hr_smoothness(outputs, batch_x3, batch_x2)
                 loss = mse_loss + smoothness_loss
                 smoothness_losses_train.append(smoothness_loss.item())
-            else:
-                loss = mse_loss
+                
+            # Add energy conservation loss if enabled
+            if use_energy_conservation:
+                energy_conservation_loss.update(batch_y, outputs, batch_x3, batch_x2)
+                ec_components = energy_conservation_loss.get_components()
+                ec_loss_value = energy_conservation_loss.compute()
+                loss = mse_loss + args.energy_conservation_weight * ec_loss_value
 
             batch_mae = train_mae(outputs, batch_y)
 
@@ -497,6 +518,12 @@ def train_model(model, train_set, valid_set, normalizer):
                 if use_hr_smoothness:
                     v_smoothness_loss = hr_smoothness(v_outputs, vx3d, vx2d).item()
                     smoothness_losses_valid.append(v_smoothness_loss)
+                    
+                # Track energy conservation loss for validation if enabled
+                if use_energy_conservation:
+                    # Create a temporary loss instance for validation tracking
+                    temp_ec_loss = EnergyConservationLossV2(alpha=args.energy_conservation_alpha, mode=args.mode).to(device)
+                    temp_ec_loss.update(v_labels, v_outputs, vx3d, vx2d)
 
                 valid_loss.update(v_outputs, v_labels)
                 valid_mae.update(v_outputs, v_labels)
@@ -523,6 +550,13 @@ def train_model(model, train_set, valid_set, normalizer):
             log_dict['hr_smoothness'] = sum(smoothness_losses_train) / len(smoothness_losses_train)
         if use_hr_smoothness and smoothness_losses_valid:
             log_dict['val_hr_smoothness'] = sum(smoothness_losses_valid) / len(smoothness_losses_valid)
+            
+        # Add energy conservation metrics if enabled
+        if use_energy_conservation:
+            ec_components = energy_conservation_loss.get_components()
+            log_dict['energy_conservation_mse'] = ec_components['mse_component']
+            log_dict['energy_conservation_physics'] = ec_components['ec_component']
+            log_dict['energy_conservation_total'] = ec_components['total_loss']
 
         # Log to W&B
         wandb.log(log_dict)

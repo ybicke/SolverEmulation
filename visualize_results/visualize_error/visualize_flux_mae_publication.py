@@ -34,7 +34,7 @@ plt.rcParams.update({
 })
 
 # === PLOT CONFIGURATION ===
-PLOT_NAME = "flux_soft_thresholding_final"
+PLOT_NAME = "flux_hard_thresholding_final"
 SUBFOLDER = "MAE_Sparsity"
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
@@ -63,7 +63,7 @@ models = [
     
     
     #{'name': 'AFNO_010', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_64_full_1percent_sparse_010/test'},
-    {'name': 'AFNO_021', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_64_full_1percent_sparse_021/test'},
+    #{'name': 'AFNO_021', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_64_full_1percent_sparse_021/test'},
     #{'name': 'AFNO_051', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_64_full_1percent_sparse_051/test'},
     
     #{'name': 'AFNO_010', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00106/test'},
@@ -76,11 +76,21 @@ models = [
     #{'name': 'AFNO_05', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars05/test'},
 
     {'name': 'AFNO_000', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_000/test'},
-    {'name': 'AFNO_0106', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00106/test'},
+    #{'name': 'AFNO_0106', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00106/test'},
     #{'name': 'AFNO_0172', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00172/test'},
     #{'name': 'AFNO_0208', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00208/test'},
     #{'name': 'AFNO_03', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars03/test'},
 
+    #{'name': 'AFNO_0435', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00435/test'},
+    #{'name': 'AFNO_0717', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00717/test'},
+    
+    {'name': 'AFNO_06', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard06/test'},
+    {'name': 'AFNO_07', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard07/test'},
+    {'name': 'AFNO_08', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard08/test'},
+    {'name': 'AFNO_09', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard09/test'},
+    
+    
+    
     
     #{'name': 'AFNO_06', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard06/test'},
     #{'name': 'AFNO_07', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard07/test'},
@@ -241,14 +251,14 @@ def add_subplot_flux_optimized(fig, x, ys, subplot_pos, models_name, xlabel=None
         ax.set_xlim(-0.5, 7)
         ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
     elif is_heating:
-        ax.set_xscale('log')  # Set log scale for heating rates
-        ax.set_xlim(1e-2, 1e3)  # Adjust limits for log scale
-        ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
-        ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
-        ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
+        #ax.set_xscale('log')  # Set log scale for heating rates
+        #ax.set_xlim(1e-2, 1e3)  # Adjust limits for log scale
+        #ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
+        #ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
+        #ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
         
-        #ax.set_xlim(-5, 30)
-        #ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
+        ax.set_xlim(-5, 30)
+        ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
     else:
         ax.set_xlim(-0.5, 95)
         ax.xaxis.set_major_locator(ticker.MaxNLocator(6))

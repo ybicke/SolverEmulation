@@ -506,78 +506,204 @@ def plot_sorted_magnitudes(all_magnitudes_sorted, lambda_5, lambda_10, lambda_20
     
 def plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_values, test_path, specified_values_quantiles):
     """
-    Create a zoomed-in view focusing specifically on higher quantile ranges for sparsification.
-    Shows the upper portion of the magnitude distribution where sparsification decisions matter most.
+    Create a zoomed-in view focusing specifically on extreme sparsification quantiles (80-99%).
+    Shows the highest portion of the magnitude distribution where extreme sparsification decisions matter most.
     """
-    # Unpack lambda values for higher percentiles
-    lambda_40 = lambda_values['lambda_40']
-    lambda_50 = lambda_values['lambda_50']
-    lambda_60 = lambda_values['lambda_60']
-    lambda_70 = lambda_values['lambda_70']
+    # Unpack lambda values for extreme sparsification percentiles only
     lambda_80 = lambda_values['lambda_80']
+    lambda_90 = lambda_values['lambda_90']
+    lambda_95 = lambda_values['lambda_95']
+    lambda_98 = lambda_values['lambda_98']
+    lambda_99 = lambda_values['lambda_99']
     
-    # Create a focused plot on the upper range where higher quantiles matter
+    # Create a focused plot on the extreme upper range
     plt.figure(figsize=(14, 8))
     
-    # Focus on the upper 30% of components where the meaningful variation occurs
-    upper_start_idx = int(len(all_magnitudes_sorted) * 0.7)  # Start from 70th percentile
+    # Focus on the upper 20% of components (80th percentile and above)
+    upper_start_idx = int(len(all_magnitudes_sorted) * 0.8)  # Start from 80th percentile
     x_upper = np.arange(upper_start_idx, len(all_magnitudes_sorted))
     y_upper = all_magnitudes_sorted[upper_start_idx:]
     
     # Plot the upper range with better visibility
-    plt.plot(x_upper, y_upper, color="blue", alpha=0.8, linewidth=1.5, label="Sorted Fourier Magnitudes")
+    plt.plot(x_upper, y_upper, color="blue", alpha=0.8, linewidth=2.0, 
+             label="Sorted Fourier Magnitudes ")
     
-    # Add horizontal lines for higher quantiles with distinct colors
-    plt.axhline(y=lambda_40, color="red", linestyle="--", linewidth=2, label=f"40% Quantile: {lambda_40:.4f}")
-    plt.axhline(y=lambda_50, color="green", linestyle="--", linewidth=2, label=f"50% Quantile: {lambda_50:.4f}")
-    plt.axhline(y=lambda_60, color="orange", linestyle="--", linewidth=2, label=f"60% Quantile: {lambda_60:.4f}")
-    plt.axhline(y=lambda_70, color="purple", linestyle="--", linewidth=2, label=f"70% Quantile: {lambda_70:.4f}")
-    plt.axhline(y=lambda_80, color="brown", linestyle="--", linewidth=2, label=f"80% Quantile: {lambda_80:.4f}")
+    # Add horizontal lines for extreme quantiles with old color scheme, thin and dotted
+    extreme_colors = ['blue', 'green', 'orange', 'red', 'black']
+    extreme_labels = ['80% Quantile', '90% Quantile', '95% Quantile', '98% Quantile', '99% Quantile']
+    extreme_values = [lambda_80, lambda_90, lambda_95, lambda_98, lambda_99]
     
-    # Add vertical lines to show percentile positions
-    percentile_positions = [
-        int(len(all_magnitudes_sorted) * 0.4),   # 40th percentile position
-        int(len(all_magnitudes_sorted) * 0.5),   # 50th percentile position
-        int(len(all_magnitudes_sorted) * 0.6),   # 60th percentile position
-        int(len(all_magnitudes_sorted) * 0.7),   # 70th percentile position
+    for value, color, label in zip(extreme_values, extreme_colors, extreme_labels):
+        plt.axhline(y=value, color=color, linestyle=":", linewidth=2, 
+                   label=f"{label}: λ = {value:.2f}", alpha=0.7)
+    
+    # Add vertical lines to show extreme percentile positions
+    extreme_percentile_positions = [
         int(len(all_magnitudes_sorted) * 0.8),   # 80th percentile position
+        int(len(all_magnitudes_sorted) * 0.9),   # 90th percentile position
+        int(len(all_magnitudes_sorted) * 0.95),  # 95th percentile position
+        int(len(all_magnitudes_sorted) * 0.98),  # 98th percentile position
+        int(len(all_magnitudes_sorted) * 0.99),  # 99th percentile position
     ]
     
-    for i, pos in enumerate(percentile_positions):
+    extreme_percentiles = [80, 90, 95, 98, 99]
+    
+    for pos, percentile, color in zip(extreme_percentile_positions, extreme_percentiles, extreme_colors):
         if pos >= upper_start_idx:  # Only show if within our zoomed range
-            percentile = [40, 50, 60, 70, 80][i]
-            plt.axvline(x=pos, color="gray", linestyle=":", alpha=0.6, linewidth=1)
-            plt.text(pos, max(y_upper) * 0.9, f"{percentile}%", rotation=90, 
-                    verticalalignment='top', horizontalalignment='right', fontsize=10)
+            plt.axvline(x=pos, color=color, linestyle=":", alpha=0.7, linewidth=1.5)
+            plt.text(pos, max(y_upper) * 0.95, f"{percentile}%", rotation=90, 
+                    verticalalignment='top', horizontalalignment='right', 
+                    fontsize=11, fontweight='bold', color=color)
     
-    # Add a statistics box
-    stats_text = f"Total components: {len(all_magnitudes_sorted):,}\n"
-    stats_text += f"Showing upper 30% ({len(y_upper):,} components)\n"
-    stats_text += f"Max magnitude: {max(all_magnitudes_sorted):.4f}\n"
-    stats_text += f"Range: {min(y_upper):.4f} - {max(y_upper):.4f}"
+    # Statistics box removed as requested
     
-    plt.text(0.02, 0.98, stats_text, transform=plt.gca().transAxes,
-             bbox=dict(boxstyle="round,pad=0.4", facecolor="lightgray", alpha=0.8),
-             verticalalignment='top', fontsize=11)
+    # Professional formatting
+    plt.title("Sparsification Range - Upper Quantiles (80%-99%)", 
+             fontsize=16, pad=20)
+    plt.xlabel("Fourier Component Index (sorted)", fontsize=16)
+    plt.ylabel("Magnitude", fontsize=16)
     
-    # Formatting
-    plt.title("Sparsification Range - Upper Quantiles (40%-80%)", fontsize=16, fontweight='bold')
-    plt.xlabel("Index (Fourier Components)", fontsize=14)
-    plt.ylabel("Magnitude", fontsize=14)
-    plt.legend(fontsize=11, loc='upper left', bbox_to_anchor=(0.7, 1))
-    plt.grid(True, alpha=0.3)
+    # Clean legend in upper left corner
+    plt.legend(fontsize=11, loc='upper left', bbox_to_anchor=(0.02, 0.98),
+              frameon=True, fancybox=True, shadow=True)
     
-    # Use scientific notation for y-axis if values are very small
-    if max(y_upper) < 0.01:
-        plt.ticklabel_format(style='scientific', axis='y', scilimits=(0,0))
+    plt.grid(True, alpha=0.3, linestyle='-')
+    
+    # Use scientific notation for y-axis
+    plt.ticklabel_format(style='scientific', axis='y', scilimits=(0,0))
+    
+    # Improve tick formatting
+    plt.tick_params(axis='both', which='major', labelsize=11)
     
     plt.tight_layout()
     
-    # Save the plot
-    zoomed_plot_file = os.path.join(test_path, 'quantile_plot_high_percentiles_zoom.png')
-    plt.savefig(zoomed_plot_file, dpi=300, bbox_inches='tight')
-    print(f"High percentiles zoomed plot saved to {zoomed_plot_file}")
+    # Save the plot with the expected filename (but now showing 80-99% range)
+    zoomed_plot_file = os.path.join(test_path, 'quantile_plot_high_percentiles_40-95_zoom.png')
+    plt.savefig(zoomed_plot_file, dpi=300, bbox_inches='tight', 
+                facecolor='white', edgecolor='none')
+    print(f"High percentiles zoom plot (now showing 80%-99%) saved to {zoomed_plot_file}")
     plt.close()
+
+
+def plot_publication_ready_quantiles(all_magnitudes_sorted, lambda_values, test_path):
+    """
+    Create a publication-ready plot focusing on the 80%, 90%, 95%, 98%, and 99% quantiles.
+    Clean, professional visualization suitable for academic papers.
+    """
+    # Set publication-ready style
+    plt.style.use('default')
+    plt.rcParams.update({
+        'font.size': 12,
+        'font.family': 'serif',
+        'axes.linewidth': 1.2,
+        'xtick.major.width': 1.2,
+        'ytick.major.width': 1.2,
+        'xtick.minor.width': 0.8,
+        'ytick.minor.width': 0.8,
+        'lines.linewidth': 2.0
+    })
+    
+    # Extract the key lambda values
+    lambda_80 = lambda_values['lambda_80']
+    lambda_90 = lambda_values['lambda_90']
+    lambda_95 = lambda_values['lambda_95']
+    lambda_98 = lambda_values['lambda_98']
+    lambda_99 = lambda_values['lambda_99']
+    
+    # Create figure with professional dimensions
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    # Focus on upper 25% of components for better visibility
+    upper_start_idx = int(len(all_magnitudes_sorted) * 0.75)
+    x_indices = np.arange(len(all_magnitudes_sorted))
+    
+    # Plot the complete magnitude distribution
+    ax.plot(x_indices, all_magnitudes_sorted, 
+            color='#2E86AB', alpha=0.7, linewidth=1.5, 
+            label='Fourier Magnitude Distribution')
+    
+    # Add clean horizontal lines for key quantiles
+    quantile_colors = ['#A23B72', '#F18F01', '#C73E1D', '#8E44AD', '#2C3E50']
+    quantile_labels = ['80th Percentile', '90th Percentile', '95th Percentile', '98th Percentile', '99th Percentile']
+    quantile_values = [lambda_80, lambda_90, lambda_95, lambda_98, lambda_99]
+    
+    for i, (value, color, label) in enumerate(zip(quantile_values, quantile_colors, quantile_labels)):
+        ax.axhline(y=value, color=color, linestyle='-', linewidth=2.5, 
+                  label=f'{label}: {value:.2e}', alpha=0.9)
+    
+    # Add vertical lines at quantile positions
+    quantile_positions = [
+        int(len(all_magnitudes_sorted) * 0.8),   # 80th percentile
+        int(len(all_magnitudes_sorted) * 0.9),   # 90th percentile  
+        int(len(all_magnitudes_sorted) * 0.95),  # 95th percentile
+        int(len(all_magnitudes_sorted) * 0.98),  # 98th percentile
+        int(len(all_magnitudes_sorted) * 0.99),  # 99th percentile
+    ]
+    
+    for pos, color in zip(quantile_positions, quantile_colors):
+        ax.axvline(x=pos, color=color, linestyle='--', alpha=0.6, linewidth=1.5)
+    
+    # Professional formatting
+    ax.set_xlabel('Fourier Component Index (sorted)', fontsize=14, fontweight='bold')
+    ax.set_ylabel('Magnitude', fontsize=14, fontweight='bold')
+    ax.set_title('Sparsification Thresholds for AFNO Model\n(80%, 90%, 95%, 98%, and 99% Quantiles)', 
+                fontsize=16, fontweight='bold', pad=20)
+    
+    # Clean legend
+    legend = ax.legend(loc='upper left', frameon=True, fancybox=True, 
+                      shadow=True, fontsize=11, bbox_to_anchor=(0.02, 0.98))
+    legend.get_frame().set_facecolor('white')
+    legend.get_frame().set_alpha(0.9)
+    
+    # Professional grid
+    ax.grid(True, linestyle='-', alpha=0.2)
+    ax.set_axisbelow(True)
+    
+    # Format axes
+    ax.tick_params(axis='both', which='major', labelsize=11)
+    
+    # Use scientific notation for y-axis
+    ax.ticklabel_format(style='scientific', axis='y', scilimits=(0,0))
+    
+    # Add text box with key statistics
+    total_components = len(all_magnitudes_sorted)
+    max_magnitude = np.max(all_magnitudes_sorted)
+    min_magnitude = np.min(all_magnitudes_sorted)
+    
+    stats_text = f'Total Components: {total_components:,}\n'
+    stats_text += f'Range: [{min_magnitude:.2e}, {max_magnitude:.2e}]\n'
+    stats_text += f'80% threshold removes {80:.0f}% of components\n'
+    stats_text += f'90% threshold removes {90:.0f}% of components\n'
+    stats_text += f'95% threshold removes {95:.0f}% of components\n'
+    stats_text += f'98% threshold removes {98:.0f}% of components\n'
+    stats_text += f'99% threshold removes {99:.0f}% of components'
+    
+    props = dict(boxstyle='round,pad=0.5', facecolor='lightgray', alpha=0.8)
+    ax.text(0.98, 0.02, stats_text, transform=ax.transAxes, fontsize=10,
+            verticalalignment='bottom', horizontalalignment='right',
+            bbox=props)
+    
+    # Tight layout for clean appearance
+    plt.tight_layout()
+    
+    # Save with high quality
+    pub_plot_file = os.path.join(test_path, 'publication_quantiles_80_90_95_98_99.png')
+    plt.savefig(pub_plot_file, dpi=300, bbox_inches='tight', 
+                facecolor='white', edgecolor='none')
+    
+    # Also save as PDF for publications
+    pub_plot_pdf = os.path.join(test_path, 'publication_quantiles_80_90_95_98_99.pdf')
+    plt.savefig(pub_plot_pdf, bbox_inches='tight', 
+                facecolor='white', edgecolor='none')
+    
+    print(f"Publication-ready plot saved as:")
+    print(f"  PNG: {pub_plot_file}")
+    print(f"  PDF: {pub_plot_pdf}")
+    
+    plt.close()
+    
+    # Reset matplotlib style
+    plt.rcdefaults()
 
 
 
@@ -658,12 +784,20 @@ def test_model(model, test_set):
     lambda_60 = np.percentile(all_magnitudes_sorted, 60)
     lambda_70 = np.percentile(all_magnitudes_sorted, 70)
     lambda_80 = np.percentile(all_magnitudes_sorted, 80)
+    lambda_90 = np.percentile(all_magnitudes_sorted, 90)
+    lambda_95 = np.percentile(all_magnitudes_sorted, 95)
+    lambda_98 = np.percentile(all_magnitudes_sorted, 98)
+    lambda_99 = np.percentile(all_magnitudes_sorted, 99)
 
     logger.info(f'Lambda 40th percentile (removing bottom 40%): {lambda_40}')
     logger.info(f'Lambda 50th percentile (removing bottom 50%): {lambda_50}')
     logger.info(f'Lambda 60th percentile (removing bottom 60%): {lambda_60}')
     logger.info(f'Lambda 70th percentile (removing bottom 70%): {lambda_70}')
     logger.info(f'Lambda 80th percentile (removing bottom 80%): {lambda_80}')
+    logger.info(f'Lambda 90th percentile (removing bottom 90%): {lambda_90}')
+    logger.info(f'Lambda 95th percentile (removing bottom 95%): {lambda_95}')
+    logger.info(f'Lambda 98th percentile (removing bottom 98%): {lambda_98}')
+    logger.info(f'Lambda 99th percentile (removing bottom 99%): {lambda_99}')
 
     # Now you can use these lambda values in your thresholding step
     print(f"Lambda 40% (Removing bottom 40% of components): {lambda_40}")
@@ -671,6 +805,21 @@ def test_model(model, test_set):
     print(f"Lambda 60% (Removing bottom 60% of components): {lambda_60}")
     print(f"Lambda 70% (Removing bottom 70% of components): {lambda_70}")
     print(f"Lambda 80% (Removing bottom 80% of components): {lambda_80}")
+    print(f"Lambda 90% (Removing bottom 90% of components): {lambda_90}")
+    print(f"Lambda 95% (Removing bottom 95% of components): {lambda_95}")
+    print(f"Lambda 98% (Removing bottom 98% of components): {lambda_98}")
+    print(f"Lambda 99% (Removing bottom 99% of components): {lambda_99}")
+    
+    # Publication-ready output
+    print("\n" + "="*60)
+    print("PUBLICATION READY LAMBDA VALUES")
+    print("="*60)
+    print(f"λ₈₀ = {lambda_80:.6e}  (80th percentile threshold)")
+    print(f"λ₉₀ = {lambda_90:.6e}  (90th percentile threshold)")
+    print(f"λ₉₅ = {lambda_95:.6e}  (95th percentile threshold)")
+    print(f"λ₉₈ = {lambda_98:.6e}  (98th percentile threshold)")
+    print(f"λ₉₉ = {lambda_99:.6e}  (99th percentile threshold)")
+    print("="*60)
 
     # Save lambda parameters to a file
     lambda_values = {
@@ -679,6 +828,10 @@ def test_model(model, test_set):
         'lambda_60': float(lambda_60),
         'lambda_70': float(lambda_70),
         'lambda_80': float(lambda_80),
+        'lambda_90': float(lambda_90),
+        'lambda_95': float(lambda_95),
+        'lambda_98': float(lambda_98),
+        'lambda_99': float(lambda_99),
     }
 
     with open(pickle_file, 'wb') as handle:
@@ -693,8 +846,11 @@ def test_model(model, test_set):
         specified_values_quantiles[v] = quantile
         print(f"Value {v} corresponds to quantile {quantile:.4f} ({quantile:.2%})")
 
-    # Create zoomed-in plot focusing on higher quantiles
+    # Create zoomed-in plot focusing on extreme sparsification quantiles (80-99%)
     plot_sorted_magnitudes_zoom(all_magnitudes_sorted, lambda_values, test_path, specified_values_quantiles)
+    
+    # Create publication-ready plot focusing on 80%, 90%, 95%, 98%, and 99% quantiles
+    plot_publication_ready_quantiles(all_magnitudes_sorted, lambda_values, test_path)
     
     # Disable magnitude collection to save memory in future runs
     model.enable_magnitude_collection(False)

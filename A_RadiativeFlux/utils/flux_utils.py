@@ -5,6 +5,7 @@ and smoothness loss.
 """
 
 import torch
+from torchmetrics import Metric
 
 
 def calculate_heating_rates(y, x3d, x2d, mode='1d'):
@@ -127,3 +128,62 @@ class SmoothHeatingRateSmoothnessLoss(torch.nn.Module):
         smoothness_loss = torch.mean(hr_diff_weighted**2)
             
         return self.weight * smoothness_loss 
+
+
+class EnergyConservationLossV2(Metric):
+    """
+    Physics-informed loss that combines MSE with energy conservation constraint.
+    
+    This loss function enforces energy conservation by ensuring that the heating rates
+    calculated from predicted fluxes match those from true fluxes, promoting physical
+    consistency in the predictions.
+    
+    Args:
+        alpha (float): Weighting factor between MSE loss (alpha) and energy conservation loss (1-alpha)
+        mode (str): '1d' or '3d' mode for proper data handling
+        dist_sync_on_step (bool): Whether to synchronize metric state across processes
+    """
+    def __init__(self, alpha=0.5, mode='1d', dist_sync_on_step=False):
+        super().__init__(dist_sync_on_step=dist_sync_on_step)
+        self.alpha = alpha
+        self.mode = mode
+        self.add_state("mse_loss", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("ec_loss", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("total_loss", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("total", default=torch.tensor(0.0), dist_reduce_fx="sum")
+
+    def update(self, y_true: torch.Tensor, y_pred: torch.Tensor, x3d: torch.Tensor, x2d: torch.Tensor):
+        """
+        Update the metric state with a new batch of predictions.
+        
+        Args:
+            y_true: True flux values
+            y_pred: Predicted flux values  
+            x3d: 3D input data (for pressure and other atmospheric variables)
+            x2d: 2D input data (for surface pressure and other surface variables)
+        """
+        mse_loss = torch.mean(torch.square(y_true - y_pred))
+        
+        # Calculate heating rates using the existing function
+        hr_true = calculate_heating_rates(y_true, x3d, x2d, mode=self.mode)
+        hr_pred = calculate_heating_rates(y_pred, x3d, x2d, mode=self.mode)
+        
+        ec_loss = torch.mean(torch.square(hr_true - hr_pred))
+        total_loss = self.alpha * mse_loss + (1 - self.alpha) * ec_loss
+        
+        self.mse_loss += mse_loss
+        self.ec_loss += ec_loss
+        self.total_loss += total_loss
+        self.total += y_true.shape[0]
+
+    def compute(self):
+        """Compute the final metric value."""
+        return self.total_loss / self.total
+    
+    def get_components(self):
+        """Get individual loss components for logging."""
+        return {
+            'mse_component': self.mse_loss / self.total,
+            'ec_component': self.ec_loss / self.total,
+            'total_loss': self.total_loss / self.total
+        } 

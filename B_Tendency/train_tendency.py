@@ -399,6 +399,33 @@ def get_model():
                 # use_height_dependent_decoder=args.use_height_dependent_decoder
             ).to(device)
             
+            
+        elif args.model == 'gt_alternating':
+            from models_3d.gt_3d_alternating import AlternatingGraphTransformer3D
+            model = AlternatingGraphTransformer3D(
+                total_cols=args.num_cells,
+                grid_file_path=args.grid_file_path,
+                triangle_id=args.triangle_id,
+                embed_dim=args.hidden_dim,
+                depth=args.layers,
+                dropout=args.dropout,
+                channels_in_3d=args.channel_3d,
+                channels_in_2d=effective_channel_2d,
+                channels_out=args.channels_out,
+                num_height_levels=args.height,
+                device=device,
+                division_factor=args.triangle_division_factor,
+                use_height_dependent_decoder=args.use_height_dependent_decoder,
+                heads=args.heads,
+                dim_head=args.dim_head,
+                mlp_ratio=args.mlp_ratio,
+                fully_connected=args.fully_connected,
+                disable_horizontal=args.disable_horizontal,
+                max_hops=args.max_hops
+            ).to(device)
+            
+            
+            
         else:
             raise ValueError(f"3D model {args.model} not supported")
     

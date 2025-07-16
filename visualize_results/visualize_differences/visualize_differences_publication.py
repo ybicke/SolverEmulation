@@ -33,7 +33,7 @@ plt.rcParams.update({
 
 # === PLOT CONFIGURATION ===
 # Manually specify plot name and subfolder
-PLOT_NAME = "AFNO_HRLU"  # Change this for each plot scenario
+PLOT_NAME = "AFNO_before_and_after_hrlu"  # Change this for each plot scenario
 SUBFOLDER = "Differences_Flux"  # Output subfolder
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
@@ -44,8 +44,8 @@ os.makedirs(plot_output_dir, exist_ok=True)
 models = [
     #{'name': 'GNN-128-l4', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_128_l4/test'},
     #{'name': 'ViT-128-l4', 'path': '/mydata/deepcloud/yves/results_git/vit_column_128_l4_h6_concat/test'},
-    #{'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
-    #{'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
+    {'name': 'AFNO-128-l4', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_clean/test'},
+    # {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
     
     
     {'name': 'AFNO-128-l4-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},

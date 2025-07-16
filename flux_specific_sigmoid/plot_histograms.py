@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from data_loaders_histo import IconColumnIterableDataset
+from data_loaders import IconColumnIterableDataset
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -12,7 +12,7 @@ import random
 
 height_level = 30
 
-def plot_histograms(train_files, num_samples=500000, output_dir="histograms", height_level = height_level):
+def plot_histograms(train_files, num_samples=500000, output_dir="histograms", height_start=30, height_end=None):
     # Create a dataset using the train files
     train_dataset = IconColumnIterableDataset(train_files)
 
@@ -24,11 +24,17 @@ def plot_histograms(train_files, num_samples=500000, output_dir="histograms", he
     # Collect flux values from the train dataset
     for i, (x3d, x2d, y) in enumerate(data_loader):
 
-        # Extract the top 3 uppermost levels of flux values
-        # top_flux = y[:, -22:, :]
-        top_flux = y[:, height_level :]
+        # Extract flux values based on height range
+        if height_end is None:
+            # From height_start to end (original behavior)
+            selected_flux = y[:, height_start :]
+            layer_description = f"Level {height_start}+"
+        else:
+            # From height_start to height_end (new functionality)
+            selected_flux = y[:, height_start:height_end]
+            layer_description = f"Levels {height_start}-{height_end-1}"
 
-        flux_values.append(top_flux)
+        flux_values.append(selected_flux)
 
         # Print a message after every 10000 samples are processed
         if (i + 1) * data_loader.batch_size % 10000 == 0:
@@ -37,19 +43,15 @@ def plot_histograms(train_files, num_samples=500000, output_dir="histograms", he
         if (i + 1) * data_loader.batch_size >= num_samples:
             break
 
-    flux_values = torch.cat(flux_values, dim=0)  # Shape: [total_samples, 3, num_fluxes]
-
-
-
-
+    flux_values = torch.cat(flux_values, dim=0)  # Shape: [total_samples, height_levels, num_fluxes]
 
     # Reshape flux_values to combine samples and levels
-    flux_values = flux_values.view(-1, flux_values.size(-1))  # Shape: [total_samples * 3, num_fluxes]
+    flux_values = flux_values.view(-1, flux_values.size(-1))  # Shape: [total_samples * height_levels, num_fluxes]
 
     # Create the output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
 
-    # Plot histograms for each flux value at the top 3 levels
+    # Plot histograms for each flux value
     num_fluxes = flux_values.size(1)
 
     flux_labels = ['LW Up', 'LW Down', 'SW Up', 'SW Down']
@@ -73,16 +75,22 @@ def plot_histograms(train_files, num_samples=500000, output_dir="histograms", he
 
         plt.figure(figsize=(8, 6))
         plt.hist(flux_i_numpy, bins=bins[i], alpha=0.7, color=colors[i], edgecolor='black')
-        plt.title(f'Histogram of {flux_labels[i]} Flux Values (Level {height_level}, Non-Zero)')
+        plt.title(f'Histogram of {flux_labels[i]} Flux Values ({layer_description}, Non-Zero)')
         plt.xlabel('Flux Value')
         plt.ylabel('Frequency')
         plt.grid(True)
         plt.tight_layout()
 
-        histogram_path = os.path.join(output_dir, f'histogram_{flux_labels[i].replace(" ", "_").lower()}_nonzero_{height_level}.png')
+        # Create filename based on height range
+        if height_end is None:
+            filename_suffix = f"nonzero_{height_start}plus"
+        else:
+            filename_suffix = f"nonzero_{height_start}to{height_end-1}"
+        
+        histogram_path = os.path.join(output_dir, f'histogram_{flux_labels[i].replace(" ", "_").lower()}_{filename_suffix}.png')
         plt.savefig(histogram_path)
         plt.close()
-        print(f'Histogram for {flux_labels[i]} flux (non-zero, {height_level} levels) saved as {histogram_path}')
+        print(f'Histogram for {flux_labels[i]} flux (non-zero, {layer_description}) saved as {histogram_path}')
 
 
 
@@ -114,4 +122,11 @@ sorted_files = [x for _, x in sorted(zip(time_indices, filenames))]
 # Specify the train files
 train_files = sorted_files[200:2000]
 
-plot_histograms(train_files, output_dir="/mydata/deepcloud/yves/results_git/data_histograms")
+# Analyze upper levels (30+) - your current analysis
+plot_histograms(train_files, output_dir="/mydata/deepcloud/yves/plot_histograms", height_start=30)
+
+# Analyze mid-layers (30-60) - new analysis
+plot_histograms(train_files, output_dir="/mydata/deepcloud/yves/plot_histograms", height_start=30, height_end=60)
+
+# Optional: Analyze lower levels (0-30) for comparison
+plot_histograms(train_files, output_dir="/mydata/deepcloud/yves/plot_histograms", height_start=0, height_end=30)
