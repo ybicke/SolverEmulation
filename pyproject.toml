@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solver-emulation"
+version = "0.1.0"
+description = "Machine learning emulation of atmospheric solvers for radiative flux and tendency prediction"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Yves Bicker", email = "yves_bicker@icloud.com"},
+]
+keywords = ["machine learning", "atmospheric science", "neural networks", "solver emulation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "torch>=2.0.0",
+    "torchmetrics>=0.11.0",
+    "torch-geometric>=2.3.0",
+    "torch-scatter>=2.1.0",
+    "torch-sparse>=0.6.0",
+    "numpy>=1.23.0",
+    "pandas>=1.5.0",
+    "h5py>=3.7.0",
+    "einops>=0.6.0",
+    "matplotlib>=3.6.0",
+    "seaborn>=0.12.0",
+    "wandb>=0.13.0",
+    "pyyaml>=6.0",
+    "tabulate>=0.9.0",
+    "tqdm>=4.64.0",
+    "psutil>=5.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.2.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "isort>=5.12.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ybicke/SolverEmulation"
+Repository = "https://github.com/ybicke/SolverEmulation"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["A_RadiativeFlux*", "B_Tendency*", "visualize_results*", "tendency_data*"]
+exclude = ["tests*", "docs*", "wandb*", "data_exploration*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

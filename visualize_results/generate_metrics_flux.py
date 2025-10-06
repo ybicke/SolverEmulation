@@ -9,6 +9,15 @@ import os
 # ====================================================================
 # CONFIGURATION SECTION - Modify paths and settings here
 # ====================================================================
+# 
+# ⚠️  IMPORTANT: Update the paths below to match your local system!
+# These example paths are from the original development environment and
+# will need to be changed to point to your trained model results.
+#
+# For each model, provide:
+#   - 'name': A descriptive name for the model
+#   - 'path': Absolute or relative path to the model's test results directory
+# ====================================================================
 
 # Flux models to compare
 models = [

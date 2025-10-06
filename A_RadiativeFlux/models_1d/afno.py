@@ -1,4 +1,7 @@
-# Adopted from https://github.com/zongyi-li/fourier_neural_operator/blob/main/fourier_1d.py
+# Code adapted from NVIDIA's AFNO implementation
+# Original: https://github.com/NVlabs/AFNO-pytorch
+# Copyright (c) 2020, NVIDIA CORPORATION. All rights reserved.
+# Modified by Yves Bicker for atmospheric radiative flux prediction
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

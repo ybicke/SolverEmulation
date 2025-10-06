@@ -34,8 +34,8 @@ plt.rcParams.update({
 })
 
 # === PLOT CONFIGURATION ===
-PLOT_NAME = "flux_hard_thresholding_final"
-SUBFOLDER = "MAE_Sparsity"
+PLOT_NAME = "flux_afno_sparsification_FINAL"
+SUBFOLDER = "MAE_Flux"
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
 plot_output_dir = join(final_results_path, SUBFOLDER)
@@ -50,16 +50,22 @@ models = [
     # {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium/test'},
     
     
+    #{'name': 'AFNO-energy-conservation', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_energy_conservation_loss/test'},
+    
     # Fluxes 1D models hrlu
     #{'name': 'GNN', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/gnn_1d_128_hrlu_0005/test'},
     #{'name': 'ViT', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/vit_128_hrlu_0005_new/test'},
-    #{'name': 'AFNO', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
+    #{'name': 'AFNO-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu/test'},
     #{'name': 'BiLSTM-32-128', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_32_128_hrlu_0005/test'},
     # {'name': 'BiLSTM-medium', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu/test'},
     
-    #{'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
-    #{'name': 'BiLSTM', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_second/test'},
+    #{'name': 'AFNO-hrlu-energy-conservation', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/afno_1d_128_hrlu_energy_conservation/test'},
     
+    
+    #{'name': 'BiLSTM-hrlu', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
+    #{'name': 'BiLSTM-wo-hrl', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results/rnn_medium_second/test'},
+    
+    #{'name': 'RNN-hrl-allLevels', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results/rnn_medium_hrlu_second/test'},
     
     
     #{'name': 'AFNO_010', 'path': '/mydata/deepcloud/yves/results_A_RadiativeFlux/results-new/afno_1d_64_full_1percent_sparse_010/test'},
@@ -70,27 +76,30 @@ models = [
     #{'name': 'AFNO_021', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_004/test'},
    # {'name': 'AFNO_051', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_008/test'},
     
-    #{'name': 'AFNO_0172', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00172/test'},
-    #{'name': 'AFNO_0208', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00208/test'},
+    {'name': 'AFNO_0152', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00172/test'},
+    {'name': 'AFNO_0217', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00208/test'},
     #{'name': 'AFNO_04', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars04/test'},
     #{'name': 'AFNO_05', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars05/test'},
 
-    {'name': 'AFNO_000', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_000/test'},
+    #{'name': 'AFNO_000', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_000/test'},
     #{'name': 'AFNO_0106', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00106/test'},
     #{'name': 'AFNO_0172', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00172/test'},
     #{'name': 'AFNO_0208', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00208/test'},
     #{'name': 'AFNO_03', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_spars03/test'},
 
-    #{'name': 'AFNO_0435', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00435/test'},
-    #{'name': 'AFNO_0717', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00717/test'},
+    {'name': 'AFNO_0401', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00435/test'},
+    {'name': 'AFNO_0676', 'path': '/mydata/deepcloud/yves/results_git/afno_column_1percent_Emb128_easyConcat_00717/test'},
     
-    {'name': 'AFNO_06', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard06/test'},
-    {'name': 'AFNO_07', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard07/test'},
-    {'name': 'AFNO_08', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard08/test'},
-    {'name': 'AFNO_09', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard09/test'},
+    #{'name': 'AFNO_06', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard06/test'},
+    #{'name': 'AFNO_07', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard07/test'},
+    #{'name': 'AFNO_08', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard08/test'},
+    #{'name': 'AFNO_09', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard09/test'},
     
     
     
+    #{'name': 'AFNO_0919', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results-new/afno_1d_128_full_1percent_sparse_0919/test'},
+    {'name': 'AFNO_1564', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results-new/afno_1d_128_full_1percent_sparse_1537/test'},
+    #{'name': 'AFNO_2844', 'path': '/mydata/deepcloud/yves/A_RadiativeFlux/results-new/afno_1d_128_full_1percent_sparse_2844/test'},
     
     #{'name': 'AFNO_06', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard06/test'},
     #{'name': 'AFNO_07', 'path': '/mydata/deepcloud/yves/online-datasets/workspace/results/afno_column_1percent_Emb128_hard07/test'},
@@ -243,24 +252,24 @@ def add_subplot_flux_optimized(fig, x, ys, subplot_pos, models_name, xlabel=None
     
     # Simplified scaling
     if is_flux:
-        #ax.set_xscale('log')  # Set log scale for heating rates
-        #ax.set_xlim(1e-3, 1e2) 
-        #ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
-        #ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
-        #ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
-        ax.set_xlim(-0.5, 7)
-        ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
+        ax.set_xscale('log')  # Set log scale for heating rates
+        ax.set_xlim(1e-3, 1e2) 
+        ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
+        ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
+        ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
+        #ax.set_xlim(-0.5, 20)
+        #ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
     elif is_heating:
-        #ax.set_xscale('log')  # Set log scale for heating rates
-        #ax.set_xlim(1e-2, 1e3)  # Adjust limits for log scale
-        #ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
-        #ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
-        #ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
+        ax.set_xscale('log')  # Set log scale for heating rates
+        ax.set_xlim(1e-2, 1e3)  # Adjust limits for log scale
+        ax.xaxis.set_major_locator(ticker.LogLocator(numticks=6))
+        ax.xaxis.set_minor_locator(ticker.LogLocator(subs='all', numticks=10))
+        ax.grid(True, which='both', alpha=0.3, linewidth=0.5)
         
-        ax.set_xlim(-5, 30)
-        ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
+        #ax.set_xlim(-5, 60)
+        #ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
     else:
-        ax.set_xlim(-0.5, 95)
+        ax.set_xlim(-0.5, 120)
         ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
     
     # Minimal grid

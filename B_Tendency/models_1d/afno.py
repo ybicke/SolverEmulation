@@ -1,5 +1,7 @@
-# Code parts used from https://github.com/NVlabs/AFNO-pytorch
-# Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
+# Code adapted from NVIDIA's AFNO implementation
+# Original: https://github.com/NVlabs/AFNO-pytorch
+# Copyright (c) 2020, NVIDIA CORPORATION. All rights reserved.
+# Modified by Yves Bicker for atmospheric tendency prediction
 
 import logging
 import torch

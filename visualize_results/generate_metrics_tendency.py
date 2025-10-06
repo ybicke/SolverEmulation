@@ -8,6 +8,15 @@ from tabulate import tabulate
 # ====================================================================
 # CONFIGURATION SECTION - Modify paths and settings here
 # ====================================================================
+# 
+# ⚠️  IMPORTANT: Update the paths below to match your local system!
+# These example paths are from the original development environment and
+# will need to be changed to point to your trained model results.
+#
+# For each model, provide:
+#   - 'name': A descriptive name for the model
+#   - 'path': Absolute or relative path to the model's test results directory
+# ====================================================================
 
 # Models to compare
 models = [
@@ -26,18 +35,18 @@ models = [
     #ViT and large GNN 3D versus GT 2D
 
     #{'name': 'ViT-1D-64-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_64_l4_triangle/test'},
-    {'name': 'ViT-1D-128-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
-    {'name': 'GT-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
-    {'name': 'GT-3D-128-L4', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp_heightDecoder/test'},
-
+    #{'name': 'ViT-1D-128-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
+    #{'name': 'GT-2D-2D-1024-L4', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l4_large/test'},
+    #{'name': 'GT-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
+    #{'name': 'GT-3D-128-L4', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp_heightDecoder/test'},
 
 
    # lonlat 1D 3D 128
-    #{'name': 'GNN-1D-128-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_128_l2_100/test'},
+    {'name': 'GNN-1D-128-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_128_l2_100/test'},
     
     # 2D graphcast style
-    #{'name': 'GNN-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_2d_graphcast_style_1024_l2_100/test'},
-    #{'name': 'GNN-3D-128-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat/test'},   
+    {'name': 'GNN-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_2d_graphcast_style_1024_l2_100/test'},
+    {'name': 'GNN-3D-128-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat/test'},   
     
     
     
@@ -56,7 +65,10 @@ models = [
 # This pickle file should contain a dictionary with at least 'train_target_variance' key
 # The variance will be converted to std for NRMSE normalization
 # Ideally computed from 100% of training data for robust estimates
-TRAINING_STATS_PATH = '/mydata/deepcloud/yves/h5_tendency_data_all/train_target_statistics.pickle'
+# TRAINING_STATS_PATH = '/mydata/deepcloud/yves/h5_tendency_data_all/train_target_statistics.pickle'
+# TRAINING_STATS_PATH = '/mydata/deepcloud/yves/h5_tendency_data_all/triangle39_train_target_statistics_v2.pickle'
+TRAINING_STATS_PATH = '/mydata/deepcloud/yves/h5_tendency_data_all/triangle39_train_target_statistics_v2_new.pickle'
+
 
 # Path to pressure level information (optional, for mass-weighted metrics)
 # Should be a numpy array of pressure differences (Pa) for each level
@@ -64,14 +76,13 @@ PRESSURE_WEIGHTS_PATH = None  # '/mydata/deepcloud/yves/pressure_weights.npy'
 
 # Output paths
 OUTPUT_DIR = '/mydata/deepcloud/yves/results_final/metrics_tendency'
-OUTPUT_FILENAME = '1D_2D_3D_Transformer_models_new.md'
+OUTPUT_FILENAME = '1D_2D_3D_GNN_models_with_large_2D_triangle39_new_Thesis.md'
 
 # Define target names and units
 target_units = {
     "Total Temperature": "K s-1", 
     "Dynamical Temperature": "K s-1",
-    "Zonal Wind ": "m s-2",
-    "Meridional Wind": "m s-2",
+    "Zonal Wind ": "m s-2",    "Meridional Wind": "m s-2",
     "Convective Humidity": "kg m-3 s-1",
     "Convective Cloud Water": "kg m-3 s-1",
     "Convective Cloud Ice": "kg m-3 s-1"

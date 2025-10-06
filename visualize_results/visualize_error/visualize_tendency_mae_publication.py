@@ -38,7 +38,7 @@ plt.rcParams.update({
 save_to_test_path = False
 
 # === PLOT CONFIGURATION ===
-PLOT_NAME = "GNN_1D_vs_3D_128_L2_lonlat_disable_horizontal"
+PLOT_NAME = "GT_1D_2D_3D_Thesis"
 SUBFOLDER = "MAE_Tendency"
 
 final_results_path = '/mydata/deepcloud/yves/results_final'
@@ -77,17 +77,18 @@ models = [
     
     
     # GNN height decoder
-    # {'name': 'GNN-3D-128-L2-lonlat-heightDecoder', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat_heightDecoder/test'},
+    #{'name': 'GNN-3D-128-L2-lonlat-heightDecoder', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat_heightDecoder/test'},
     #{'name': 'GNN-3D-64-L2-lonlat-heightDecoder', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_lonlat_heightDecoder/test'},
     # {'name': 'GNN-3D-64-L2-lonlat-heightDecoder', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_64_l2_100_lonlat_heightDecoder/test'},
    
    
-    # GNN's
-    {'name': 'GNN-1D-128-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_128_l2_100/test'},
-    #{'name': 'GNN-2D-1024-L2', 'path': '/mydata/deepcloud/yves/results-new/gnn_2d_graphcast_style_1024_l2_100/test'},
+    # GNN's for Thesis
+    #{'name': 'GNN-1D', 'path': '/mydata/deepcloud/yves/results-new/gnn_1d_tendency_128_l2_100/test'},
+    #{'name': 'GNN-2D', 'path': '/mydata/deepcloud/yves/results-new/gnn_2d_graphcast_style_1024_l2_100/test'},
     #{'name': 'GNN-3D', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat/test'},
     
-    {'name': 'GNN-3D-128-L2-lonlat-disable-horizontal', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat_disable_horizontal/test'},
+    
+    #{'name': 'GNN-3D-128-L2-lonlat-disable-horizontal', 'path': '/mydata/deepcloud/yves/results-new/gnn_3d_tendency_128_l2_100_lonlat_disable_horizontal/test'},
 
     
 
@@ -113,15 +114,19 @@ models = [
     #{'name': 'GT-3D-simp-64-L4-k2-drop01-simplePosEmp', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_64_l4_k2_drop01_simplePosEmp/test'},
     
     
+    
     #ViT
     #{'name': 'ViT-1D-64-l4', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_64_l4_triangle/test'},
     #{'name': 'ViT-1D', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
     
     # large GNN 3D versus GT 2D
     #{'name': 'GT-2D', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l2_triangle39_k2_new/test'},
+    #{'name': 'GT-2D-large', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l4_large/test'},
+
     
     # {'name': 'GT-3D-large-256-L4-k3-100', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_large/test'},
     #{'name': 'GT-3D-128-L4', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4/test'},
+
     #{'name': 'AFNO-1D-128-L4', 'path': '/mydata/deepcloud/yves/results-new/afno_1d_128_l4_triangle/test'},
     
 
@@ -131,10 +136,14 @@ models = [
 
 
     #{'name': 'GT-3D-128-L4-k2-drop01-simplePosEmp', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp/test'},
-    # {'name': 'GT-3D', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp_heightDecoder/test'},
+    #{'name': 'GT-3D', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp_heightDecoder/test'},
 
 
 
+# the transformer models used in the thesis: 
+    {'name': 'ViT-1D', 'path': '/mydata/deepcloud/yves/results-new/vit_1d_128_l4_triangle/test'},
+    {'name': 'GT-2D', 'path': '/mydata/deepcloud/yves/results-new/gt_gencast_1024_l4_large/test'},
+    {'name': 'GT-3D', 'path': '/mydata/deepcloud/yves/results-new/gt_simplified_128_l4_k2_drop01_simplePosEmp_heightDecoder/test'},
 
 
 

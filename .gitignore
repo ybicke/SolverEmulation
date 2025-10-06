@@ -1,6 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# ML experiment tracking
 wandb/
 */wandb/
 **/wandb/
 lightning_logs/
 */lightning_logs/
 **/lightning_logs/
+
+# Model checkpoints (uncomment if you want to ignore)
+# *.ckpt
+# *.pth
+# *.pt
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local configuration (if users create their own)
+config.yaml
+local_config.py
+*.local
